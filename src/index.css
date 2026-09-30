@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-primary: #11120F;
+    --bg-secondary: #171813;
+    --bg-elevated: #1C1E19;
+    --bg-card: #20221D;
+    --bg-hover: #252720;
+    --text-primary: #F5F1E8;
+    --text-secondary: #B8B4A9;
+    --text-muted: #77756D;
+    --border: #30322C;
+    --border-subtle: #272923;
+    --forest: #2A6849;
+    --forest-bright: #3C8A67;
+    --terracotta: #C8541E;
+    --gold: #A08328;
+    --cream: #FAF7F2;
+  }
+
+  body {
+    background-color: #11120F;
+    color: #F5F1E8;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Headings typography rules */
+  h1 {
+    font-family: 'DM Serif Display', 'Cormorant Garamond', Georgia, serif;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    font-family: 'DM Serif Display', 'Cormorant Garamond', Georgia, serif;
+    line-height: 1.1;
+  }
+
+  h3 {
+    font-family: 'DM Serif Display', 'Cormorant Garamond', Georgia, serif;
+    line-height: 1.2;
+  }
+}
+
+/* Tabular figures for aligned financial numbers */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Subtle 0.03 opacity dark grid pattern */
+.bg-dark-grid {
+  background-image: 
+    linear-gradient(to right, rgba(245, 241, 232, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(245, 241, 232, 0.025) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Subtle warm radial hero glow */
+.bg-hero-glow {
+  background: radial-gradient(circle at 50% 10%, rgba(200, 84, 30, 0.035) 0%, rgba(42, 104, 73, 0.025) 40%, transparent 70%);
+}
+
+/* Dark editorial scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #11120F;
+}
+::-webkit-scrollbar-thumb {
+  background: #272923;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #30322C;
+}

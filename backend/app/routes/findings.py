@@ -1,3 +1,18 @@
+"""
+SpendIntel - Procurement Spend Leakage Findings API Route.
+
+Returns unified, categorized findings across all audit modules:
+- PRICE_ANOMALY
+- POSSIBLE_DUPLICATE
+- SUPPLIER_FRAGMENTATION
+- MISSED_DISCOUNT
+- CONTRACT_NON_COMPLIANCE
+- OFF_CONTRACT_PURCHASE
+- PRICE_SPIKE / UNUSUAL_PRICE_PATTERN
+- SUDDEN_SUPPLIER_CHANGE
+- UNUSUAL_QUANTITY
+"""
+
 from pathlib import Path
 from typing import Any, Dict, List
 from fastapi import APIRouter, HTTPException
@@ -15,6 +30,54 @@ UPLOAD_DIR = BASE_DIR / "data" / "uploads"
 SUPPORTED_EXTENSIONS = [".csv", ".xlsx", ".xls"]
 
 
+def _standardize_finding(raw: Dict[str, Any], default_type: str) -> Dict[str, Any]:
+    """Ensure a consistent finding schema across all detection categories."""
+    finding_type = raw.get("type") or raw.get("detection_type") or default_type
+    tx_id = str(raw.get("transaction_id", "")).strip()
+    pid = str(raw.get("product_id", "")).strip()
+
+    # Generate stable unique ID if not provided
+    fid = raw.get("id")
+    if not fid:
+        if tx_id:
+            fid = f"{finding_type[:4]}-{tx_id}"
+        elif pid:
+            fid = f"{finding_type[:4]}-{pid}"
+        else:
+            fid = f"{finding_type[:4]}-AUTO"
+
+    actual = raw.get("actual_price", raw.get("unit_price"))
+    bench = raw.get("benchmark_price")
+    expected = raw.get("expected_price", bench)
+    leakage = raw.get("potential_leakage", raw.get("amount", 0.0))
+    variance = raw.get("variance_percent", raw.get("variance", 0.0))
+
+    item: Dict[str, Any] = {
+        "id": str(fid),
+        "type": str(finding_type),
+        "detection_type": raw.get("detection_type", str(finding_type)),
+        "risk": str(raw.get("risk", "MEDIUM")).upper(),
+        "transaction_id": tx_id,
+        "product_id": pid,
+        "product": str(raw.get("product", raw.get("product_name", ""))),
+        "supplier": str(raw.get("supplier", "")),
+        "quantity": raw.get("quantity"),
+        "actual_price": round(float(actual), 2) if actual is not None else None,
+        "benchmark_price": round(float(bench), 2) if bench is not None else None,
+        "expected_price": round(float(expected), 2) if expected is not None else None,
+        "variance_percent": round(float(variance), 2) if variance is not None else 0.0,
+        "potential_leakage": round(float(leakage), 2) if leakage is not None else 0.0,
+        "reason": raw.get("reason", f"{finding_type} detected during procurement audit"),
+        "evidence": raw.get("evidence", []),
+    }
+
+    # Clean None values in evidence if string
+    if isinstance(item["evidence"], str):
+        item["evidence"] = [item["evidence"]]
+
+    return item
+
+
 @router.get("/api/findings/{file_id}")
 @router.get("/findings/{file_id}")
 def get_findings(file_id: str) -> Dict[str, Any]:
@@ -24,13 +87,13 @@ def get_findings(file_id: str) -> Dict[str, Any]:
     - Searches for {file_id}.csv, {file_id}.xlsx, or {file_id}.xls in backend/app/data/uploads/.
     - Returns HTTP 404 if no matching file exists.
     - Executes analyze_procurement() and aggregates all findings into a unified list.
-    - Preserves detection types: PRICE_ANOMALY, POSSIBLE_DUPLICATE, SUPPLIER_FRAGMENTATION.
+    - Standardizes schema across all categories.
     - Returns JSON structure: {"count": <number>, "findings": [...]}.
-    - Returns HTTP 400 if validation fails or columns are missing.
     """
+    target_id = "cb8b20d5-2516-47a9-8646-317e9beee50b" if file_id.lower() == "demo" else file_id
     target_file = None
     for ext in SUPPORTED_EXTENSIONS:
-        candidate = UPLOAD_DIR / f"{file_id}{ext}"
+        candidate = UPLOAD_DIR / f"{target_id}{ext}"
         if candidate.exists() and candidate.is_file():
             target_file = candidate
             break
@@ -53,29 +116,32 @@ def get_findings(file_id: str) -> Dict[str, Any]:
 
     # 1. Price anomalies
     for item in result.get("price_anomalies", []):
-        finding = dict(item)
-        finding["detection_type"] = "PRICE_ANOMALY"
-        if finding.get("type") in [None, "", "Price Anomaly"]:
-            finding["type"] = "PRICE_ANOMALY"
-        combined_findings.append(finding)
+        combined_findings.append(_standardize_finding(item, "PRICE_ANOMALY"))
 
-    # 2. Duplicate transactions
+    # 2. Missed discounts
+    for item in result.get("discount_findings", []):
+        combined_findings.append(_standardize_finding(item, "MISSED_DISCOUNT"))
+
+    # 3. Contract compliance
+    for item in result.get("contract_findings", []):
+        combined_findings.append(_standardize_finding(item, "CONTRACT_NON_COMPLIANCE"))
+
+    # 4. Duplicate transactions
     for item in result.get("duplicates", []):
-        finding = dict(item)
-        finding["detection_type"] = "POSSIBLE_DUPLICATE"
-        if finding.get("type") in [None, "", "Duplicate Transaction"]:
-            finding["type"] = "POSSIBLE_DUPLICATE"
-        combined_findings.append(finding)
+        combined_findings.append(_standardize_finding(item, "POSSIBLE_DUPLICATE"))
 
-    # 3. Supplier fragmentation
+    # 5. Supplier fragmentation
     for item in result.get("fragmentation", []):
-        finding = dict(item)
-        finding["detection_type"] = "SUPPLIER_FRAGMENTATION"
-        if finding.get("type") in [None, "", "Supplier Fragmentation"]:
-            finding["type"] = "SUPPLIER_FRAGMENTATION"
-        combined_findings.append(finding)
+        combined_findings.append(_standardize_finding(item, "SUPPLIER_FRAGMENTATION"))
 
+    # 6. Unusual procurement patterns
+    for item in result.get("pattern_findings", []):
+        combined_findings.append(_standardize_finding(item, "UNUSUAL_PATTERN"))
+
+    is_demo = target_id == "cb8b20d5-2516-47a9-8646-317e9beee50b"
+    is_manual = str(target_id).startswith("manual_")
     return {
+        "source": "demo" if is_demo else ("manual" if is_manual else "upload"),
         "count": len(combined_findings),
         "findings": combined_findings,
     }

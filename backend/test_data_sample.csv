@@ -1,0 +1,4 @@
+Transaction_ID,Date,Vendor_Name,Item_Description,Quantity,Unit_Price,Total_Spend,Contract_Reference,Payment_Terms,Department
+T-001,2024-01-10,Vendor Alpha,High-End Laptop,5,75000,375000,,Net 30,Engineering
+T-002,2024-01-12,Vendor Beta,High-End Laptop,5,85000,425000,,Net 30,Engineering
+T-003,2024-01-15,Vendor Alpha,High-End Laptop,5,75000,375000,,Net 30,Engineering

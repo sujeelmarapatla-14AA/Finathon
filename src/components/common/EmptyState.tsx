@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileSpreadsheet, ArrowUpRight } from 'lucide-react';
+import { FileSpreadsheet, ArrowRight } from 'lucide-react';
 
 interface EmptyStateProps {
   title?: string;
@@ -9,33 +9,35 @@ interface EmptyStateProps {
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
-  title = "NO PROCUREMENT DATA",
-  description = "Upload your first dataset and we'll start looking for hidden leakage.",
+  title = "No procurement data yet.",
+  description = "Upload transaction data or load the demo dataset to let SpendIntel uncover the patterns hidden inside.",
   actionText = "Upload Dataset",
   onAction,
 }) => {
   return (
-    <div className="py-24 px-8 text-center border border-border-default rounded-[12px] bg-transparent max-w-xl mx-auto my-12">
-      <div className="w-12 h-12 rounded-full bg-dark-secondary border border-border-default flex items-center justify-center mx-auto mb-4 text-brand-forest-bright">
-        <FileSpreadsheet className="w-5 h-5 stroke-[1.5]" />
+    <div className="py-20 px-8 text-center bg-white rounded-[32px] border border-[#E8E8E3] max-w-xl mx-auto my-12 shadow-sm space-y-4">
+      <div className="w-14 h-14 rounded-full bg-[#FAFAF8] border border-[#E8E8E3] flex items-center justify-center mx-auto text-[#111111]">
+        <FileSpreadsheet className="w-6 h-6 stroke-[1.5]" />
       </div>
-      <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-text-muted block mb-2">
+      <span className="text-[10px] uppercase font-sans font-semibold tracking-wider text-[#8A8A84] block">
         DATA REPOSITORY
       </span>
-      <h3 className="font-serif text-3xl text-text-primary font-normal mb-3">
+      <h3 className="text-2xl sm:text-3xl font-sans font-medium text-[#111111] tracking-tight">
         {title}
       </h3>
-      <p className="text-text-secondary text-sm max-w-sm mx-auto mb-6 leading-relaxed font-sans">
+      <p className="text-[#5E5E5A] text-xs sm:text-sm max-w-md mx-auto leading-relaxed font-sans">
         {description}
       </p>
       {onAction && (
-        <button
-          onClick={onAction}
-          className="inline-flex items-center gap-2 h-10 px-5 rounded-[8px] text-xs uppercase font-sans font-semibold tracking-wider bg-brand-forest hover:bg-brand-forest-bright text-brand-cream transition-colors shadow-fine"
-        >
-          <span>{actionText}</span>
-          <ArrowUpRight className="w-3.5 h-3.5" />
-        </button>
+        <div className="pt-2">
+          <button
+            onClick={onAction}
+            className="inline-flex items-center gap-2 h-11 px-6 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#0A0A0A] hover:bg-black text-white transition-all shadow-sm"
+          >
+            <span>{actionText}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
       )}
     </div>
   );

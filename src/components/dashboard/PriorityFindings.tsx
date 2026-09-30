@@ -1,99 +1,163 @@
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
-import { MOCK_ALERTS } from '../../data/mockData';
+import { ArrowRight, ChevronRight, AlertCircle, ShieldAlert } from 'lucide-react';
+import { formatINR } from '../../utils/formatters';
+import { Badge } from '../common/Badge';
+
+export interface FindingItem {
+  transaction_id?: string;
+  id?: string;
+  findingRef?: string;
+  product?: string;
+  supplier?: string;
+  variance_percent?: number;
+  priceVariance?: string;
+  potential_leakage?: number;
+  potentialLeakage?: string;
+  risk?: string;
+  priority?: string;
+  type?: string;
+}
 
 interface PriorityFindingsProps {
-  onInvestigate: (findingRef: string) => void;
+  findings?: FindingItem[];
+  onInvestigate: (findingIdOrRef: string) => void;
   onViewAll?: () => void;
 }
 
 export const PriorityFindings: React.FC<PriorityFindingsProps> = ({
+  findings,
   onInvestigate,
   onViewAll,
 }) => {
+  // Default fallback if live findings not yet loaded
+  const displayItems: FindingItem[] = (findings && findings.length > 0)
+    ? findings.slice(0, 6)
+    : [
+        {
+          transaction_id: 'TX10013',
+          product: 'Industrial Laptop',
+          supplier: 'TechWorld Solutions',
+          variance_percent: 10.53,
+          potential_leakage: 100000,
+          risk: 'HIGH',
+        },
+        {
+          transaction_id: 'TX10028',
+          product: 'Cloud Compute Instance',
+          supplier: 'CloudScale Networks',
+          variance_percent: 14.2,
+          potential_leakage: 85000,
+          risk: 'HIGH',
+        },
+        {
+          transaction_id: 'TX10005',
+          product: 'High-Yield Toner Cartridge',
+          supplier: 'ABC Traders',
+          variance_percent: 8.53,
+          potential_leakage: 45000,
+          risk: 'MEDIUM',
+        },
+        {
+          transaction_id: 'TX10034',
+          product: 'Ergonomic Standing Desk',
+          supplier: 'Apex Office Supplies',
+          variance_percent: 12.1,
+          potential_leakage: 62000,
+          risk: 'HIGH',
+        },
+      ];
+
   return (
-    <div className="bg-transparent border border-border-default rounded-[12px] p-6 sm:p-8 flex flex-col justify-between h-full">
-      <div>
-        <div className="flex items-center justify-between pb-6 border-b border-border-subtle">
-          <div>
-            <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-brand-gold block mb-1">
-              ACTION REQUIRED
-            </span>
-            <h2 className="font-serif text-2xl text-text-primary font-normal">
-              PRIORITY FINDINGS
-            </h2>
-          </div>
-          <span className="text-xs font-mono text-text-muted">
-            {MOCK_ALERTS.length} Alerts
+    <div className="bg-white rounded-[28px] border border-[#E8E8E3] p-6 sm:p-8 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#F0F0EB] gap-4">
+        <div>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8A8A84] block mb-1">
+            Deterministic Flags
           </span>
+          <h2 className="text-2xl font-sans font-medium text-[#111111]">
+            Findings worth investigating.
+          </h2>
+          <p className="text-xs text-[#5E5E5A] mt-1 font-sans">
+            Ranked by financial leakage exposure and contract benchmark variance.
+          </p>
         </div>
 
-        {/* Separated List (NOT individual giant cards) */}
-        <div className="divide-y divide-border-subtle">
-          {MOCK_ALERTS.slice(0, 4).map((alert) => (
-            <div
-              key={alert.id}
-              className="py-4 first:pt-4 group hover:bg-dark-elevated/30 -mx-2 px-2 rounded-[6px] transition-colors"
-            >
-              <div className="flex items-center justify-between mb-1.5">
-                {/* Status Indicator */}
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-sans font-semibold uppercase tracking-wider text-brand-terracotta">
-                  <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta" />
-                  {alert.priority}
-                </span>
-
-                <span className="text-[11px] font-mono text-text-muted">
-                  {alert.findingRef}
-                </span>
-              </div>
-
-              <div className="mb-2">
-                <h4 className="text-sm font-sans font-medium text-text-primary group-hover:text-brand-forest-bright transition-colors">
-                  {alert.product}
-                </h4>
-                <p className="text-xs text-text-muted font-sans mt-0.5">
-                  {alert.supplier}
-                </p>
-              </div>
-
-              <div className="flex items-baseline justify-between pt-1">
-                <div>
-                  <span className="text-sm font-serif font-normal text-brand-terracotta tnum">
-                    {alert.potentialLeakage}
-                  </span>
-                  <span className="text-xs font-sans text-text-muted ml-1.5">leakage</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-mono font-medium text-brand-terracotta tnum">
-                    {alert.priceVariance}
-                  </span>
-
-                  <button
-                    onClick={() => onInvestigate(alert.findingRef)}
-                    className="inline-flex items-center gap-1 text-xs font-sans font-medium text-brand-cream hover:text-brand-forest-bright transition-colors"
-                  >
-                    <span>Investigate</span>
-                    <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="pt-4 border-t border-border-subtle flex items-center justify-between">
-        <span className="text-xs text-text-muted">Ranked by risk exposure</span>
         {onViewAll && (
           <button
             onClick={onViewAll}
-            className="text-xs font-sans text-brand-forest-bright hover:underline font-medium"
+            className="text-xs font-semibold text-[#111111] hover:text-black flex items-center gap-1.5 group shrink-0"
           >
-            View All Findings →
+            <span>View all transactions</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </button>
         )}
+      </div>
+
+      {/* Clean fintech transaction list (Section 10) */}
+      <div className="divide-y divide-[#F0F0EB]">
+        {displayItems.map((item, idx) => {
+          const key = item.transaction_id || item.id || item.findingRef || `item-${idx}`;
+          const idToPass = item.transaction_id || item.findingRef || 'TX10013';
+          const variance = item.variance_percent
+            ? `+${item.variance_percent.toFixed(2)}%`
+            : item.priceVariance || '+10.53%';
+          const leakageFormatted = item.potential_leakage !== undefined
+            ? formatINR(item.potential_leakage)
+            : (item.potentialLeakage || '₹1,00,000');
+
+          return (
+            <div
+              key={key}
+              onClick={() => onInvestigate(idToPass)}
+              className="py-4 px-3 -mx-3 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#FAFAF8] transition-all cursor-pointer group"
+            >
+              {/* Left: Risk pill, Product & Supplier */}
+              <div className="flex items-center gap-4">
+                <div className="shrink-0">
+                  <Badge size="md">{item.risk || item.priority || 'MEDIUM'}</Badge>
+                </div>
+                <div>
+                  <h4 className="text-base font-semibold text-[#111111] group-hover:text-black transition-colors">
+                    {item.product || 'Industrial Laptop'}
+                  </h4>
+                  <div className="flex items-center gap-2 text-sm text-[#5E5E5A] mt-0.5">
+                    <span>{item.supplier || 'TechWorld Solutions'}</span>
+                    <span className="text-[#DCDCD7]">·</span>
+                    <span className="font-mono text-xs text-[#8A8A84]">{idToPass}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Variance, Leakage, Investigate CTA */}
+              <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
+                <div className="text-right">
+                  <span className="text-sm font-mono font-semibold text-[#D96B4A] tnum">
+                    {variance}
+                  </span>
+                  <div className="text-xs text-[#8A8A84]">variance</div>
+                </div>
+
+                <div className="text-right min-w-[100px]">
+                  <span className="text-base font-semibold text-[#111111] tnum">
+                    {leakageFormatted}
+                  </span>
+                  <div className="text-xs text-[#8A8A84]">potential leakage</div>
+                </div>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onInvestigate(idToPass);
+                  }}
+                  className="h-9 px-4 rounded-full text-xs font-semibold bg-[#FAFAF8] group-hover:bg-[#0A0A0A] border border-[#E8E8E3] group-hover:border-[#0A0A0A] text-[#111111] group-hover:text-white transition-all flex items-center gap-1.5 shrink-0"
+                >
+                  <span>Investigate</span>
+                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

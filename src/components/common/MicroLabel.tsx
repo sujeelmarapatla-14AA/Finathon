@@ -33,10 +33,10 @@ export const MicroLabel: React.FC<MicroLabelProps> = ({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-sans text-[10.5px] uppercase font-semibold tracking-super-wide ${variantStyles[variant]} ${className}`}
+      className={`inline-flex items-center gap-1.5 font-sans text-[12px] uppercase font-semibold tracking-wider ${variantStyles[variant]} ${className}`}
     >
       {hasDot && (
-        <span className={`w-1.5 h-1.5 rounded-full ${dotStyles[variant]} animate-pulse`} />
+        <span className={`w-2 h-2 rounded-full ${dotStyles[variant]} animate-pulse`} />
       )}
       {children}
     </span>

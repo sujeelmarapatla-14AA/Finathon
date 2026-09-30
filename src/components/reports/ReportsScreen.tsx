@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { Download, FileText, CheckCircle2 } from 'lucide-react';
+import { Download, CheckCircle2 } from 'lucide-react';
+import { PageHeader } from '../common/PageHeader';
+import { Button } from '../common/Button';
+import { Badge } from '../common/Badge';
 
 export const ReportsScreen: React.FC = () => {
   const [downloadToast, setDownloadToast] = useState<string | null>(null);
@@ -8,115 +11,117 @@ export const ReportsScreen: React.FC = () => {
     {
       name: 'MONTHLY LEAKAGE REPORT',
       date: '30 Sep 2026',
-      records: '50,284 transactions',
+      records: '40 procurement transactions',
       status: 'AUDITED',
       description: 'Comprehensive line-item variance decomposition across all procurement ledgers.',
     },
     {
       name: 'SUPPLIER RISK REPORT',
       date: '28 Sep 2026',
-      records: '428 supplier entities',
+      records: '16 supplier entities',
       status: 'AUDITED',
       description: 'Vendor contract adherence, spot billing deviation, and concentration exposure.',
     },
     {
       name: 'RECOVERY OPPORTUNITY REPORT',
       date: '25 Sep 2026',
-      records: '37 critical actions',
+      records: '14 priority actions',
       status: 'ACTIONABLE',
       description: 'Immediate reclamation pathways including vendor debit memos and rebate claims.',
     },
     {
       name: 'TRANSACTION ANOMALY REPORT',
       date: '20 Sep 2026',
-      records: '143 flagged outliers',
+      records: '22 flagged outliers',
       status: 'VERIFIED',
-      description: 'Price spikes, duplicate purchase orders, and unapproved freight surcharges.',
+      description: 'Price anomalies, duplicate purchase orders, and unapproved price markups.',
     },
   ];
 
   const handleExport = (name: string, format: string) => {
-    setDownloadToast(`${name} (${format}) generated`);
+    const content = `data:text/plain;charset=utf-8,SpendIntel Procurement Audit Report - ${name} (${format})\nGenerated: ${new Date().toISOString()}`;
+    const encoded = encodeURI(content);
+    const a = document.createElement('a');
+    a.href = encoded;
+    a.download = `SpendIntel_${name.toLowerCase().replace(/\s+/g, '_')}.${format.toLowerCase()}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    setDownloadToast(`${name} (${format}) exported successfully`);
     setTimeout(() => setDownloadToast(null), 3000);
   };
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
-      {/* Toast */}
+    <div className="space-y-8 max-w-5xl mx-auto py-2">
+      {/* Toast Notification */}
       {downloadToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-dark-card border border-brand-forest/40 text-brand-cream px-4 py-3 rounded-[8px] shadow-modal flex items-center gap-3 animate-in fade-in duration-200">
-          <CheckCircle2 className="w-4 h-4 text-brand-forest-bright" />
-          <div className="text-xs font-sans">
-            <p className="font-medium text-text-primary">Export Complete</p>
-            <p className="text-text-muted">{downloadToast}</p>
+        <div className="fixed bottom-6 right-6 z-50 bg-[#0A0A0A] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/10 animate-in fade-in slide-in-from-bottom-2">
+          <CheckCircle2 className="w-5 h-5 text-[#73C69A]" />
+          <div className="text-xs">
+            <p className="font-semibold text-white">Dossier Exported</p>
+            <p className="text-[#8A8A84]">{downloadToast}</p>
           </div>
         </div>
       )}
 
-      {/* Page Header (Section 21) */}
-      <div className="border-b border-border-default pb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-brand-forest-bright block mb-2">
-            07 / AUDIT ARCHIVES
+      {/* Header */}
+      <PageHeader
+        label="Audit & Compliance Archives"
+        title="Procurement Reports"
+        subtitle="Audit-ready forensic spend packages prepared for the Chief Financial Officer and Procurement Audit Committee."
+        actions={
+          <span className="text-xs font-mono text-[#8A8A84] bg-white px-3.5 py-1.5 rounded-full border border-[#E8E8E3] shrink-0">
+            SOC2 & ISO 27001 Formatted
           </span>
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-text-primary font-normal tracking-tight">
-            PROCUREMENT REPORTS
-          </h1>
-          <p className="mt-3 text-sm sm:text-base text-text-secondary font-sans max-w-2xl leading-relaxed">
-            Forensic dossiers prepared for the Chief Financial Officer and Procurement Audit Committee.
-          </p>
-        </div>
+        }
+      />
 
-        <span className="text-xs font-mono text-text-muted">
-          Q3 Compliance Package
-        </span>
-      </div>
-
-      {/* Report Rows (Section 21) */}
-      <div className="border border-border-default rounded-[12px] bg-dark-bg divide-y divide-border-subtle overflow-hidden">
+      {/* Clean Editorial Report Rows */}
+      <div className="bg-white rounded-[24px] border border-[#E8E8E3] divide-y divide-[#F0F0EB] overflow-hidden shadow-sm">
         {reports.map((rep) => (
           <div
             key={rep.name}
-            className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-dark-elevated/40 transition-colors"
+            className="p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-[#FAFAF8] transition-colors group"
           >
-            <div className="space-y-1">
+            <div className="space-y-1.5 max-w-xl">
               <div className="flex items-center gap-3">
-                <h3 className="font-serif text-xl text-text-primary font-normal">
+                <h3 className="text-base sm:text-lg font-sans font-semibold text-[#111111] group-hover:text-black">
                   {rep.name}
                 </h3>
-                <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-sans font-semibold uppercase tracking-wider ${
-                  rep.status === 'ACTIONABLE'
-                    ? 'bg-brand-terracotta/20 text-brand-terracotta border border-brand-terracotta/30'
-                    : 'bg-brand-forest/20 text-brand-forest-bright border border-brand-forest/30'
-                }`}>
+                <Badge variant={rep.status === 'ACTIONABLE' ? 'high' : 'low'}>
                   {rep.status}
-                </span>
+                </Badge>
               </div>
-              <p className="text-xs text-text-muted font-sans max-w-lg">
+              <p className="text-xs text-[#5E5E5A] font-sans leading-relaxed">
                 {rep.description}
               </p>
-              <div className="flex items-center gap-4 text-xs font-mono text-text-secondary pt-1">
-                <span>Date: {rep.date}</span>
+              <div className="flex items-center gap-4 text-xs font-mono text-[#8A8A84] pt-1">
+                <span>Updated: {rep.date}</span>
                 <span>•</span>
-                <span>Records: {rep.records}</span>
+                <span>{rep.records}</span>
               </div>
             </div>
 
-            {/* Action Buttons: [ Export PDF ] [ Export CSV ] (Section 21) */}
-            <div className="flex items-center gap-2.5 shrink-0 self-start md:self-auto">
-              <button
+            {/* Actions: Export PDF / Export CSV */}
+            <div className="flex items-center gap-3 shrink-0">
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Download className="w-3.5 h-3.5 text-[#5E5E5A]" />}
+                onClick={() => handleExport(rep.name, 'PDF')}
+              >
+                Export PDF
+              </Button>
+
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<Download className="w-3.5 h-3.5" />}
                 onClick={() => handleExport(rep.name, 'CSV')}
-                className="h-9 px-3.5 rounded-[8px] text-xs font-sans text-text-primary bg-dark-secondary hover:bg-dark-elevated border border-border-default transition-colors"
               >
                 Export CSV
-              </button>
-              <button
-                onClick={() => handleExport(rep.name, 'PDF')}
-                className="h-9 px-4 rounded-[8px] text-xs font-sans font-semibold uppercase tracking-wider bg-brand-forest hover:bg-brand-forest-bright text-brand-cream transition-colors shadow-fine flex items-center gap-1.5"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Export PDF</span>
-              </button>
+              </Button>
             </div>
           </div>
         ))}
@@ -124,3 +129,4 @@ export const ReportsScreen: React.FC = () => {
     </div>
   );
 };
+

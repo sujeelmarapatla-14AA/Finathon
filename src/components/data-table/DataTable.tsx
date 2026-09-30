@@ -1,99 +1,275 @@
-import React, { useState } from 'react';
-import { Search, Download, ArrowUpRight, ArrowRight, X } from 'lucide-react';
-import { MOCK_TRANSACTIONS } from '../../data/mockData';
-import { Transaction } from '../../types';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, Download, ChevronRight, X, Filter } from 'lucide-react';
+import { DataSource, DashboardData } from '../../types';
+import { fetchFindingsData, DEMO_FILE_ID } from '../../services/api';
+import { formatINR } from '../../utils/formatters';
+import { PageHeader } from '../common/PageHeader';
+import { Button } from '../common/Button';
+import { Badge } from '../common/Badge';
+import { ProcurementAnalyticsSuite } from './analytics/ProcurementAnalyticsSuite';
+import { computeProcurementAnalytics } from './analytics/analyticsUtils';
 
 interface DataTableProps {
-  onInvestigateTransaction?: (poNumber: string) => void;
+  onInvestigateTransaction?: (transactionId: string) => void;
+  transactions?: any[];
+  dashboardData?: DashboardData | null;
+  source?: DataSource;
+  fileId?: string;
 }
 
 export const DataTable: React.FC<DataTableProps> = ({
   onInvestigateTransaction,
+  transactions: propTransactions,
+  dashboardData,
+  source = 'demo',
+  fileId = DEMO_FILE_ID,
 }) => {
+  // Existing Filter State
   const [filterType, setFilterType] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+  const [dataList, setDataList] = useState<any[]>(propTransactions || []);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  // Interactive Chart Filter State (Section 19, 20 & 21)
+  const [selectedSupplier, setSelectedSupplier] = useState<string | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
+  const [selectedRisk, setSelectedRisk] = useState<string | null>(null);
+  const [selectedAlertType, setSelectedAlertType] = useState<string | null>(null);
+  const [selectedBucket, setSelectedBucket] = useState<string | null>(null);
+  const [selectedTxId, setSelectedTxId] = useState<string | null>(null);
+
+  // Sync with prop transactions or fetch live from backend
+  useEffect(() => {
+    let isCancelled = false;
+
+    if (propTransactions && propTransactions.length > 0) {
+      setDataList(propTransactions);
+      return;
+    }
+
+    async function loadData() {
+      setLoading(true);
+      try {
+        const res = await fetchFindingsData(source, fileId);
+        if (!isCancelled && res.findings) {
+          setDataList(res.findings);
+        }
+      } catch (err) {
+        console.warn('Transactions data fetch notice:', err);
+      } finally {
+        if (!isCancelled) setLoading(false);
+      }
+    }
+
+    loadData();
+    return () => {
+      isCancelled = true;
+    };
+  }, [source, fileId, propTransactions]);
+
+  // Reset interactive filters when source changes
+  useEffect(() => {
+    setSelectedSupplier(null);
+    setSelectedProduct(null);
+    setSelectedRisk(null);
+    setSelectedAlertType(null);
+    setSelectedBucket(null);
+    setSelectedTxId(null);
+  }, [source, fileId]);
 
   const filterTabs = [
     'All',
-    'High Risk',
-    'Price Anomaly',
+    'Price anomaly',
     'Duplicate',
-    'Discount',
-    'Office Supplies',
-    'IT Hardware',
+    'Supplier fragmentation',
+    'Contract',
+    'Missed discount',
   ];
 
-  const filteredData = MOCK_TRANSACTIONS.filter((tx) => {
-    if (filterType === 'High Risk' && tx.status !== 'HIGH' && tx.status !== 'CRITICAL') return false;
-    if (filterType === 'Price Anomaly' && tx.type !== 'Price Anomalies') return false;
-    if (filterType === 'Duplicate' && tx.type !== 'Duplicate Purchases') return false;
-    if (filterType === 'Discount' && tx.type !== 'Missed Discounts') return false;
-    if (filterType === 'Office Supplies' && tx.category !== 'Office Supplies') return false;
-    if (filterType === 'IT Hardware' && tx.category !== 'IT Hardware') return false;
+  // SINGLE FILTERED DATASET (Section 20 - Filter State)
+  // All charts and the table consume this exact same filtered dataset
+  const filteredData = useMemo(() => {
+    return dataList.filter((tx) => {
+      const fType = String(tx.type || tx.detection_type || '').toUpperCase();
 
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      return (
-        tx.id.toLowerCase().includes(q) ||
-        tx.supplier.toLowerCase().includes(q) ||
-        tx.product.toLowerCase().includes(q) ||
-        tx.poNumber.toLowerCase().includes(q)
-      );
-    }
+      // Category tab filter
+      if (filterType === 'Price anomaly' && !fType.includes('PRICE_ANOMALY')) return false;
+      if (filterType === 'Duplicate' && !fType.includes('DUPLICATE')) return false;
+      if (filterType === 'Supplier fragmentation' && !fType.includes('FRAGMENTATION')) return false;
+      if (filterType === 'Contract' && !fType.includes('CONTRACT')) return false;
+      if (filterType === 'Missed discount' && !fType.includes('DISCOUNT')) return false;
 
-    return true;
-  });
+      // Interactive chart alert type filter
+      if (selectedAlertType) {
+        const upperAlert = selectedAlertType.toUpperCase();
+        if (!fType.includes(upperAlert)) return false;
+      }
+
+      // Interactive chart supplier filter
+      if (selectedSupplier) {
+        const supp = String(tx.supplier || tx.supplier_name || '').toLowerCase();
+        if (supp !== selectedSupplier.toLowerCase()) return false;
+      }
+
+      // Interactive chart product filter
+      if (selectedProduct) {
+        const prod = String(tx.product || tx.product_name || '').toLowerCase();
+        if (prod !== selectedProduct.toLowerCase()) return false;
+      }
+
+      // Interactive chart risk filter
+      if (selectedRisk) {
+        const r = String(tx.risk || tx.status || '').toUpperCase();
+        if (!r.includes(selectedRisk.toUpperCase())) return false;
+      }
+
+      // Interactive chart variance bucket filter (0-5%, 5-10%, 10-15%, 15-20%, 20%+)
+      if (selectedBucket) {
+        const v = Number(tx.variance_percent ?? tx.variance ?? 0);
+        if (selectedBucket === '0–5%' && (v < 0 || v >= 5)) return false;
+        if (selectedBucket === '5–10%' && (v < 5 || v >= 10)) return false;
+        if (selectedBucket === '10–15%' && (v < 10 || v >= 15)) return false;
+        if (selectedBucket === '15–20%' && (v < 15 || v >= 20)) return false;
+        if (selectedBucket === '20%+' && v < 20) return false;
+      }
+
+      // Search query filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const id = String(tx.transaction_id || tx.id || '').toLowerCase();
+        const supp = String(tx.supplier || '').toLowerCase();
+        const prod = String(tx.product || tx.product_name || '').toLowerCase();
+        const po = String(tx.po_id || tx.poNumber || '').toLowerCase();
+        return id.includes(q) || supp.includes(q) || prod.includes(q) || po.includes(q);
+      }
+
+      return true;
+    });
+  }, [
+    dataList,
+    filterType,
+    searchQuery,
+    selectedSupplier,
+    selectedProduct,
+    selectedRisk,
+    selectedAlertType,
+    selectedBucket,
+  ]);
+
+  // Master analytics computation (Section 30 - Performance & Memoization)
+  const analytics = useMemo(() => {
+    return computeProcurementAnalytics(filteredData, dashboardData);
+  }, [filteredData, dashboardData]);
+
+  // Interactive filter toggle helpers (Section 21 - Graph -> Table)
+  const handleToggleSupplier = (supplier: string) => {
+    setSelectedSupplier((prev) => (prev === supplier ? null : supplier));
+  };
+
+  const handleToggleProduct = (product: string) => {
+    setSelectedProduct((prev) => (prev === product ? null : product));
+  };
+
+  const handleToggleRisk = (risk: string) => {
+    setSelectedRisk((prev) => (prev === risk ? null : risk));
+  };
+
+  const handleToggleAlertType = (alertType: string) => {
+    setSelectedAlertType((prev) => (prev === alertType ? null : alertType));
+  };
+
+  const handleToggleBucket = (bucket: string) => {
+    setSelectedBucket((prev) => (prev === bucket ? null : bucket));
+  };
+
+  const handleClearInteractiveFilter = (type: 'supplier' | 'product' | 'risk' | 'alert' | 'bucket') => {
+    if (type === 'supplier') setSelectedSupplier(null);
+    if (type === 'product') setSelectedProduct(null);
+    if (type === 'risk') setSelectedRisk(null);
+    if (type === 'alert') setSelectedAlertType(null);
+    if (type === 'bucket') setSelectedBucket(null);
+  };
+
+  const handleClearAllInteractiveFilters = () => {
+    setSelectedSupplier(null);
+    setSelectedProduct(null);
+    setSelectedRisk(null);
+    setSelectedAlertType(null);
+    setSelectedBucket(null);
+  };
+
+  const handleExportCSV = () => {
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      'Transaction,Supplier,Product,Quantity,ActualPrice,BenchmarkPrice,Variance,Leakage,Risk\n' +
+      filteredData
+        .map(
+          (e) =>
+            `${e.transaction_id || e.id},"${e.supplier || ''}","${e.product || e.product_name || ''}",${e.quantity || ''},${e.actual_price || e.unit_price || ''},${e.benchmark_price || e.benchmark_unit_price || ''},${e.variance_percent || e.variance || 0}%,${e.potential_leakage || e.amount || 0},${e.risk || 'MEDIUM'}`
+        )
+        .join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `spendintel_${source}_procurement_audit.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="border-b border-border-default pb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-brand-forest-bright block mb-2">
-            TRANSACTION AUDIT REPOSITORY
-          </span>
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-text-primary font-normal tracking-tight">
-            Transactions
-          </h1>
-          <p className="mt-3 text-sm sm:text-base text-text-secondary font-sans max-w-2xl leading-relaxed">
-            Granular line-item reconciliation showing unit price variance against contractual rate cards and historical peer purchases.
-          </p>
-        </div>
+    <div className="space-y-12">
+      {/* 1. Header (Section 2 & 33 - Dynamic Source Indicator) */}
+      <PageHeader
+        label="Procurement Analytics & Audit Center"
+        title="Trace the spend."
+        description="Comprehensive forensic analytics and line-item reconciliation showing unit price variance against contractual rate cards and historical benchmark purchases."
+        actions={
+          <div className="flex items-center gap-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#E8E8E3] text-[10px] font-mono font-semibold text-[#111111] shadow-xs">
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  source === 'nova'
+                    ? 'bg-[#5E81AC] animate-pulse shadow-[0_0_6px_rgba(94,129,172,0.8)]'
+                    : source === 'upload'
+                    ? 'bg-[#E5A93C] shadow-[0_0_6px_rgba(229,169,60,0.8)]'
+                    : 'bg-[#73C69A] shadow-[0_0_6px_rgba(115,198,154,0.8)]'
+                }`}
+              />
+              <span>
+                {source === 'nova'
+                  ? 'LIVE NOVA'
+                  : source === 'upload'
+                  ? 'UPLOADED DATA'
+                  : source === 'manual'
+                  ? 'MANUAL DATA'
+                  : 'DEMO DATASET'}
+              </span>
+            </div>
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={handleExportCSV}
+              icon={<Download className="w-3.5 h-3.5 text-[#5E5E5A]" />}
+              iconPosition="left"
+            >
+              Export CSV
+            </Button>
+          </div>
+        }
+      />
 
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => {
-              const csvContent = "data:text/csv;charset=utf-8," + 
-                "Transaction,Date,Supplier,Product,Quantity,UnitPrice,Benchmark,Variance,Leakage,Status\n" +
-                MOCK_TRANSACTIONS.map(e => `${e.id},${e.date},${e.supplier},"${e.product}",${e.quantity},${e.unitPrice},${e.benchmarkPrice},${e.variancePct}%,${e.leakageAmount},${e.status}`).join("\n");
-              const encodedUri = encodeURI(csvContent);
-              const link = document.createElement("a");
-              link.setAttribute("href", encodedUri);
-              link.setAttribute("download", "leakguard_procurement_transactions.csv");
-              document.body.appendChild(link);
-              link.click();
-            }}
-            className="h-9 px-4 rounded-[8px] text-xs font-sans font-medium text-text-primary bg-dark-secondary hover:bg-dark-elevated border border-border-default transition-colors flex items-center gap-2"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export CSV</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Filter Tabs & Search Bar */}
-      <div className="p-4 rounded-[12px] bg-dark-bg border border-border-default flex flex-col md:flex-row md:items-center justify-between gap-4">
-        {/* Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+      {/* 2. Top Filter Bar & Search Controls (Section 19 & 28 - Filter Bar at top) */}
+      <div className="p-4 sm:p-5 rounded-[24px] bg-white border border-[#E8E8E3] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
           {filterTabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setFilterType(tab)}
-              className={`px-3 py-1.5 rounded-[6px] text-xs font-sans whitespace-nowrap transition-colors ${
+              className={`px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
                 filterType === tab
-                  ? 'bg-brand-forest/20 text-brand-forest-bright font-medium border border-brand-forest/40'
-                  : 'text-text-muted hover:text-text-primary hover:bg-dark-elevated'
+                  ? 'bg-[#0A0A0A] text-white shadow-sm font-semibold'
+                  : 'bg-[#FAFAF8] text-[#5E5E5A] hover:text-[#111111] hover:bg-[#F5F5F2] border border-[#E8E8E3]'
               }`}
             >
               {tab}
@@ -101,199 +277,203 @@ export const DataTable: React.FC<DataTableProps> = ({
           ))}
         </div>
 
-        {/* Search */}
-        <div className="relative shrink-0 w-full md:w-64">
-          <Search className="w-3.5 h-3.5 text-text-muted absolute left-3 top-3" />
+        <div className="relative w-full md:w-80">
+          <Search className="w-4 h-4 text-[#8A8A84] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search TX, supplier, PO..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-9 pl-9 pr-3 text-xs rounded-[8px] bg-dark-secondary border border-border-default text-text-primary focus:outline-none focus:border-brand-forest font-sans"
+            placeholder="Search transaction, supplier, product..."
+            className="w-full h-10 pl-9 pr-4 rounded-full bg-[#FAFAF8] border border-[#E8E8E3] text-xs font-sans text-[#111111] placeholder-[#8A8A84] focus:outline-none focus:border-[#111111] transition-colors"
           />
         </div>
       </div>
 
-      {/* Table */}
-      <div className="border border-border-default rounded-[12px] bg-dark-bg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-border-subtle text-[11px] font-sans uppercase tracking-wider text-text-muted bg-dark-secondary/60">
-                <th className="py-3 px-6 font-medium">Transaction</th>
-                <th className="py-3 px-6 font-medium">Date</th>
-                <th className="py-3 px-6 font-medium">Supplier</th>
-                <th className="py-3 px-6 font-medium">Product</th>
-                <th className="py-3 px-6 font-medium text-right">Qty</th>
-                <th className="py-3 px-6 font-medium text-right">Unit Price</th>
-                <th className="py-3 px-6 font-medium text-right">Benchmark</th>
-                <th className="py-3 px-6 font-medium text-right">Variance</th>
-                <th className="py-3 px-6 font-medium text-right">Leakage</th>
-                <th className="py-3 px-6 font-medium text-center">Status</th>
-                <th className="py-3 px-6 font-medium text-center">Audit</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-subtle text-xs font-sans text-text-primary">
-              {filteredData.map((row) => (
-                <tr
-                  key={row.id}
-                  onClick={() => setSelectedTx(row)}
-                  className="hover:bg-dark-elevated cursor-pointer transition-colors group"
-                >
-                  <td className="py-3.5 px-6 font-mono font-medium text-text-primary group-hover:text-brand-forest-bright">
-                    {row.id}
-                  </td>
-                  <td className="py-3.5 px-6 text-text-muted whitespace-nowrap">
-                    {row.date}
-                  </td>
-                  <td className="py-3.5 px-6 font-medium whitespace-nowrap">
-                    {row.supplier}
-                  </td>
-                  <td className="py-3.5 px-6 max-w-[200px] truncate text-text-secondary">
-                    {row.product}
-                  </td>
-                  <td className="py-3.5 px-6 font-mono text-right tnum">
-                    {row.quantity}
-                  </td>
-                  <td className="py-3.5 px-6 font-serif text-right text-text-primary tnum">
-                    ₹{row.unitPrice.toLocaleString()}
-                  </td>
-                  <td className="py-3.5 px-6 font-serif text-right text-text-muted tnum">
-                    ₹{row.benchmarkPrice.toLocaleString()}
-                  </td>
-                  <td className="py-3.5 px-6 font-mono text-right tnum">
-                    <span className={row.variancePct > 0 ? 'text-brand-terracotta' : 'text-brand-forest-bright'}>
-                      {row.variancePct > 0 ? `+${row.variancePct}%` : '0.0%'}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-6 font-serif text-right font-normal text-brand-terracotta tnum">
-                    {row.leakageAmount > 0 ? `₹${row.leakageAmount.toLocaleString()}` : '—'}
-                  </td>
-                  <td className="py-3.5 px-6 text-center">
-                    <span className={`inline-block px-2 py-0.5 rounded-[4px] text-[10px] font-sans font-semibold uppercase tracking-wider ${
-                      row.status === 'CRITICAL' || row.status === 'HIGH'
-                        ? 'bg-brand-terracotta/20 text-brand-terracotta border border-brand-terracotta/30'
-                        : row.status === 'MEDIUM'
-                        ? 'bg-brand-gold/20 text-brand-gold border border-brand-gold/30'
-                        : 'bg-brand-forest/20 text-brand-forest-bright border border-brand-forest/30'
-                    }`}>
-                      {row.status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-6 text-center">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedTx(row);
-                      }}
-                      className="p-1 rounded text-text-muted hover:text-brand-forest-bright transition-colors"
-                      title="Inspect"
-                    >
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </button>
-                  </td>
+      {/* 3. Master Analytics Visualization Layer (Section 28 Layout) */}
+      <ProcurementAnalyticsSuite
+        analytics={analytics}
+        source={source}
+        selectedSupplier={selectedSupplier}
+        selectedProduct={selectedProduct}
+        selectedRisk={selectedRisk}
+        selectedAlertType={selectedAlertType}
+        selectedBucket={selectedBucket}
+        onSelectSupplier={handleToggleSupplier}
+        onSelectProduct={handleToggleProduct}
+        onSelectRisk={handleToggleRisk}
+        onSelectAlertType={handleToggleAlertType}
+        onSelectBucket={handleToggleBucket}
+        onClearInteractiveFilter={handleClearInteractiveFilter}
+        onClearAllInteractiveFilters={handleClearAllInteractiveFilters}
+        onInvestigateTransaction={onInvestigateTransaction}
+        isLoading={loading}
+      />
+
+      {/* 4. Transaction Evidence Table (Section 28 & 37) */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-medium text-[#111111]">
+              Procurement Audit Line Items
+            </h3>
+            <p className="text-xs text-[#5E5E5A]">
+              Underlying granular purchase orders matching active analytics filters.
+            </p>
+          </div>
+          <span className="text-xs font-mono text-[#8A8A84]">
+            Showing {filteredData.length} records
+          </span>
+        </div>
+
+        <div className="bg-white rounded-[28px] border border-[#E8E8E3] overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[1020px]">
+              <thead>
+                <tr className="border-b border-[#F0F0EB] bg-[#FAFAF8]/90 text-[11px] font-sans font-semibold uppercase tracking-wider text-[#8A8A84] h-12">
+                  <th className="px-6 text-left">Transaction</th>
+                  <th className="px-5 text-left">Supplier</th>
+                  <th className="px-5 text-left">Product</th>
+                  <th className="px-4 text-right">Quantity</th>
+                  <th className="px-4 text-right">Actual</th>
+                  <th className="px-4 text-right">Benchmark</th>
+                  <th className="px-4 text-right">Variance</th>
+                  <th className="px-5 text-right">Leakage</th>
+                  <th className="px-4 text-center">Risk</th>
+                  <th className="px-6 text-right">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-[#F0F0EB] text-xs font-sans">
+                {filteredData.length === 0 ? (
+                  <tr>
+                    <td colSpan={10} className="py-16 text-center text-[#8A8A84]">
+                      <div className="space-y-2 max-w-sm mx-auto">
+                        <span className="text-xs font-semibold text-[#111111] uppercase tracking-wider block">
+                          NO DATA FOR THIS FILTER
+                        </span>
+                        <p className="text-xs text-[#8A8A84]">
+                          Try adjusting your search criteria, clearing chart filters, or resetting category tabs.
+                        </p>
+                        {(selectedSupplier || selectedProduct || selectedRisk || selectedAlertType || selectedBucket) && (
+                          <button
+                            onClick={handleClearAllInteractiveFilters}
+                            className="mt-2 text-xs font-medium text-[#73C69A] hover:underline"
+                          >
+                            Clear interactive chart filters
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredData.map((tx, idx) => {
+                    const txId = tx.transaction_id || tx.id || `TX-${idx + 1}`;
+                    const supp = tx.supplier || 'Not available';
+                    const prod = tx.product || tx.product_name || 'Not available';
+                    const qty = tx.quantity !== undefined && tx.quantity !== null ? tx.quantity : '—';
+                    const actual =
+                      tx.actual_price !== undefined && tx.actual_price !== null
+                        ? formatINR(tx.actual_price)
+                        : tx.unit_price !== undefined
+                        ? formatINR(tx.unit_price)
+                        : '—';
+                    const bench =
+                      tx.benchmark_price !== undefined && tx.benchmark_price !== null
+                        ? formatINR(tx.benchmark_price)
+                        : tx.benchmark_unit_price !== undefined
+                        ? formatINR(tx.benchmark_unit_price)
+                        : '—';
+                    const variance =
+                      tx.variance_percent !== undefined && tx.variance_percent !== null
+                        ? `+${tx.variance_percent.toFixed(2)}%`
+                        : tx.variance !== undefined
+                        ? `+${Number(tx.variance).toFixed(2)}%`
+                        : '—';
+                    const leakage = Number(tx.potential_leakage || tx.amount || 0);
+                    const isRowSelected = selectedTxId === txId;
 
-        <div className="px-6 py-3.5 bg-dark-secondary/40 border-t border-border-subtle flex items-center justify-between text-xs text-text-muted">
-          <span>Showing {filteredData.length} of {MOCK_TRANSACTIONS.length} audited transactions</span>
-          <span className="font-mono text-[11px]">Ledger hash verified</span>
-        </div>
-      </div>
+                    return (
+                      <tr
+                        key={tx.id || `${txId}-${idx}`}
+                        onClick={() => {
+                          setSelectedTxId(txId === selectedTxId ? null : txId);
+                          onInvestigateTransaction?.(txId);
+                        }}
+                        className={`h-14 transition-colors cursor-pointer group ${
+                          isRowSelected
+                            ? 'bg-[#5E81AC]/10'
+                            : 'hover:bg-[#FAFAF8]'
+                        }`}
+                      >
+                        <td className="px-6 font-mono font-medium text-[#111111]">
+                          {txId}
+                        </td>
+                        <td
+                          className="px-5 font-medium text-[#111111] max-w-[160px] truncate"
+                          title={supp}
+                        >
+                          {supp}
+                        </td>
+                        <td
+                          className="px-5 text-[#5E5E5A] max-w-[200px] truncate"
+                          title={prod}
+                        >
+                          {prod}
+                        </td>
+                        <td className="px-4 text-right font-mono text-[#5E5E5A] tnum">
+                          {qty}
+                        </td>
+                        <td className="px-4 text-right font-mono font-medium text-[#111111] tnum">
+                          {actual}
+                        </td>
+                        <td className="px-4 text-right font-mono text-[#8A8A84] tnum">
+                          {bench}
+                        </td>
+                        <td className="px-4 text-right font-mono font-medium text-[#D96B4A] tnum">
+                          {variance}
+                        </td>
+                        <td className="px-5 text-right font-mono font-medium text-[#111111] tnum">
+                          {leakage > 0 ? formatINR(leakage) : '—'}
+                        </td>
+                        <td className="px-4 text-center">
+                          <Badge
+                            variant={
+                              String(tx.risk || tx.status || 'MEDIUM').toLowerCase() === 'high'
+                                ? 'high'
+                                : String(tx.risk || '').toLowerCase() === 'medium'
+                                ? 'medium'
+                                : 'low'
+                            }
+                          >
+                            {tx.risk || tx.status || 'MEDIUM'}
+                          </Badge>
+                        </td>
+                        <td className="px-6 text-right">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onInvestigateTransaction?.(txId);
+                            }}
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-[#FAFAF8] group-hover:bg-[#0A0A0A] border border-[#E8E8E3] group-hover:border-[#0A0A0A] text-[#111111] group-hover:text-white transition-all shadow-xs"
+                          >
+                            <span>Investigate</span>
+                            <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
 
-      {/* Slide-over Transaction Detail Drawer */}
-      {selectedTx && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity"
-            onClick={() => setSelectedTx(null)}
-          />
-          <div className="relative z-10 w-full max-w-md bg-dark-elevated h-full border-l border-border-default shadow-modal p-6 overflow-y-auto space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
-              <div>
-                <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-text-muted block mb-1">
-                  TRANSACTION DOSSIER
-                </span>
-                <h3 className="font-serif text-2xl text-text-primary font-normal">
-                  {selectedTx.id}
-                </h3>
-              </div>
-              <button
-                onClick={() => setSelectedTx(null)}
-                className="p-1.5 rounded text-text-muted hover:text-text-primary"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <span className="text-[10px] uppercase tracking-wide text-text-muted font-sans block mb-1">
-                  Product / Service
-                </span>
-                <p className="font-serif text-lg text-text-primary">{selectedTx.product}</p>
-                <p className="text-xs text-text-muted mt-0.5">{selectedTx.category} · {selectedTx.department}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 p-4 rounded-[8px] bg-dark-secondary border border-border-subtle">
-                <div>
-                  <span className="text-[10px] uppercase font-sans text-text-muted block">Invoiced Price</span>
-                  <span className="font-serif text-xl font-normal text-text-primary tnum">₹{selectedTx.unitPrice.toLocaleString()}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase font-sans text-text-muted block">Contract Benchmark</span>
-                  <span className="font-serif text-xl font-normal text-brand-forest-bright tnum">₹{selectedTx.benchmarkPrice.toLocaleString()}</span>
-                </div>
-                <div className="pt-2 border-t border-border-subtle">
-                  <span className="text-[10px] uppercase font-sans text-text-muted block">Volume</span>
-                  <span className="font-mono text-sm text-text-primary tnum">{selectedTx.quantity} Units</span>
-                </div>
-                <div className="pt-2 border-t border-border-subtle">
-                  <span className="text-[10px] uppercase font-sans text-text-muted block">Variance</span>
-                  <span className="font-mono text-sm text-brand-terracotta tnum font-semibold">+{selectedTx.variancePct}%</span>
-                </div>
-              </div>
-
-              <div>
-                <span className="text-[10px] uppercase tracking-wide text-text-muted font-sans block mb-1">
-                  Supplier & Agreement
-                </span>
-                <p className="text-sm font-medium text-text-primary">{selectedTx.supplier}</p>
-                <p className="text-xs text-text-muted">Purchase Order: {selectedTx.poNumber}</p>
-                <p className="text-xs text-text-muted">Invoice Status: {selectedTx.invoiceStatus}</p>
-              </div>
-
-              <div>
-                <span className="text-[10px] uppercase tracking-wide text-text-muted font-sans block mb-1">
-                  Calculated Leakage
-                </span>
-                <div className="p-3.5 rounded-[8px] bg-brand-terracotta/10 border border-brand-terracotta/30 flex justify-between items-center">
-                  <span className="text-xs font-sans text-brand-terracotta">Potential Avoidable Exposure</span>
-                  <span className="font-serif text-2xl text-brand-terracotta font-normal tnum">
-                    ₹{selectedTx.leakageAmount.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-6 border-t border-border-subtle">
-              <button
-                onClick={() => {
-                  setSelectedTx(null);
-                  if (onInvestigateTransaction) onInvestigateTransaction(selectedTx.poNumber);
-                }}
-                className="w-full h-10 rounded-[8px] flex items-center justify-center gap-2 text-xs font-sans font-semibold uppercase tracking-wider bg-brand-forest hover:bg-brand-forest-bright text-brand-cream transition-colors shadow-fine"
-              >
-                <span>Launch AI Investigation</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
+          {/* Table Footer */}
+          <div className="p-4 sm:p-5 border-t border-[#F0F0EB] bg-[#FAFAF8]/50 flex items-center justify-between text-xs text-[#8A8A84]">
+            <span>Showing {filteredData.length} procurement records</span>
+            <span className="font-mono">Evidence-backed deterministic verification</span>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

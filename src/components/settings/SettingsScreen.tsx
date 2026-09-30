@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Sliders, ShieldCheck, Database, Bell, Lock, Cpu, CheckCircle2 } from 'lucide-react';
+import { PageHeader } from '../common/PageHeader';
+import { Button } from '../common/Button';
 
 interface SettingsScreenProps {
   currentSystemState: 'normal' | 'empty' | 'error';
@@ -12,11 +14,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 }) => {
   const [activeSection, setActiveSection] = useState<'rules' | 'workspace' | 'sources' | 'ai' | 'notifications' | 'security'>('rules');
 
-  // Detection Rules State (Section 22)
   const [priceVarianceThreshold, setPriceVarianceThreshold] = useState<number>(5.0);
   const [duplicateSimilarity, setDuplicateSimilarity] = useState<number>(85);
   const [discountValidation, setDiscountValidation] = useState<boolean>(true);
   const [supplierConcentration, setSupplierConcentration] = useState<number>(30);
+  const [savedToast, setSavedToast] = useState(false);
 
   const sections = [
     { id: 'rules' as const, label: 'Detection Rules', icon: Sliders },
@@ -24,164 +26,182 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     { id: 'sources' as const, label: 'Data Sources', icon: Database },
     { id: 'ai' as const, label: 'AI Configuration', icon: Cpu },
     { id: 'notifications' as const, label: 'Notifications', icon: Bell },
-    { id: 'security' as const, label: 'Security', icon: Lock },
+    { id: 'security' as const, label: 'Security & Certs', icon: Lock },
   ];
 
+  const handleSave = () => {
+    setSavedToast(true);
+    setTimeout(() => setSavedToast(false), 2500);
+  };
+
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
-      {/* Page Header (Section 22) */}
-      <div className="border-b border-border-default pb-8">
-        <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-brand-forest-bright block mb-2">
-          SYSTEM PREFERENCES
-        </span>
-        <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-text-primary font-normal tracking-tight">
-          Settings
-        </h1>
-        <p className="mt-3 text-sm sm:text-base text-text-secondary font-sans max-w-2xl leading-relaxed">
-          Calibrate detection sensitivity, ERP connector status, AI prompt parameters, and lifecycle states.
-        </p>
-      </div>
+    <div className="space-y-8 max-w-5xl mx-auto py-2">
+      {savedToast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#0A0A0A] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/10 animate-in fade-in">
+          <CheckCircle2 className="w-5 h-5 text-[#73C69A]" />
+          <div className="text-xs">
+            <p className="font-semibold text-white">Parameters Saved</p>
+            <p className="text-[#8A8A84]">Detection thresholds successfully applied.</p>
+          </div>
+        </div>
+      )}
 
-      {/* Settings Grid: Left Nav | Right Content */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-        {/* Left Navigation */}
-        <div className="md:col-span-4 space-y-1">
-          {sections.map((sec) => {
-            const Icon = sec.icon;
-            const isActive = activeSection === sec.id;
-            return (
-              <button
-                key={sec.id}
-                onClick={() => setActiveSection(sec.id)}
-                className={`w-full h-10 px-3 rounded-[8px] flex items-center gap-2.5 text-xs font-sans transition-colors ${
-                  isActive
-                    ? 'bg-brand-forest/15 text-text-primary font-medium border border-brand-forest/30'
-                    : 'text-text-muted hover:text-text-primary hover:bg-dark-elevated'
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-brand-forest-bright' : 'text-text-muted'}`} />
-                <span>{sec.label}</span>
-              </button>
-            );
-          })}
+      {/* Header */}
+      <PageHeader
+        label="Platform Configuration"
+        title="Settings"
+        subtitle="Calibrate deterministic detection rules, ERP connector endpoints, and system sensitivity thresholds."
+      />
 
-          {/* Quick Lifecycle State Switcher for Evaluators (Section 30 & 32) */}
-          <div className="pt-6 border-t border-border-subtle space-y-2">
-            <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-text-muted block px-1">
-              Preview Lifecycle States
+      {/* Settings Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+        {/* Left Nav */}
+        <div className="md:col-span-4 space-y-4">
+          <div className="bg-white rounded-[24px] border border-[#E8E8E3] p-3 shadow-sm space-y-1">
+            {sections.map((sec) => {
+              const Icon = sec.icon;
+              const isActive = activeSection === sec.id;
+              return (
+                <button
+                  key={sec.id}
+                  onClick={() => setActiveSection(sec.id)}
+                  className={`w-full h-10 px-4 rounded-xl flex items-center gap-3 text-xs font-sans transition-all ${
+                    isActive
+                      ? 'bg-[#0A0A0A] text-white font-medium shadow-sm'
+                      : 'text-[#5E5E5A] hover:text-[#111111] hover:bg-[#FAFAF8]'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-[#73C69A]' : 'text-[#8A8A84]'}`} />
+                  <span>{sec.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Quick Lifecycle State Preview */}
+          <div className="bg-[#FAFAF8] rounded-[24px] border border-[#E8E8E3] p-5 space-y-2">
+            <span className="text-[10px] uppercase font-semibold tracking-wider text-[#8A8A84] block mb-1">
+              System State Controls
             </span>
             <div className="space-y-1">
               <button
                 onClick={() => onSetSystemState('normal')}
-                className={`w-full text-left px-3 py-1.5 rounded-[6px] text-xs font-sans ${
+                className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-sans transition-colors ${
                   currentSystemState === 'normal'
-                    ? 'bg-dark-elevated text-brand-cream border border-border-default'
-                    : 'text-text-muted hover:text-text-secondary'
+                    ? 'bg-white font-semibold text-[#111111] border border-[#E8E8E3] shadow-sm'
+                    : 'text-[#5E5E5A] hover:text-[#111111]'
                 }`}
               >
                 ● Normal Operational State
               </button>
               <button
                 onClick={() => onSetSystemState('empty')}
-                className={`w-full text-left px-3 py-1.5 rounded-[6px] text-xs font-sans ${
+                className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-sans transition-colors ${
                   currentSystemState === 'empty'
-                    ? 'bg-dark-elevated text-brand-cream border border-border-default'
-                    : 'text-text-muted hover:text-text-secondary'
+                    ? 'bg-white font-semibold text-[#111111] border border-[#E8E8E3] shadow-sm'
+                    : 'text-[#5E5E5A] hover:text-[#111111]'
                 }`}
               >
-                Inspect Empty State (Section 30)
+                ● Empty State
               </button>
               <button
                 onClick={() => onSetSystemState('error')}
-                className={`w-full text-left px-3 py-1.5 rounded-[6px] text-xs font-sans ${
+                className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-sans transition-colors ${
                   currentSystemState === 'error'
-                    ? 'bg-dark-elevated text-brand-cream border border-border-default'
-                    : 'text-text-muted hover:text-text-secondary'
+                    ? 'bg-white font-semibold text-[#111111] border border-[#E8E8E3] shadow-sm'
+                    : 'text-[#5E5E5A] hover:text-[#111111]'
                 }`}
               >
-                Inspect Error State (Section 32)
+                ● Error State
               </button>
             </div>
           </div>
         </div>
 
-        {/* Right Content: Detection Rules (Section 22) */}
-        <div className="md:col-span-8 border border-border-default rounded-[12px] p-6 sm:p-8 bg-transparent space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
-            <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-brand-forest-bright">
-              DETECTION RULES CONFIGURATION
+        {/* Right Content */}
+        <div className="md:col-span-8 bg-white rounded-[24px] border border-[#E8E8E3] p-6 lg:p-8 shadow-sm space-y-6">
+          <div className="flex items-center justify-between pb-4 border-b border-[#F0F0EB]">
+            <div>
+              <span className="text-[10px] uppercase font-semibold tracking-wider text-[#73C69A] block mb-1">
+                Detection Rules
+              </span>
+              <h3 className="text-xl font-sans font-medium text-[#111111]">
+                Tolerance & Audit Thresholds
+              </h3>
+            </div>
+            <span className="text-xs font-mono text-[#8A8A84] bg-[#FAFAF8] px-3 py-1 rounded-full border border-[#E8E8E3]">
+              SpendIntel Core Engine
             </span>
-            <span className="text-xs font-mono text-text-muted">Ruleset Engine v3.2</span>
           </div>
 
           {/* Rule 1: Price variance threshold */}
-          <div className="space-y-2 pb-4 border-b border-border-subtle">
-            <div className="flex items-center justify-between">
+          <div className="space-y-2 pb-5 border-b border-[#F0F0EB]">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <h4 className="text-sm font-sans font-medium text-text-primary">
+                <h4 className="text-sm font-semibold text-[#111111]">
                   Price Variance Threshold (%)
                 </h4>
-                <p className="text-xs text-text-muted">
+                <p className="text-xs text-[#5E5E5A] mt-0.5">
                   Trigger leakage alerts when purchase order exceeds benchmark index.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <input
                   type="number"
                   step="0.5"
                   value={priceVarianceThreshold}
                   onChange={(e) => setPriceVarianceThreshold(Number(e.target.value))}
-                  className="w-20 h-9 px-2.5 rounded-[8px] bg-dark-secondary border border-border-default text-text-primary text-xs font-mono text-right tnum focus:outline-none focus:border-brand-forest"
+                  className="w-20 h-10 px-3 rounded-xl bg-[#FAFAF8] border border-[#E8E8E3] text-[#111111] text-xs font-mono text-right tnum focus:outline-none focus:border-[#111111]"
                 />
-                <span className="text-xs text-text-muted font-mono">%</span>
+                <span className="text-xs text-[#8A8A84] font-mono">%</span>
               </div>
             </div>
           </div>
 
           {/* Rule 2: Duplicate similarity */}
-          <div className="space-y-2 pb-4 border-b border-border-subtle">
-            <div className="flex items-center justify-between">
+          <div className="space-y-2 pb-5 border-b border-[#F0F0EB]">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <h4 className="text-sm font-sans font-medium text-text-primary">
-                  Duplicate Similarity Score
+                <h4 className="text-sm font-semibold text-[#111111]">
+                  Duplicate Similarity Threshold (%)
                 </h4>
-                <p className="text-xs text-text-muted">
+                <p className="text-xs text-[#5E5E5A] mt-0.5">
                   Fuzzy line-item similarity match threshold across overlapping POs.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <input
                   type="number"
                   step="1"
                   value={duplicateSimilarity}
                   onChange={(e) => setDuplicateSimilarity(Number(e.target.value))}
-                  className="w-20 h-9 px-2.5 rounded-[8px] bg-dark-secondary border border-border-default text-text-primary text-xs font-mono text-right tnum focus:outline-none focus:border-brand-forest"
+                  className="w-20 h-10 px-3 rounded-xl bg-[#FAFAF8] border border-[#E8E8E3] text-[#111111] text-xs font-mono text-right tnum focus:outline-none focus:border-[#111111]"
                 />
-                <span className="text-xs text-text-muted font-mono">%</span>
+                <span className="text-xs text-[#8A8A84] font-mono">%</span>
               </div>
             </div>
           </div>
 
           {/* Rule 3: Discount validation */}
-          <div className="space-y-2 pb-4 border-b border-border-subtle">
-            <div className="flex items-center justify-between">
+          <div className="space-y-2 pb-5 border-b border-[#F0F0EB]">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <h4 className="text-sm font-sans font-medium text-text-primary">
-                  Automated Discount Validation
+                <h4 className="text-sm font-semibold text-[#111111]">
+                  Automated Discount Tier Validation
                 </h4>
-                <p className="text-xs text-text-muted">
+                <p className="text-xs text-[#5E5E5A] mt-0.5">
                   Audit unapplied tiered volume rebates and early settlement terms.
                 </p>
               </div>
               <button
                 onClick={() => setDiscountValidation(!discountValidation)}
-                className={`w-11 h-6 rounded-full transition-colors relative ${
-                  discountValidation ? 'bg-brand-forest' : 'bg-dark-card'
+                className={`w-12 h-7 rounded-full transition-colors relative p-1 ${
+                  discountValidation ? 'bg-[#0A0A0A]' : 'bg-[#E8E8E3]'
                 }`}
               >
                 <span
-                  className={`block w-4 h-4 rounded-full bg-text-primary transition-transform ${
-                    discountValidation ? 'translate-x-6' : 'translate-x-1'
+                  className={`block w-5 h-5 rounded-full bg-white transition-transform shadow-sm ${
+                    discountValidation ? 'translate-x-5' : 'translate-x-0'
                   }`}
                 />
               </button>
@@ -190,35 +210,40 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
           {/* Rule 4: Supplier concentration */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <h4 className="text-sm font-sans font-medium text-text-primary">
-                  Supplier Concentration Limit
+                <h4 className="text-sm font-semibold text-[#111111]">
+                  Supplier Concentration Limit (%)
                 </h4>
-                <p className="text-xs text-text-muted">
+                <p className="text-xs text-[#5E5E5A] mt-0.5">
                   Flag spend concentration exceeding tolerance within a single commodity tier.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <input
                   type="number"
                   step="5"
                   value={supplierConcentration}
                   onChange={(e) => setSupplierConcentration(Number(e.target.value))}
-                  className="w-20 h-9 px-2.5 rounded-[8px] bg-dark-secondary border border-border-default text-text-primary text-xs font-mono text-right tnum focus:outline-none focus:border-brand-forest"
+                  className="w-20 h-10 px-3 rounded-xl bg-[#FAFAF8] border border-[#E8E8E3] text-[#111111] text-xs font-mono text-right tnum focus:outline-none focus:border-[#111111]"
                 />
-                <span className="text-xs text-text-muted font-mono">%</span>
+                <span className="text-xs text-[#8A8A84] font-mono">%</span>
               </div>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-border-subtle flex justify-end">
-            <button className="h-9 px-4 rounded-[8px] text-xs font-sans font-semibold uppercase tracking-wider bg-brand-forest hover:bg-brand-forest-bright text-brand-cream transition-colors">
+          <div className="pt-4 border-t border-[#F0F0EB] flex justify-end">
+            <Button
+              variant="primary"
+              size="md"
+              onClick={handleSave}
+            >
               Save Parameters
-            </button>
+            </Button>
           </div>
         </div>
       </div>
     </div>
   );
 };
+

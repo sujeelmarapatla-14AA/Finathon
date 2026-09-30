@@ -1,44 +1,48 @@
 import React from 'react';
 import { RiskLevel } from '../../types';
 
-interface BadgeProps {
+export interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'forest' | 'terracotta' | 'gold' | 'ink' | 'neutral' | RiskLevel;
-  size?: 'xs' | 'sm' | 'md';
+  variant?: 'HIGH' | 'CRITICAL' | 'MEDIUM' | 'LOW' | 'high' | 'critical' | 'medium' | 'low' | 'neutral' | 'success' | 'warning' | RiskLevel | string;
+  size?: 'sm' | 'md' | string;
+  showDot?: boolean;
   className?: string;
 }
 
 export const Badge: React.FC<BadgeProps> = ({
   children,
   variant = 'neutral',
-  size = 'sm',
+  size = 'md',
+  showDot = true,
   className = '',
 }) => {
-  const sizeStyles = {
-    xs: 'text-[9px] px-1.5 py-0.5 tracking-wider',
-    sm: 'text-[10px] px-2 py-0.5 tracking-wide',
-    md: 'text-xs px-2.5 py-1 tracking-normal',
-  };
+  const rawVariant = typeof variant === 'string' ? variant.toUpperCase() : '';
+  const childStr = typeof children === 'string' ? children.toUpperCase() : '';
+  const v = ['HIGH', 'CRITICAL', 'MEDIUM', 'LOW'].includes(childStr) ? childStr : rawVariant;
 
-  const variantStyles: Record<string, string> = {
-    CRITICAL: 'bg-terracotta-50 text-terracotta-700 border border-terracotta-200/80',
-    HIGH: 'bg-terracotta-50/70 text-terracotta-600 border border-terracotta-200/60',
-    MEDIUM: 'bg-gold-50 text-gold-700 border border-gold-200',
-    LOW: 'bg-forest-50 text-forest-700 border border-forest-200',
-    forest: 'bg-forest-50 text-forest-700 border border-forest-200',
-    terracotta: 'bg-terracotta-50 text-terracotta-600 border border-terracotta-200',
-    gold: 'bg-gold-50 text-gold-700 border border-gold-200',
-    ink: 'bg-ink-950 text-cream-100 border border-ink-800',
-    neutral: 'bg-cream-200/60 text-ink-950 border border-border',
-  };
+  let bgClass = 'bg-[#FAFAF8] text-[#5E5E5A] border-[#E8E8E3]';
+  let dotClass = 'bg-[#8A8A84]';
+
+  if (v === 'HIGH' || v === 'CRITICAL' || v === 'WARNING') {
+    bgClass = 'bg-[#D96B4A]/10 text-[#D96B4A] border-[#D96B4A]/25';
+    dotClass = 'bg-[#D96B4A]';
+  } else if (v === 'MEDIUM') {
+    bgClass = 'bg-[#B6A35A]/10 text-[#B6A35A] border-[#B6A35A]/25';
+    dotClass = 'bg-[#B6A35A]';
+  } else if (v === 'LOW' || v === 'SUCCESS' || v === 'AUDITED' || v === 'VERIFIED') {
+    bgClass = 'bg-[#73C69A]/10 text-[#111111] border-[#73C69A]/25';
+    dotClass = 'bg-[#73C69A]';
+  }
+
+  const heightClass = size === 'sm' ? 'min-h-[22px] py-0.5 px-2.5 text-[11.5px]' : 'min-h-[26px] py-1 px-3 text-[12.5px]';
 
   return (
     <span
-      className={`inline-flex items-center justify-center font-sans font-medium uppercase rounded-[3px] select-none transition-colors ${sizeStyles[size]} ${
-        variantStyles[variant] || variantStyles.neutral
-      } ${className}`}
+      className={`inline-flex items-center gap-1.5 ${heightClass} rounded-full font-sans font-semibold uppercase tracking-wider border select-none whitespace-nowrap ${bgClass} ${className}`}
     >
-      {children}
+      {showDot && <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} />}
+      <span>{children}</span>
     </span>
   );
 };
+

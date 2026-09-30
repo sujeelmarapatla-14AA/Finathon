@@ -1,139 +1,214 @@
-import React, { useState } from 'react';
-import { LEAKAGE_CATEGORIES_DATA } from '../../data/mockData';
-import { ArrowUpRight } from 'lucide-react';
+import React from 'react';
+import { ArrowUpRight, ShieldAlert, BarChart3 } from 'lucide-react';
+import { formatCompactINR, formatINR } from '../../utils/formatters';
+
+interface LeakageCategoryItem {
+  type: string;
+  count: number;
+  amount: number;
+}
 
 interface LeakageChartProps {
+  leakageBreakdown?: LeakageCategoryItem[];
+  totalLeakage?: number;
   onSelectCategory?: (category: string) => void;
 }
 
-export const LeakageChart: React.FC<LeakageChartProps> = ({ onSelectCategory }) => {
-  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+export const LeakageChart: React.FC<LeakageChartProps> = ({
+  leakageBreakdown,
+  totalLeakage = 465750,
+  onSelectCategory,
+}) => {
+  const getAmount = (type: string, fallback: number) => {
+    if (!leakageBreakdown) return fallback;
+    const found = leakageBreakdown.find((b) => b.type === type);
+    return found ? Number(found.amount || 0) : 0;
+  };
 
-  // Categories matching Section 11 exactly
-  const categories = LEAKAGE_CATEGORIES_DATA.filter(c => c.amountRaw > 0);
+  const getCount = (type: string, fallback: number) => {
+    if (!leakageBreakdown) return fallback;
+    const found = leakageBreakdown.find((b) => b.type === type);
+    return found ? Number(found.count || 0) : 0;
+  };
+
+  const allCategories = [
+    {
+      name: 'PRICE ANOMALIES',
+      type: 'PRICE_ANOMALY',
+      amount: getAmount('PRICE_ANOMALY', 465750),
+      count: getCount('PRICE_ANOMALY', 14),
+      color: '#73C69A', // Mint accent
+      description: 'Purchases billed above established benchmarks or contract baselines',
+    },
+    {
+      name: 'MISSED DISCOUNTS',
+      type: 'MISSED_DISCOUNT',
+      amount: getAmount('MISSED_DISCOUNT', 155800),
+      count: getCount('MISSED_DISCOUNT', 2),
+      color: '#B6A35A', // Gold
+      description: 'Volume discount tiers and cash rebate terms uncaptured at settlement',
+    },
+    {
+      name: 'CONTRACT NON-COMPLIANCE',
+      type: 'CONTRACT_NON_COMPLIANCE',
+      amount: getAmount('CONTRACT_NON_COMPLIANCE', 0),
+      count: getCount('CONTRACT_NON_COMPLIANCE', 0),
+      color: '#60A5FA', // Blue
+      description: 'Transactions deviating from active contracted master rate cards',
+    },
+    {
+      name: 'DUPLICATE PURCHASES',
+      type: 'POSSIBLE_DUPLICATE',
+      amount: getAmount('POSSIBLE_DUPLICATE', 3396000),
+      count: getCount('POSSIBLE_DUPLICATE', 8),
+      color: '#D96B4A', // Warning Coral
+      description: 'Identical product, supplier, and quantity invoiced within short windows',
+    },
+    {
+      name: 'SUPPLIER FRAGMENTATION',
+      type: 'SUPPLIER_FRAGMENTATION',
+      amount: getAmount('SUPPLIER_FRAGMENTATION', 0),
+      count: getCount('SUPPLIER_FRAGMENTATION', 5),
+      color: '#A78BFA', // Purple
+      description: 'Product volume fractured across multiple vendors without consolidation',
+    },
+    {
+      name: 'UNUSUAL PATTERNS',
+      type: 'UNUSUAL_PATTERN',
+      amount: getAmount('UNUSUAL_PATTERN', 0),
+      count: getCount('UNUSUAL_PATTERN', 14),
+      color: '#F472B6', // Pink
+      description: 'Statistical price spikes, sudden supplier changes, and order volume outliers',
+    },
+  ];
+
+  // Adapt gracefully for small data: filter out irrelevant empty categories (Section 16)
+  const categories = leakageBreakdown
+    ? (allCategories.some((c) => c.amount > 0 || c.count > 0)
+        ? allCategories.filter((c) => c.amount > 0 || c.count > 0)
+        : allCategories)
+    : allCategories;
+
+  // Calculate sum for relative bar widths
+  const maxAmount = Math.max(...categories.map(c => c.amount), 1);
+  const totalCategorySpend = categories.reduce((acc, c) => acc + c.amount, 0);
 
   return (
-    <div className="bg-transparent border border-border-default rounded-[12px] p-6 sm:p-8 flex flex-col justify-between h-full">
-      {/* Editorial Heading & Subtitle */}
-      <div>
-        <div className="flex items-start justify-between pb-6 border-b border-border-subtle gap-4">
+    <div className="rounded-[32px] bg-[#0A0A0A] text-white p-6 sm:p-10 border border-[#1F1F1F] shadow-xl relative overflow-hidden">
+      {/* Background fine grid */}
+      <div className="absolute inset-0 bg-dark-grid opacity-20 pointer-events-none" />
+
+      <div className="relative">
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between pb-8 border-b border-white/10 gap-4">
           <div>
-            <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-brand-terracotta block mb-1">
-              02 / DETECTION
+            <span className="text-[10px] uppercase font-semibold tracking-wider text-[#73C69A] block mb-2">
+              Spend Intelligence
             </span>
-            <h2 className="font-serif text-2xl sm:text-3xl text-text-primary font-normal">
-              LEAKAGE OVERVIEW
+            <h2 className="text-2xl sm:text-3xl font-sans font-medium text-white tracking-tight">
+              Where spend is leaking.
             </h2>
-            <p className="text-xs sm:text-sm text-text-secondary mt-1 font-sans">
-              Potential financial exposure by category
+            <p className="text-xs sm:text-sm text-[#8A8A84] mt-1 font-sans">
+              Every flagged transaction is backed by deterministic evidence.
             </p>
           </div>
 
-          <div className="text-right shrink-0">
-            <span className="text-[10px] uppercase tracking-micro text-text-muted block">Total Exposure</span>
-            <span className="font-serif text-2xl sm:text-3xl text-brand-terracotta font-normal tnum">
-              ₹31.6L
+          <div className="text-left sm:text-right shrink-0">
+            <span className="text-[10px] uppercase tracking-wider text-[#8A8A84] block">
+              Flagged Exposure
+            </span>
+            <span className="text-3xl font-sans font-medium text-white tracking-tight tnum">
+              {formatINR(totalLeakage)}
             </span>
           </div>
         </div>
 
-        {/* Horizontal Proportional Segment Strip */}
-        <div className="my-6">
-          <div className="h-2 w-full rounded-[2px] overflow-hidden flex bg-dark-elevated">
-            {categories.map((cat) => (
-              <div
-                key={cat.category}
-                style={{
-                  width: `${cat.percentage}%`,
-                  backgroundColor: cat.color,
-                }}
-                className="h-full transition-opacity hover:opacity-80 cursor-pointer"
-                title={`${cat.category}: ${cat.amount} (${cat.percentage}%)`}
-                onClick={() => onSelectCategory?.(cat.category)}
-              />
-            ))}
+        {/* 2-Column Layout: Left Leakage Visualization, Right Ranked Categories */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 items-center">
+          {/* Left Column (5 Cols): Proportional Distribution Meter & Summary */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="rounded-2xl bg-white/5 border border-white/10 p-6 space-y-4">
+              <div className="text-xs uppercase font-sans text-[#8A8A84] tracking-wider">
+                Leakage Distribution Strip
+              </div>
+
+              {/* Proportional Segment Bar */}
+              <div className="h-3 w-full rounded-full overflow-hidden flex bg-white/10">
+                {categories.map((cat) => {
+                  const pct = totalCategorySpend > 0 ? (cat.amount / totalCategorySpend) * 100 : 25;
+                  return (
+                    <div
+                      key={cat.name}
+                      style={{ width: `${pct}%`, backgroundColor: cat.color }}
+                      className="h-full transition-opacity hover:opacity-80 cursor-pointer"
+                      title={`${cat.name}: ${formatINR(cat.amount)}`}
+                    />
+                  );
+                })}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                {categories.map((cat) => (
+                  <div key={cat.name} className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
+                    <span className="text-[11px] text-[#8A8A84] truncate">{cat.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 text-xs text-[#8A8A84] leading-relaxed">
+              <span className="text-white font-medium">Audit Note:</span> Price anomalies form the highest confidence direct-recovery category, directly recoverable through contract rebate renegotiation.
+            </div>
+          </div>
+
+          {/* Right Column (7 Cols): Ranked Proportional Bar Rows */}
+          <div className="lg:col-span-7 space-y-5">
+            {categories.map((cat) => {
+              const barWidth = maxAmount > 0 ? (cat.amount / maxAmount) * 100 : 0;
+              const formattedAmt = formatINR(cat.amount);
+
+              return (
+                <div
+                  key={cat.name}
+                  onClick={() => onSelectCategory?.(cat.type)}
+                  className="p-4 rounded-2xl bg-white/5 hover:bg-white/[0.08] border border-white/10 transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center justify-between text-xs mb-2">
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }} />
+                      <span className="font-semibold text-white tracking-wide">
+                        {cat.name}
+                      </span>
+                      <span className="text-[11px] text-[#8A8A84] font-mono">
+                        ({cat.count} flags)
+                      </span>
+                    </div>
+
+                    <div className="text-sm font-medium text-white tnum">
+                      {formattedAmt}
+                    </div>
+                  </div>
+
+                  {/* Clean Proportional Bar */}
+                  <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-700 ease-out"
+                      style={{
+                        width: `${Math.max(barWidth, 4)}%`,
+                        backgroundColor: cat.color,
+                      }}
+                    />
+                  </div>
+
+                  <p className="text-[11px] text-[#8A8A84] mt-2 font-sans line-clamp-1">
+                    {cat.description}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
-
-        {/* Horizontal Bar Chart (Section 11) */}
-        <div className="space-y-5">
-          {categories.map((cat) => {
-            const isHovered = hoveredCategory === cat.category;
-
-            return (
-              <div
-                key={cat.category}
-                onMouseEnter={() => setHoveredCategory(cat.category)}
-                onMouseLeave={() => setHoveredCategory(null)}
-                onClick={() => onSelectCategory?.(cat.category)}
-                className="group cursor-pointer select-none"
-              >
-                <div className="flex items-center justify-between text-xs font-sans mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <span 
-                      className="w-2 h-2 rounded-full shrink-0" 
-                      style={{ backgroundColor: cat.color }} 
-                    />
-                    <span className="font-medium text-text-primary group-hover:text-brand-forest-bright transition-colors">
-                      {cat.category}
-                    </span>
-                  </div>
-
-                  <div className="flex items-baseline gap-3">
-                    <span className="font-mono text-text-muted text-[11px] tnum">
-                      {cat.percentage}%
-                    </span>
-                    <span className="font-serif text-base sm:text-lg font-normal text-text-primary group-hover:text-brand-terracotta transition-colors tnum">
-                      {cat.amount}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Bar */}
-                <div className="w-full bg-dark-card h-2 rounded-[2px] overflow-hidden">
-                  <div
-                    className="h-full rounded-[2px] transition-all duration-500 ease-out"
-                    style={{
-                      width: `${cat.percentage}%`,
-                      backgroundColor: cat.color,
-                      opacity: isHovered ? 1 : 0.88,
-                    }}
-                  />
-                </div>
-
-                <p className="text-[11px] text-text-muted mt-1 leading-normal font-sans">
-                  {cat.description}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Clean Bottom Legend: Terracotta = leakage, Forest = recovered/saved, Gold = opportunity */}
-      <div className="mt-8 pt-4 border-t border-border-subtle flex flex-wrap items-center justify-between gap-3 text-xs text-text-muted font-sans">
-        <div className="flex items-center gap-4">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-brand-terracotta" />
-            <span>Terracotta: Leakage</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-brand-forest" />
-            <span>Forest: Recovered / Saved</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-brand-gold" />
-            <span>Gold: Opportunity</span>
-          </span>
-        </div>
-
-        <button 
-          onClick={() => onSelectCategory?.('Price Anomalies')}
-          className="inline-flex items-center gap-1 text-brand-forest-bright hover:underline font-medium text-xs"
-        >
-          <span>Examine All Vectors</span>
-          <ArrowUpRight className="w-3 h-3" />
-        </button>
       </div>
     </div>
   );

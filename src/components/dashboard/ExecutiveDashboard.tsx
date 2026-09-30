@@ -1,198 +1,302 @@
 import React from 'react';
-import { KPICard } from '../common/KPICard';
+import { motion, useReducedMotion, Variants } from 'framer-motion';
+import { TabType, DashboardData, DataSource } from '../../types';
 import { LeakageChart } from './LeakageChart';
-import { PriorityFindings } from './PriorityFindings';
-import { KPI_DATA, MOCK_TRANSACTIONS } from '../../data/mockData';
-import { TabType } from '../../types';
-import { ArrowUpRight, ArrowRight } from 'lucide-react';
+import { PriorityFindings, FindingItem } from './PriorityFindings';
+import { ArrowRight, Database, Sliders, Layers, Cloud, FileSpreadsheet, RefreshCw, PenLine } from 'lucide-react';
+import { formatCompactINR, formatINR } from '../../utils/formatters';
+import { CUBIC_EASE } from '../layout/PageTransition';
+import { PageHeader } from '../common/PageHeader';
+import { Button } from '../common/Button';
 
 interface ExecutiveDashboardProps {
+  dashboardData?: DashboardData | null;
+  findingsData?: FindingItem[] | null;
+  dataSource?: DataSource;
+  onSwitchSource?: (source: DataSource) => void;
   onInvestigate: (findingRef: string) => void;
   onNavigate: (tab: TabType) => void;
   onAnalyzeData?: () => void;
+  onLoadDemo?: () => void;
+  isDemoActive?: boolean;
 }
 
 export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
+  dashboardData,
+  findingsData,
+  dataSource = 'demo',
+  onSwitchSource,
   onInvestigate,
   onNavigate,
   onAnalyzeData,
+  onLoadDemo,
+  isDemoActive = true,
 }) => {
+  const shouldReduceMotion = useReducedMotion();
+
+  const totalSpend = dashboardData?.kpis?.total_spend ?? dashboardData?.total_spend ?? 0;
+  const potentialLeakage = dashboardData?.kpis?.potential_leakage ?? dashboardData?.potential_leakage ?? 0;
+  const leakageRate = dashboardData?.kpis?.leakage_rate ?? dashboardData?.leakage_rate ?? 0;
+  const suppliersCount = dashboardData?.kpis?.suppliers ?? dashboardData?.suppliers ?? 0;
+  const transactionsCount = dashboardData?.kpis?.transactions ?? dashboardData?.transactions ?? 0;
+
+  const sourceLabels: Record<DataSource, { name: string; desc: string; icon: any }> = {
+    demo: { name: 'Demo Dataset', desc: '40-transaction multi-vendor benchmark dataset', icon: Database },
+    nova: { name: 'Live Nova Cloud', desc: 'Real-time REST procurement API (POs, bills, contracts & vendors)', icon: Cloud },
+    upload: { name: 'Uploaded File', desc: 'Custom procurement dataset ingested via SpendIntel', icon: FileSpreadsheet },
+    manual: { name: 'Manual Data', desc: 'Direct transaction entries ingested via SpendIntel', icon: PenLine },
+  };
+
+  const backendSourceState = (dashboardData?.source as DataSource) || dataSource;
+  const backendSourceLabel = dashboardData?.source_label || (
+    backendSourceState === 'nova' ? 'LIVE NOVA' :
+    backendSourceState === 'upload' ? 'UPLOADED FILE' :
+    backendSourceState === 'manual' ? 'MANUAL DATA' :
+    'DEMO DATASET'
+  );
+
+  const activeSourceInfo = sourceLabels[backendSourceState] || sourceLabels.demo;
+
+  // Stagger variants for editorial metric blocks
+  const metricsContainer: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.06,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const metricItem: Variants = {
+    hidden: { opacity: 0, y: 14 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.55, ease: CUBIC_EASE },
+    },
+  };
+
+  const sectionReveal: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.65, ease: CUBIC_EASE },
+    },
+  };
+
   return (
-    <div className="space-y-8">
-      {/* 1. Page Header (Section 8) */}
-      <div className="border-b border-border-default pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-brand-forest-bright block mb-2">
-            01 / OVERVIEW · PROCUREMENT INTELLIGENCE
+    <div className="space-y-12">
+      {/* 1. Header & Quick Controls (Section 3 & 4) */}
+      <motion.div variants={sectionReveal} initial="hidden" animate="visible" className="space-y-6">
+        <PageHeader
+          label="Procurement Financial Overview"
+          title="Executive Summary"
+          description="Live deterministic analysis of active procurement commitments, price variances, and recoverable leakage."
+          actions={
+            <>
+              {/* Premium Source Selector Pill */}
+              <div className="flex items-center bg-white p-1 rounded-full border border-[#E8E8E3] shadow-xs">
+                <button
+                  onClick={() => onSwitchSource ? onSwitchSource('demo') : (onLoadDemo && onLoadDemo())}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                    dataSource === 'demo'
+                      ? 'bg-[#0A0A0A] text-white font-semibold shadow-xs'
+                      : 'text-[#5E5E5A] hover:text-[#111111]'
+                  }`}
+                >
+                  <Database className={`w-3.5 h-3.5 ${dataSource === 'demo' ? 'text-[#73C69A]' : 'text-[#8A8A84]'}`} />
+                  <span>Demo Dataset</span>
+                </button>
+
+                <button
+                  onClick={() => onSwitchSource && onSwitchSource('nova')}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                    dataSource === 'nova'
+                      ? 'bg-[#0A0A0A] text-white font-semibold shadow-xs'
+                      : 'text-[#5E5E5A] hover:text-[#111111]'
+                  }`}
+                >
+                  <Cloud className={`w-3.5 h-3.5 ${dataSource === 'nova' ? 'text-[#5E81AC]' : 'text-[#8A8A84]'}`} />
+                  <span>Live Nova</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (onAnalyzeData) onAnalyzeData();
+                    else onNavigate('upload');
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                    dataSource === 'upload'
+                      ? 'bg-[#0A0A0A] text-white font-semibold shadow-xs'
+                      : 'text-[#5E5E5A] hover:text-[#111111]'
+                  }`}
+                >
+                  <FileSpreadsheet className={`w-3.5 h-3.5 ${dataSource === 'upload' ? 'text-[#73C69A]' : 'text-[#8A8A84]'}`} />
+                  <span>Upload Data</span>
+                </button>
+              </div>
+
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={() => onNavigate('simulator')}
+                icon={<Sliders className="w-3.5 h-3.5 text-[#5E5E5A]" />}
+                iconPosition="left"
+              >
+                Simulator
+              </Button>
+            </>
+          }
+        />
+
+        {/* Active Source Status Banner */}
+        <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3] text-xs font-sans text-[#5E5E5A]">
+          <div className="flex items-center gap-2.5">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white border border-[#E8E8E3] text-[10px] font-mono font-semibold text-[#111111] shadow-xs">
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                backendSourceLabel.includes('NOVA') ? 'bg-[#5E81AC] animate-pulse shadow-[0_0_6px_rgba(94,129,172,0.6)]' :
+                backendSourceLabel.includes('UPLOAD') ? 'bg-[#E5A93C] shadow-[0_0_6px_rgba(229,169,60,0.6)]' :
+                'bg-[#73C69A] shadow-[0_0_6px_rgba(115,198,154,0.6)]'
+              }`} />
+              <span>{backendSourceLabel}</span>
+            </div>
+            <span className="text-[#DCDCD7]">·</span>
+            <span>{activeSourceInfo.desc}</span>
+          </div>
+
+          <div className="flex items-center gap-4 font-mono text-[11px] text-[#8A8A84]">
+            <span>{transactionsCount} purchase orders</span>
+            <span>•</span>
+            <span>{suppliersCount} vendors</span>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* 2. Large Editorial Metric Blocks with Stagger (Section 8 & 5) */}
+      <motion.div
+        variants={metricsContainer}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-20px' }}
+        className="bg-white rounded-[28px] border border-[#E8E8E3] p-8 sm:p-10 shadow-sm"
+      >
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6 divide-y md:divide-y-0 md:divide-x divide-[#E8E8E3]">
+          {/* TOTAL SPEND */}
+          <motion.div variants={metricItem} className="space-y-1.5">
+            <span className="text-xs uppercase tracking-wider font-semibold text-[#8A8A84] block">
+              TOTAL SPEND
+            </span>
+            <div className="text-3xl sm:text-4xl lg:text-[42px] font-sans font-semibold text-[#111111] tracking-tight tnum">
+              {formatCompactINR(totalSpend)}
+            </div>
+            <p className="text-sm text-[#5E5E5A] mt-1 font-sans">
+              Across {transactionsCount} purchase orders
+            </p>
+          </motion.div>
+
+          {/* POTENTIAL LEAKAGE */}
+          <motion.div variants={metricItem} className="space-y-1.5 pt-6 md:pt-0 md:pl-6">
+            <span className="text-xs uppercase tracking-wider font-semibold text-[#D96B4A] block">
+              POTENTIAL LEAKAGE
+            </span>
+            <div className="text-3xl sm:text-4xl lg:text-[42px] font-sans font-semibold text-[#D96B4A] tracking-tight tnum">
+              {formatCompactINR(potentialLeakage)}
+            </div>
+            <p className="text-sm text-[#5E5E5A] mt-1 font-sans">
+              Deterministic price variance & duplicates
+            </p>
+          </motion.div>
+
+          {/* LEAKAGE RATE */}
+          <motion.div variants={metricItem} className="space-y-1.5 pt-6 md:pt-0 md:pl-6">
+            <span className="text-xs uppercase tracking-wider font-semibold text-[#8A8A84] block">
+              LEAKAGE RATE
+            </span>
+            <div className="text-3xl sm:text-4xl lg:text-[42px] font-sans font-semibold text-[#111111] tracking-tight tnum">
+              {typeof leakageRate === 'number' ? leakageRate.toFixed(2) : leakageRate}%
+            </div>
+            <p className="text-sm text-[#5E5E5A] mt-1 font-sans">
+              Of total procurement value
+            </p>
+          </motion.div>
+
+          {/* SUPPLIERS */}
+          <motion.div variants={metricItem} className="space-y-1.5 pt-6 md:pt-0 md:pl-6">
+            <span className="text-xs uppercase tracking-wider font-semibold text-[#8A8A84] block">
+              SUPPLIERS
+            </span>
+            <div className="text-3xl sm:text-4xl lg:text-[42px] font-sans font-semibold text-[#111111] tracking-tight tnum">
+              {suppliersCount}
+            </div>
+            <p className="text-sm text-[#5E5E5A] mt-1 font-sans">
+              Benchmarked vendor entities
+            </p>
+          </motion.div>
+        </div>
+      </motion.div>
+
+      {/* 3. Spend Intelligence Section: Scroll-Triggered Reveal (Section 9 & 11) */}
+      <motion.div
+        variants={sectionReveal}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-40px' }}
+      >
+        <LeakageChart
+          leakageBreakdown={dashboardData?.leakage_breakdown}
+          totalLeakage={potentialLeakage}
+          onSelectCategory={(category) => onNavigate('table')}
+        />
+      </motion.div>
+
+      {/* 4. Priority Findings Section: Scroll-Triggered Reveal (Section 10 & 11) */}
+      <motion.div
+        variants={sectionReveal}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-40px' }}
+      >
+        <PriorityFindings
+          findings={findingsData ?? dashboardData?.priority_findings}
+          onInvestigate={onInvestigate}
+          onViewAll={() => onNavigate('table')}
+        />
+      </motion.div>
+
+      {/* 5. Editorial Platform Value Banner (Section 11) */}
+      <motion.div
+        variants={sectionReveal}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-40px' }}
+        className="rounded-[28px] bg-[#FAFAF8] border border-[#E8E8E3] p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6"
+      >
+        <div className="space-y-2 max-w-xl">
+          <span className="text-[10px] uppercase font-semibold tracking-wider text-[#73C69A] block">
+            Spend Recovery Simulator
           </span>
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-text-primary font-normal tracking-tight">
-            Find where your money is leaking.
-          </h1>
-          <p className="mt-3 text-sm sm:text-base text-text-secondary font-sans max-w-2xl leading-relaxed">
-            Analyze procurement activity, uncover hidden spend leakage, and understand exactly why it happened.
+          <h3 className="text-2xl font-sans font-medium text-[#111111]">
+            Simulate supplier price optimization in real-time.
+          </h3>
+          <p className="text-xs sm:text-sm text-[#5E5E5A] font-sans leading-relaxed">
+            Test alternative vendor rate cards, simulate demand volume adjustments, and project net financial recovery with zero guesswork.
           </p>
         </div>
 
-        {/* Action Buttons: [ Analyze Data ] (Primary: forest green) & [ Demo Dataset ] (Secondary: dark surface + border) */}
-        <div className="flex items-center gap-3 shrink-0">
-          <button
-            onClick={() => onNavigate('table')}
-            className="h-10 px-4 rounded-[8px] text-xs font-sans font-semibold uppercase tracking-wider text-text-primary bg-transparent hover:bg-dark-elevated border border-border-default transition-colors"
-          >
-            Demo Dataset
-          </button>
-          <button
-            onClick={() => {
-              if (onAnalyzeData) onAnalyzeData();
-              else onNavigate('upload');
-            }}
-            className="h-10 px-5 rounded-[8px] text-xs font-sans font-semibold uppercase tracking-wider bg-brand-forest hover:bg-brand-forest-bright text-brand-cream transition-colors shadow-fine flex items-center gap-2"
-          >
-            <span>Analyze Data</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-
-      {/* 2. KPI Section: 4-column grid with thin vertical separators (Section 9) */}
-      <div className="rounded-[12px] border border-border-default bg-dark-bg overflow-hidden divide-y md:divide-y-0 md:divide-x divide-border-default grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <KPICard
-          label="TOTAL SPEND"
-          value={KPI_DATA.totalSpend}
-          subtext="Audited across 50,284 commercial line items"
-          comparison="FY25-26 Active Ledgers"
-          highlight="default"
-        />
-        <KPICard
-          label="POTENTIAL LEAKAGE"
-          value={KPI_DATA.potentialLeakage}
-          subtext="1.69% of spend identified as avoidable variance"
-          comparison="↑ 12.4% from previous period"
-          highlight="terracotta"
-        />
-        <KPICard
-          label="HIGH-RISK FINDINGS"
-          value={KPI_DATA.highRiskCount}
-          subtext="Immediate review required across 14 categories"
-          comparison="37 Critical Severity"
-          highlight="terracotta"
-        />
-        <KPICard
-          label="SUPPLIERS ANALYZED"
-          value={KPI_DATA.suppliersAnalyzed}
-          subtext="Benchmarked against contractual master agreements"
-          comparison="428 Vendor Entities"
-          highlight="forest"
-        />
-      </div>
-
-      {/* 3. Main Dashboard 12-Column Grid (Section 10) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        {/* Left 8 Columns: Leakage Overview Chart */}
-        <div className="lg:col-span-8">
-          <LeakageChart onSelectCategory={() => onNavigate('leakage')} />
-        </div>
-
-        {/* Right 4 Columns: Priority Findings */}
-        <div className="lg:col-span-4">
-          <PriorityFindings
-            onInvestigate={onInvestigate}
-            onViewAll={() => onNavigate('table')}
-          />
-        </div>
-      </div>
-
-      {/* 4. Recent Findings Transaction Table (Section 42) */}
-      <div className="border border-border-default rounded-[12px] bg-dark-bg overflow-hidden">
-        <div className="px-6 py-5 border-b border-border-default flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-text-muted block mb-1">
-              03 / RECENT ACTIVITY
-            </span>
-            <h3 className="font-serif text-xl sm:text-2xl text-text-primary font-normal">
-              Recent Findings
-            </h3>
-          </div>
-
-          <button
-            onClick={() => onNavigate('table')}
-            className="inline-flex items-center gap-1.5 text-xs font-sans text-brand-forest-bright hover:underline font-medium"
-          >
-            <span>View Full Transaction Ledger</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* Table Rows (Aligned with Tabular Numerals) */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-border-subtle text-[11px] font-sans uppercase tracking-wider text-text-muted bg-dark-secondary/60">
-                <th className="py-3 px-6 font-medium">Transaction</th>
-                <th className="py-3 px-6 font-medium">Date</th>
-                <th className="py-3 px-6 font-medium">Supplier</th>
-                <th className="py-3 px-6 font-medium">Product</th>
-                <th className="py-3 px-6 font-medium text-right">Qty</th>
-                <th className="py-3 px-6 font-medium text-right">Unit Price</th>
-                <th className="py-3 px-6 font-medium text-right">Benchmark</th>
-                <th className="py-3 px-6 font-medium text-right">Variance</th>
-                <th className="py-3 px-6 font-medium text-right">Leakage</th>
-                <th className="py-3 px-6 font-medium text-center">Risk</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-subtle text-xs font-sans text-text-primary">
-              {MOCK_TRANSACTIONS.slice(0, 5).map((row) => (
-                <tr
-                  key={row.id}
-                  onClick={() => onInvestigate(row.id === 'TX-10294' ? 'FINDING #027' : 'FINDING #014')}
-                  className="hover:bg-dark-elevated cursor-pointer transition-colors group"
-                >
-                  <td className="py-3.5 px-6 font-mono font-medium text-text-primary group-hover:text-brand-forest-bright">
-                    {row.id}
-                  </td>
-                  <td className="py-3.5 px-6 text-text-muted whitespace-nowrap">
-                    {row.date}
-                  </td>
-                  <td className="py-3.5 px-6 font-medium whitespace-nowrap">
-                    {row.supplier}
-                  </td>
-                  <td className="py-3.5 px-6 max-w-[200px] truncate text-text-secondary">
-                    {row.product}
-                  </td>
-                  <td className="py-3.5 px-6 font-mono text-right tnum">
-                    {row.quantity}
-                  </td>
-                  <td className="py-3.5 px-6 font-serif text-right text-text-primary tnum">
-                    ₹{row.unitPrice.toLocaleString()}
-                  </td>
-                  <td className="py-3.5 px-6 font-serif text-right text-text-muted tnum">
-                    ₹{row.benchmarkPrice.toLocaleString()}
-                  </td>
-                  <td className="py-3.5 px-6 font-mono text-right tnum">
-                    <span className={row.variancePct > 0 ? 'text-brand-terracotta' : 'text-brand-forest-bright'}>
-                      {row.variancePct > 0 ? `+${row.variancePct}%` : '0.0%'}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-6 font-serif text-right font-normal text-brand-terracotta tnum">
-                    {row.leakageAmount > 0 ? `₹${row.leakageAmount.toLocaleString()}` : '—'}
-                  </td>
-                  <td className="py-3.5 px-6 text-center">
-                    <span className={`inline-block px-2 py-0.5 rounded-[4px] text-[10px] font-sans font-semibold uppercase tracking-wider ${
-                      row.status === 'CRITICAL' || row.status === 'HIGH'
-                        ? 'bg-brand-terracotta/20 text-brand-terracotta border border-brand-terracotta/30'
-                        : row.status === 'MEDIUM'
-                        ? 'bg-brand-gold/20 text-brand-gold border border-brand-gold/30'
-                        : 'bg-brand-forest/20 text-brand-forest-bright border border-brand-forest/30'
-                    }`}>
-                      {row.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <Button
+          variant="primary"
+          size="md"
+          onClick={() => onNavigate('simulator')}
+          icon={<ArrowRight className="w-3.5 h-3.5" />}
+          iconPosition="right"
+          className="shrink-0"
+        >
+          Open Recovery Simulator
+        </Button>
+      </motion.div>
     </div>
   );
 };

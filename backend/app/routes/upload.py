@@ -82,6 +82,19 @@ async def upload_procurement_file(file: UploadFile = File(...)) -> Dict[str, Any
     rows_count = int(len(df))
     columns_list = [str(col).strip() for col in df.columns.tolist()]
 
+    # Validate core procurement schema
+    required_cols = ["transaction_id", "product_id", "product_name", "supplier", "quantity", "unit_price", "benchmark_unit_price"]
+    col_lookup = {col.strip().lower().replace(" ", "_"): col for col in df.columns}
+    missing_cols = [req for req in required_cols if req not in col_lookup]
+
+    if missing_cols:
+        if file_path.exists():
+            file_path.unlink(missing_ok=True)
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid procurement schema. Missing required columns: {', '.join(missing_cols)}.",
+        )
+
     return {
         "success": True,
         "file_id": file_id,

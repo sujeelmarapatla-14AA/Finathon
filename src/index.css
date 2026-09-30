@@ -4,46 +4,33 @@
 
 @layer base {
   :root {
-    --bg-primary: #11120F;
-    --bg-secondary: #171813;
-    --bg-elevated: #1C1E19;
-    --bg-card: #20221D;
-    --bg-hover: #252720;
-    --text-primary: #F5F1E8;
-    --text-secondary: #B8B4A9;
-    --text-muted: #77756D;
-    --border: #30322C;
-    --border-subtle: #272923;
-    --forest: #2A6849;
-    --forest-bright: #3C8A67;
-    --terracotta: #C8541E;
-    --gold: #A08328;
-    --cream: #FAF7F2;
+    --bg-main: #FAFAF8;
+    --text-main: #111111;
+    --text-muted: #5E5E5A;
+    --accent: #73C69A;
+    --border-color: #E8E8E3;
+  }
+
+  html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
-    background-color: #11120F;
-    color: #F5F1E8;
+    background-color: #FAFAF8;
+    color: #111111;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
   }
 
-  /* Headings typography rules */
-  h1 {
-    font-family: 'DM Serif Display', 'Cormorant Garamond', Georgia, serif;
-    line-height: 1.02;
+  /* Refined typography hierarchy */
+  h1, h2, h3, h4 {
     letter-spacing: -0.02em;
-  }
-
-  h2 {
-    font-family: 'DM Serif Display', 'Cormorant Garamond', Georgia, serif;
-    line-height: 1.1;
-  }
-
-  h3 {
-    font-family: 'DM Serif Display', 'Cormorant Garamond', Georgia, serif;
-    line-height: 1.2;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
@@ -53,31 +40,71 @@
   font-feature-settings: "tnum" 1;
 }
 
-/* Subtle 0.03 opacity dark grid pattern */
+/* Dark hero section fine grid (from Moneliq reference) */
 .bg-dark-grid {
   background-image: 
-    linear-gradient(to right, rgba(245, 241, 232, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(245, 241, 232, 0.025) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+/* Light container fine grid */
+.bg-light-grid {
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
-/* Subtle warm radial hero glow */
-.bg-hero-glow {
-  background: radial-gradient(circle at 50% 10%, rgba(200, 84, 30, 0.035) 0%, rgba(42, 104, 73, 0.025) 40%, transparent 70%);
+/* Subtle corner aurora glow for dark hero */
+.bg-hero-aurora {
+  background: radial-gradient(circle at 10% 20%, rgba(115, 198, 154, 0.09) 0%, rgba(10, 10, 10, 0) 65%);
 }
 
-/* Dark editorial scrollbars */
+/* Minimalist scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #11120F;
+  background: #FAFAF8;
 }
 ::-webkit-scrollbar-thumb {
-  background: #272923;
-  border-radius: 3px;
+  background: #DCDCD7;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #30322C;
+  background: #B8B8B2;
+}
+
+/* Micro-Interactions (Section 10) */
+button {
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+}
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.card-lift {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease;
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+}
+
+tr {
+  transition: background-color 150ms ease;
+}
+
+/* Reduced motion preference (Section 13) */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

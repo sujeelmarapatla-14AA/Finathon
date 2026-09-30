@@ -1,301 +1,565 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { EvidenceTimeline } from './EvidenceTimeline';
-import { MOCK_FINDINGS } from '../../data/mockData';
-import { FindingDetail, TabType } from '../../types';
-import { CheckCircle2, X, Download, FileText, GitCompare, Calculator, ArrowRight } from 'lucide-react';
+import { TabType, DataSource, ApiInvestigationData } from '../../types';
+import { fetchTransactionInvestigation, DEMO_FILE_ID } from '../../services/api';
+import { formatINR } from '../../utils/formatters';
+import { PageHeader } from '../common/PageHeader';
+import { Button } from '../common/Button';
+import { Badge } from '../common/Badge';
+import {
+  FileText,
+  GitCompare,
+  Calculator,
+  Download,
+  CheckCircle2,
+  ArrowRight,
+  Sparkles,
+  Search,
+  RefreshCw,
+  AlertCircle,
+  ShieldAlert,
+} from 'lucide-react';
 
 interface AiInvestigationScreenProps {
-  selectedFindingRef: string;
-  onSelectFinding: (ref: string) => void;
+  selectedFindingRef?: string;
+  source?: DataSource;
+  fileId?: string;
+  priorityFindings?: any[];
+  allFindings?: any[];
+  onSelectFinding?: (ref: string) => void;
   onNavigate: (tab: TabType) => void;
 }
 
 export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
   selectedFindingRef,
+  source = 'demo',
+  fileId = DEMO_FILE_ID,
+  priorityFindings,
+  allFindings,
   onSelectFinding,
   onNavigate,
 }) => {
-  const [activeRef, setActiveRef] = useState<string>(selectedFindingRef || 'FINDING #027');
-  const [showEvidenceModal, setShowEvidenceModal] = useState(false);
-  const [exportToast, setExportToast] = useState(false);
+  // Resolve initial transaction ID from props or available state
+  const resolveInitialId = useCallback(() => {
+    if (selectedFindingRef && selectedFindingRef.trim()) {
+      return selectedFindingRef.trim();
+    }
+    if (priorityFindings && priorityFindings.length > 0) {
+      const first = priorityFindings[0];
+      return (first.transaction_id || first.id || '').trim();
+    }
+    if (allFindings && allFindings.length > 0) {
+      const first = allFindings[0];
+      return (first.transaction_id || first.id || '').trim();
+    }
+    if (source === 'demo') {
+      return 'TX10013';
+    }
+    if (source === 'nova') {
+      return 'PO-12-0044-3';
+    }
+    return '';
+  }, [selectedFindingRef, priorityFindings, allFindings, source]);
 
-  const finding: FindingDetail = MOCK_FINDINGS[activeRef] || MOCK_FINDINGS['FINDING #027'];
+  const [activeTxId, setActiveTxId] = useState<string>(() => resolveInitialId());
+  const [customInputId, setCustomInputId] = useState<string>('');
+  const [investigationData, setInvestigationData] = useState<ApiInvestigationData | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [showTimeline, setShowTimeline] = useState<boolean>(true);
+  const [exportToast, setExportToast] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const availableFindings = [
-    { ref: 'FINDING #027', name: 'Industrial Laptop', leakage: '₹4,50,000' },
-    { ref: 'FINDING #014', name: 'Printer Cartridge', leakage: '₹5,500' },
-    { ref: 'FINDING #058', name: 'Cloud Compute Tier', leakage: '₹3,20,000' },
-  ];
+  // Sync with prop changes when user selects a finding from other screens
+  useEffect(() => {
+    if (selectedFindingRef && selectedFindingRef.trim() && selectedFindingRef.trim() !== activeTxId) {
+      setActiveTxId(selectedFindingRef.trim());
+    } else if (!activeTxId) {
+      const fallbackId = resolveInitialId();
+      if (fallbackId) setActiveTxId(fallbackId);
+    }
+  }, [selectedFindingRef, resolveInitialId, activeTxId]);
 
-  const handleExport = () => {
+  // Load investigation data from backend
+  const loadInvestigation = useCallback(async (txIdToLoad: string) => {
+    const cleanId = txIdToLoad.trim();
+    if (!cleanId) return;
+
+    setLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const data = await fetchTransactionInvestigation(source, cleanId, fileId);
+      setInvestigationData(data);
+    } catch (err: any) {
+      console.warn('Investigation fetch error:', err);
+      setErrorMessage(err.message || "SpendIntel couldn't complete this investigation.");
+      setInvestigationData(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [source, fileId]);
+
+  // Trigger investigation whenever activeTxId, source, or fileId changes
+  useEffect(() => {
+    if (activeTxId) {
+      loadInvestigation(activeTxId);
+    }
+  }, [activeTxId, loadInvestigation]);
+
+  // Candidate tabs for quick switching between findings
+  const candidateList = allFindings && allFindings.length > 0 ? allFindings : priorityFindings || [];
+  const sampleFindingTabs = candidateList.length > 0
+    ? candidateList.slice(0, 5).map((f: any) => ({
+        id: f.transaction_id || f.id || '',
+        product: f.product || f.product_name || 'Procurement Item',
+        risk: f.risk || f.status || 'HIGH',
+        leakage: f.potential_leakage || f.amount ? formatINR(f.potential_leakage || f.amount) : '—',
+      })).filter((t: any) => Boolean(t.id))
+    : source === 'nova'
+    ? [
+        { id: 'PO-12-0044-3', product: 'Laptop 14 inch Core i5', risk: 'HIGH', leakage: '₹1,50,000' },
+        { id: 'PO-12-0010-1', product: 'Server Rack 42U', risk: 'MEDIUM', leakage: '₹85,000' },
+        { id: 'PO-12-0088-2', product: 'Office Desk Chair', risk: 'LOW', leakage: '₹32,000' },
+      ]
+    : [
+        { id: 'TX10013', product: 'Industrial Laptop', risk: 'HIGH', leakage: '₹1,00,000' },
+        { id: 'TX10030', product: 'Steel Fasteners', risk: 'HIGH', leakage: '₹1,45,000' },
+        { id: 'TX10008', product: 'Industrial Bearing', risk: 'MEDIUM', leakage: '₹10,800' },
+      ];
+
+  const handleExportFinding = () => {
     setExportToast(true);
     setTimeout(() => setExportToast(false), 3000);
   };
 
+  const handleCustomSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (customInputId.trim()) {
+      const nextId = customInputId.trim();
+      setActiveTxId(nextId);
+      onSelectFinding?.(nextId);
+      setCustomInputId('');
+    }
+  };
+
+  const handleSelectTab = (tabId: string) => {
+    setActiveTxId(tabId);
+    onSelectFinding?.(tabId);
+  };
+
+  // 1. EMPTY STATE: When no transaction/finding is selected and not loading
+  if (!activeTxId && !loading && !investigationData) {
+    return (
+      <div className="space-y-8">
+        <PageHeader
+          label="AI INVESTIGATION"
+          title="Every alert comes with evidence."
+          description="Autonomous procurement analysis explaining the root cause, financial impact, and actionable recovery steps for each transaction."
+        />
+
+        <div className="bg-white rounded-[28px] border border-[#E8E8E3] p-12 sm:p-16 text-center max-w-2xl mx-auto shadow-sm space-y-6">
+          <div className="w-16 h-16 rounded-full bg-[#FAFAF8] border border-[#E8E8E3] flex items-center justify-center mx-auto text-[#73C69A] shadow-xs">
+            <Sparkles className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-xl sm:text-2xl font-sans font-medium text-[#111111]">
+              Select a finding to investigate.
+            </h3>
+            <p className="text-sm text-[#5E5E5A] max-w-md mx-auto leading-relaxed">
+              Explore detected leakage anomalies, contract rate non-compliance, or duplicates in the Findings Explorer to launch an AI forensic investigation.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <Button
+              variant="dark-primary"
+              size="lg"
+              icon={<ArrowRight className="w-4 h-4" />}
+              onClick={() => onNavigate('leakage')}
+            >
+              View Findings
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const finding = investigationData?.finding;
+  const actualPrice = finding?.actual_price ?? (source === 'nova' ? 48500 : 52500);
+  const benchmarkPrice = finding?.benchmark_price ?? (source === 'nova' ? 42000 : 47500);
+  const variancePct = finding?.variance_percent ?? (source === 'nova' ? 15.48 : 10.53);
+  const potentialLeakage = finding?.potential_leakage ?? (source === 'nova' ? 150000 : 100000);
+  const productName = finding?.product_name || finding?.product || (source === 'nova' ? 'Laptop 14 inch Core i5' : 'Industrial Laptop');
+  const supplierName = finding?.supplier || (source === 'nova' ? 'Dell Enterprise Direct' : 'TechWorld Solutions');
+  const quantity = finding?.quantity ?? 20;
+
+  const analyst = investigationData?.ai_analysis;
+  const isAiActive = Boolean(analyst && analyst.summary);
+
+  const summaryText =
+    analyst?.summary ||
+    investigationData?.analyst_summary ||
+    investigationData?.summary ||
+    `Transaction ${activeTxId} for ${quantity} units of ${productName} from ${supplierName} was invoiced at ₹${actualPrice.toLocaleString('en-IN')}, representing an avoidable financial variance over the established benchmark of ₹${benchmarkPrice.toLocaleString('en-IN')}.`;
+
+  const rootCauseText =
+    analyst?.root_cause ||
+    investigationData?.root_cause ||
+    `Spot purchase order issued bypassing enterprise preferred rate cards, resulting in a +${variancePct.toFixed(2)}% markup against approved contracted price schedules.`;
+
+  const evidencePoints = analyst?.evidence_points || (
+    investigationData?.evidence && investigationData.evidence.length > 0
+      ? investigationData.evidence.map((s) => `${s.title}: ${s.description} (${s.value})`)
+      : [
+          `Invoiced unit price: ₹${actualPrice.toLocaleString('en-IN')} vs verified benchmark: ₹${benchmarkPrice.toLocaleString('en-IN')}`,
+          `Variance exceeds standard commercial tolerance threshold of 3.00% by +${(variancePct - 3).toFixed(2)}%`,
+          `Confirmed overpayment across ${quantity} invoiced units amounts to ₹${potentialLeakage.toLocaleString('en-IN')}`,
+        ]
+  );
+
+  const recommendedActions = analyst?.recommended_actions || investigationData?.recommended_actions || [
+    `Issue supplier debit memo for ₹${potentialLeakage.toLocaleString('en-IN')} to ${supplierName}`,
+    `Re-align purchase orders for ${productName} with contracted volume rate cards`,
+    `Simulate alternate vendor routing in the SpendIntel Recovery Simulator`,
+  ];
+
   return (
     <div className="space-y-8">
-      {/* Export Toast */}
+      {/* Export Toast Notification */}
       {exportToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-dark-card border border-brand-forest/40 text-brand-cream px-4 py-3 rounded-[8px] shadow-modal flex items-center gap-3 animate-in fade-in duration-200">
-          <CheckCircle2 className="w-4 h-4 text-brand-forest-bright" />
-          <div className="text-xs font-sans">
-            <p className="font-medium text-text-primary">Finding Exported</p>
-            <p className="text-text-muted">Forensic dossier PDF prepared for {activeRef}.</p>
+        <div className="fixed bottom-6 right-6 z-50 bg-[#0A0A0A] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/10 animate-in fade-in slide-in-from-bottom-2">
+          <CheckCircle2 className="w-5 h-5 text-[#73C69A]" />
+          <div className="text-xs">
+            <p className="font-semibold text-white">Forensic Finding Exported</p>
+            <p className="text-[#8A8A84]">Audit dossier PDF generated for {activeTxId}.</p>
           </div>
         </div>
       )}
 
-      {/* Page Header (Section 15) */}
-      <div className="border-b border-border-default pb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-brand-forest-bright block mb-2">
-            04 / HERO INVESTIGATION
-          </span>
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-text-primary font-normal tracking-tight">
-            AI Investigation
-          </h1>
-          <p className="mt-3 text-sm sm:text-base text-text-secondary font-sans leading-relaxed">
-            Every alert comes with evidence.
-          </p>
-        </div>
+      {/* 1. Header */}
+      <PageHeader
+        label="AI INVESTIGATION"
+        title="Every alert comes with evidence."
+        description="Autonomous procurement analysis explaining the root cause, financial impact, and actionable recovery steps for each transaction."
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <form onSubmit={handleCustomSearch} className="relative">
+              <input
+                type="text"
+                placeholder="Lookup PO / Tx ID..."
+                value={customInputId}
+                onChange={(e) => setCustomInputId(e.target.value)}
+                className="h-9 w-44 pl-8 pr-3 rounded-full bg-white border border-[#E8E8E3] text-xs text-[#111111] focus:outline-none focus:border-[#111111] shadow-xs"
+              />
+              <Search className="w-3.5 h-3.5 text-[#8A8A84] absolute left-2.5 top-1/2 -translate-y-1/2" />
+            </form>
 
-        {/* Ref Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          {availableFindings.map((f) => (
-            <button
-              key={f.ref}
-              onClick={() => {
-                setActiveRef(f.ref);
-                onSelectFinding(f.ref);
-              }}
-              className={`px-3 py-1.5 rounded-[6px] text-xs font-sans transition-all whitespace-nowrap border ${
-                activeRef === f.ref
-                  ? 'border-brand-forest bg-brand-forest/15 text-text-primary font-medium'
-                  : 'border-border-subtle text-text-muted hover:text-text-primary hover:bg-dark-elevated'
-              }`}
-            >
-              <span className="font-mono">{f.ref}</span> · {f.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Two-Column Grid: LEFT Finding Summary | RIGHT AI Analyst (Section 15) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        {/* LEFT COLUMN (5 Columns): Finding Summary */}
-        <div className="lg:col-span-5 border border-border-default rounded-[12px] p-6 sm:p-8 bg-transparent flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-4 border-b border-border-subtle mb-6">
-              <span className="font-mono text-xs text-text-muted uppercase tracking-wider">
-                {finding.refNumber}
-              </span>
-              <span className="text-[10px] font-sans font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-brand-terracotta/20 text-brand-terracotta border border-brand-terracotta/30">
-                {finding.category}
-              </span>
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 shrink-0 scrollbar-none">
+              {sampleFindingTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => handleSelectTab(tab.id)}
+                  className={`h-9 px-3.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                    activeTxId === tab.id
+                      ? 'bg-[#0A0A0A] text-white shadow-sm font-semibold'
+                      : 'bg-white hover:bg-[#FAFAF8] text-[#5E5E5A] hover:text-[#111111] border border-[#E8E8E3]'
+                  }`}
+                >
+                  <span className="font-mono">{tab.id}</span>
+                </button>
+              ))}
             </div>
+          </div>
+        }
+      />
 
-            <div className="space-y-4">
+      {/* 2. LOADING STATE */}
+      {loading && (
+        <div className="bg-white rounded-[28px] border border-[#E8E8E3] p-12 sm:p-16 text-center max-w-2xl mx-auto shadow-sm space-y-6 animate-in fade-in duration-200">
+          <div className="relative w-16 h-16 mx-auto flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full border-2 border-[#E8E8E3] border-t-[#0A0A0A] animate-spin" />
+            <Sparkles className="w-6 h-6 text-[#73C69A] absolute" />
+          </div>
+
+          <div className="space-y-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAFAF8] border border-[#E8E8E3] text-[10px] font-mono font-semibold tracking-wider text-[#111111] uppercase">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#73C69A] animate-pulse" />
+              ANALYZING FINDING...
+            </span>
+            <h3 className="text-xl font-sans font-medium text-[#111111] pt-1">
+              Forensic Investigation in Progress
+            </h3>
+            <p className="text-xs sm:text-sm text-[#5E5E5A] max-w-md mx-auto font-mono">
+              Verifying transaction evidence and synthesizing AI commercial intelligence for {activeTxId}...
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* 3. ERROR STATE */}
+      {errorMessage && !investigationData && !loading && (
+        <div className="bg-white rounded-[28px] border border-[#E8E8E3] p-12 text-center max-w-2xl mx-auto shadow-sm space-y-6 animate-in fade-in duration-200">
+          <div className="w-16 h-16 rounded-full bg-[#FAFAF8] border border-[#E8E8E3] flex items-center justify-center mx-auto text-[#D96B4A]">
+            <AlertCircle className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAFAF8] border border-[#E8E8E3] text-[10px] font-mono font-semibold tracking-wider text-[#D96B4A] uppercase">
+              INVESTIGATION NOTICE
+            </span>
+            <h3 className="text-xl font-sans font-medium text-[#111111]">
+              SpendIntel couldn't complete this investigation.
+            </h3>
+            <p className="text-sm text-[#5E5E5A] max-w-md mx-auto leading-relaxed">
+              {errorMessage}
+            </p>
+          </div>
+
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <Button
+              variant="dark-primary"
+              size="md"
+              icon={<RefreshCw className="w-3.5 h-3.5" />}
+              onClick={() => loadInvestigation(activeTxId)}
+            >
+              Retry Investigation
+            </Button>
+
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={() => onNavigate('leakage')}
+            >
+              View Findings
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* 4. MAIN INVESTIGATION RESULTS (when data is loaded) */}
+      {!loading && investigationData && (
+        <div className="space-y-8 animate-in fade-in duration-300">
+          {/* AI Graceful Degradation Notice (if AI API is offline but deterministic audit is ready) */}
+          {!isAiActive && (
+            <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3] text-xs text-[#5E5E5A] flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2.5">
+                <AlertCircle className="w-4 h-4 text-[#8A8A84] shrink-0" />
+                <span>AI analysis is temporarily unavailable. Verified deterministic evidence and financial calculations are fully operational below.</span>
+              </div>
+              <button
+                onClick={() => loadInvestigation(activeTxId)}
+                className="text-xs font-semibold text-[#111111] underline hover:no-underline shrink-0"
+              >
+                Retry AI Analysis
+              </button>
+            </div>
+          )}
+
+          {/* Two-Column Editorial Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* LEFT COLUMN (5 Columns): Finding Summary */}
+            <div className="lg:col-span-5 bg-white rounded-[24px] border border-[#E8E8E3] p-6 lg:p-8 shadow-sm space-y-6">
+              <div className="pb-6 border-b border-[#F0F0EB] flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#8A8A84] block mb-1">
+                    Transaction Reference
+                  </span>
+                  <span className="text-xl font-sans font-medium text-[#111111]">
+                    {activeTxId}
+                  </span>
+                </div>
+
+                <Badge variant={String(finding?.risk || 'HIGH').toLowerCase() === 'high' ? 'high' : 'medium'}>
+                  {finding?.risk || 'HIGH RISK'}
+                </Badge>
+              </div>
+
+              {/* Product & Supplier Details */}
               <div>
-                <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-text-muted block mb-1">
-                  Product Finding
+                <span className="text-[10px] uppercase font-semibold tracking-wider text-[#8A8A84] block mb-1">
+                  Procured Product
                 </span>
-                <h2 className="font-serif text-3xl sm:text-4xl text-text-primary font-normal">
-                  {finding.product}
+                <h2 className="text-2xl font-sans font-medium text-[#111111]">
+                  {productName}
                 </h2>
-                <p className="text-xs text-text-secondary mt-1 font-sans">
-                  Supplier: <strong className="text-text-primary font-medium">{finding.supplier}</strong>
-                </p>
-                <p className="text-xs text-text-muted font-sans mt-0.5">
-                  PO: {finding.poNumber} · Contract: {finding.contractStatus}
-                </p>
-              </div>
-
-              {/* Potential Leakage Display */}
-              <div className="pt-4 border-t border-border-subtle">
-                <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-text-muted block mb-1">
-                  Potential Leakage
-                </span>
-                <div className="font-serif text-4xl sm:text-5xl font-normal text-brand-terracotta tnum">
-                  {finding.potentialLeakage}
+                <div className="flex items-center gap-2 text-xs text-[#5E5E5A] mt-1.5">
+                  <span>{supplierName}</span>
+                  <span className="text-[#DCDCD7]">·</span>
+                  <span className="font-mono">{quantity} units invoiced</span>
                 </div>
-                <span className="text-xs text-text-secondary mt-1 block font-sans">
-                  {finding.variance} variance on total spend of {finding.exposure}
-                </span>
+              </div>
+
+              {/* Core Comparison Metrics */}
+              <div className="grid grid-cols-2 gap-4 pt-1">
+                <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3]">
+                  <span className="text-[10px] uppercase font-semibold text-[#8A8A84] block mb-2">
+                    Actual price
+                  </span>
+                  <span className="text-xl font-sans font-medium text-[#111111] tnum">
+                    {formatINR(actualPrice)}
+                  </span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3]">
+                  <span className="text-[10px] uppercase font-semibold text-[#8A8A84] block mb-2">
+                    Benchmark
+                  </span>
+                  <span className="text-xl font-sans font-medium text-[#111111] tnum">
+                    {formatINR(benchmarkPrice)}
+                  </span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3]">
+                  <span className="text-[10px] uppercase font-semibold text-[#8A8A84] block mb-2">
+                    Variance
+                  </span>
+                  <span className="text-xl font-sans font-medium text-[#D96B4A] tnum">
+                    +{variancePct.toFixed(2)}%
+                  </span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3]">
+                  <span className="text-[10px] uppercase font-semibold text-[#8A8A84] block mb-2">
+                    Potential leakage
+                  </span>
+                  <span className="text-xl font-sans font-medium text-[#111111] tnum">
+                    {formatINR(potentialLeakage)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-6 border-t border-[#F0F0EB] grid grid-cols-2 gap-3">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<FileText className="w-3.5 h-3.5" />}
+                  onClick={() => setShowTimeline(!showTimeline)}
+                  className="w-full justify-center"
+                >
+                  {showTimeline ? 'Hide evidence' : 'Show evidence'}
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<GitCompare className="w-3.5 h-3.5" />}
+                  onClick={() => onNavigate('suppliers')}
+                  className="w-full justify-center"
+                >
+                  Suppliers
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<Calculator className="w-3.5 h-3.5" />}
+                  onClick={() => onNavigate('simulator')}
+                  className="w-full justify-center"
+                >
+                  Simulate
+                </Button>
+
+                <Button
+                  variant="dark-primary"
+                  size="sm"
+                  icon={<Download className="w-3.5 h-3.5" />}
+                  onClick={handleExportFinding}
+                  className="w-full justify-center"
+                >
+                  Export dossier
+                </Button>
               </div>
             </div>
-          </div>
 
-          {/* Quick Metrics Bar */}
-          <div className="pt-6 border-t border-border-subtle grid grid-cols-3 gap-3 text-left">
-            <div>
-              <span className="text-[10px] uppercase tracking-wide text-text-muted block">Actual Price</span>
-              <span className="font-serif text-lg text-text-primary tnum">{finding.actualPrice}</span>
-            </div>
-            <div>
-              <span className="text-[10px] uppercase tracking-wide text-text-muted block">Benchmark</span>
-              <span className="font-serif text-lg text-brand-forest-bright tnum">{finding.historicalAverage}</span>
-            </div>
-            <div>
-              <span className="text-[10px] uppercase tracking-wide text-text-muted block">Units</span>
-              <span className="font-serif text-lg text-text-primary tnum">{finding.quantity}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN (7 Columns): AI Analyst (Section 15) */}
-        <div className="lg:col-span-7 border border-border-default rounded-[12px] p-6 sm:p-8 bg-transparent flex flex-col justify-between">
-          <div className="space-y-6">
-            {/* AI Analyst Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
-              <div className="flex items-center gap-2">
-                <span className="font-sans text-[10px] uppercase tracking-micro font-semibold text-text-primary">
-                  AI ANALYST
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-forest-bright animate-pulse" />
-                <span className="text-[10px] font-sans font-semibold uppercase tracking-micro text-brand-forest-bright">
-                  ANALYSIS COMPLETE
-                </span>
-              </div>
-            </div>
-
-            {/* AI Explanation (Section 15) */}
-            <div className="p-5 rounded-[8px] bg-dark-secondary border border-border-subtle space-y-3">
-              <p className="text-sm sm:text-base font-sans text-text-primary leading-relaxed">
-                100 laptops were purchased from TechWorld at ₹52,000 per unit.
-              </p>
-              <p className="text-sm sm:text-base font-sans text-text-secondary leading-relaxed">
-                Comparable approved suppliers averaged ₹47,500.
-              </p>
-              <p className="text-sm sm:text-base font-sans text-brand-terracotta-soft leading-relaxed font-medium">
-                The difference represents an estimated ₹4.5L in potentially avoidable expenditure.
-              </p>
-            </div>
-
-            {/* Key Findings List */}
-            <div className="space-y-2 text-xs font-sans text-text-secondary">
-              <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-text-muted block mb-2">
-                Diagnostic Findings
-              </span>
-              <div className="space-y-1.5">
-                {finding.whyFlagged.map((point, idx) => (
-                  <div key={idx} className="flex items-start gap-2">
-                    <span className="w-1 h-1 rounded-full bg-brand-terracotta mt-1.5 shrink-0" />
-                    <p className="leading-relaxed">{point}</p>
+            {/* RIGHT COLUMN (7 Columns): "SpendIntel Analyst" Report */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="bg-white rounded-[24px] border border-[#E8E8E3] p-6 lg:p-8 shadow-sm space-y-6">
+                {/* Analyst Header */}
+                <div className="flex items-center justify-between pb-6 border-b border-[#F0F0EB]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-[#0A0A0A] text-white flex items-center justify-center text-xs font-mono font-bold">
+                      SI
+                    </div>
+                    <div>
+                      <h3 className="text-base font-semibold text-[#111111]">
+                        SpendIntel Analyst
+                      </h3>
+                      <p className="text-xs text-[#8A8A84]">
+                        Deterministic verification & structured commercial intelligence
+                      </p>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
 
-          {/* AI Actions (Section 16: Primary: forest green, Secondary: dark surface + border) */}
-          <div className="pt-6 border-t border-border-subtle flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => setShowEvidenceModal(true)}
-              className="h-9 px-3.5 rounded-[8px] text-xs font-sans font-medium text-text-primary bg-dark-secondary hover:bg-dark-elevated border border-border-default transition-colors flex items-center gap-2"
-            >
-              <FileText className="w-3.5 h-3.5 text-brand-forest-bright" />
-              <span>Show Evidence</span>
-            </button>
-
-            <button
-              onClick={() => onNavigate('suppliers')}
-              className="h-9 px-3.5 rounded-[8px] text-xs font-sans font-medium text-text-primary bg-dark-secondary hover:bg-dark-elevated border border-border-default transition-colors flex items-center gap-2"
-            >
-              <GitCompare className="w-3.5 h-3.5 text-brand-forest-bright" />
-              <span>Compare Suppliers</span>
-            </button>
-
-            <button
-              onClick={() => onNavigate('simulator')}
-              className="h-9 px-4 rounded-[8px] text-xs font-sans font-semibold uppercase tracking-wider bg-brand-forest hover:bg-brand-forest-bright text-brand-cream transition-colors shadow-fine flex items-center gap-2"
-            >
-              <Calculator className="w-3.5 h-3.5" />
-              <span>Calculate Recovery</span>
-            </button>
-
-            <button
-              onClick={handleExport}
-              className="h-9 px-3.5 rounded-[8px] text-xs font-sans font-medium text-text-primary bg-dark-secondary hover:bg-dark-elevated border border-border-default transition-colors flex items-center gap-2 ml-auto"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export Finding</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* WHY THIS WAS FLAGGED (Section 15: 5-Step Evidence Timeline) */}
-      <EvidenceTimeline />
-
-      {/* Supporting Evidence Modal */}
-      {showEvidenceModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div 
-            className="fixed inset-0 bg-black/75 backdrop-blur-sm"
-            onClick={() => setShowEvidenceModal(false)}
-          />
-          <div className="relative z-10 w-full max-w-xl bg-dark-elevated border border-border-default rounded-[12px] shadow-modal p-6 space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
-              <div>
-                <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-brand-forest-bright block mb-1">
-                  EVIDENCE REPOSITORY
-                </span>
-                <h3 className="font-serif text-2xl text-text-primary">
-                  Transaction Audit Trace · {finding.refNumber}
-                </h3>
-              </div>
-              <button 
-                onClick={() => setShowEvidenceModal(false)}
-                className="p-1 rounded text-text-muted hover:text-text-primary"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-3 text-xs font-sans">
-              <div className="p-3.5 rounded-[8px] bg-dark-secondary border border-border-subtle flex justify-between items-center">
-                <div>
-                  <p className="font-medium text-text-primary">PO-2026-8841 (TechWorld Systems)</p>
-                  <p className="text-text-muted mt-0.5">Invoiced spot billing @ ₹52,000 / unit</p>
+                  <span className="text-xs font-mono text-[#73C69A] bg-[#73C69A]/10 border border-[#73C69A]/20 px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#73C69A]" />
+                    Audit-Ready
+                  </span>
                 </div>
-                <span className="font-serif text-sm font-medium text-brand-terracotta tnum">₹52,00,000</span>
-              </div>
 
-              <div className="p-3.5 rounded-[8px] bg-dark-secondary border border-border-subtle flex justify-between items-center">
-                <div>
-                  <p className="font-medium text-text-primary">PO-2026-6110 (XYZ Supplies - June)</p>
-                  <p className="text-text-muted mt-0.5">Historical peer benchmark @ ₹47,200 / unit</p>
+                {/* 1. Summary Block */}
+                <div className="space-y-2">
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#8A8A84] block">
+                    Summary
+                  </span>
+                  <p className="text-sm text-[#111111] font-sans leading-relaxed">
+                    {summaryText}
+                  </p>
                 </div>
-                <span className="font-serif text-sm font-medium text-brand-forest-bright tnum">₹23,60,000</span>
-              </div>
 
-              <div className="p-3.5 rounded-[8px] bg-dark-secondary border border-border-subtle flex justify-between items-center">
-                <div>
-                  <p className="font-medium text-text-primary">Contract Rate Card MSA-OEM-2024</p>
-                  <p className="text-text-muted mt-0.5">Authorized contracted baseline @ ₹47,500 / unit</p>
+                {/* 2. Root Cause Block */}
+                <div className="space-y-2 p-5 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3]">
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#D96B4A] block">
+                    Root Cause
+                  </span>
+                  <p className="text-xs sm:text-sm text-[#5E5E5A] font-sans leading-relaxed">
+                    {rootCauseText}
+                  </p>
                 </div>
-                <span className="font-serif text-sm font-medium text-text-primary tnum">₹47,500</span>
-              </div>
-            </div>
 
-            <div className="pt-4 border-t border-border-subtle flex justify-end gap-3">
-              <button
-                onClick={() => setShowEvidenceModal(false)}
-                className="h-9 px-4 rounded-[8px] text-xs font-sans text-text-primary bg-dark-card border border-border-default hover:bg-dark-hover"
-              >
-                Close
-              </button>
-              <button
-                onClick={() => {
-                  setShowEvidenceModal(false);
-                  onNavigate('table');
-                }}
-                className="h-9 px-4 rounded-[8px] text-xs font-sans font-semibold uppercase tracking-wider bg-brand-forest text-brand-cream hover:bg-brand-forest-bright"
-              >
-                Open In Transactions
-              </button>
+                {/* 3. Evidence Points Block */}
+                <div className="space-y-3">
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#8A8A84] block">
+                    Evidence Ledger
+                  </span>
+                  <div className="space-y-2">
+                    {evidencePoints.map((point, i) => (
+                      <div key={i} className="flex items-start gap-3 text-xs sm:text-sm text-[#111111]">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#73C69A] mt-2 shrink-0" />
+                        <span className="leading-relaxed">{point}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 4. Recommended Actions Block */}
+                <div className="space-y-3 pt-4 border-t border-[#F0F0EB]">
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#111111] block">
+                    Recommended Actions
+                  </span>
+                  <div className="space-y-2.5">
+                    {recommendedActions.map((action, i) => (
+                      <div
+                        key={i}
+                        className="p-3.5 rounded-xl bg-[#FAFAF8] border border-[#E8E8E3] flex items-center justify-between gap-4 text-xs font-medium text-[#111111]"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <span className="font-mono text-[11px] text-[#8A8A84]">0{i + 1}</span>
+                          <span>{action}</span>
+                        </div>
+                        <ArrowRight className="w-3.5 h-3.5 text-[#8A8A84] shrink-0" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Evidence Timeline Section */}
+              {showTimeline && (
+                <EvidenceTimeline steps={investigationData?.evidence} />
+              )}
             </div>
           </div>
         </div>

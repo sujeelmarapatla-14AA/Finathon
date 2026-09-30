@@ -7,6 +7,12 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Environment variables
+.env
+.env.*
+*.env
+backend/.env
+
 # Node
 node_modules
 dist
@@ -33,6 +39,8 @@ backend/env/
 # Uploads data (ignore uploaded files, keep folder)
 backend/app/data/uploads/*
 !backend/app/data/uploads/.gitkeep
+*.db
+backend/app/data/*.db
 
 # Editor directories and files
 .vscode/*

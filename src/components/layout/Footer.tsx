@@ -140,6 +140,17 @@ export const Footer: React.FC<FooterProps> = ({
               >
                 Investigation
               </button>
+              <button
+                type="button"
+                onClick={() => onSelectTab('history')}
+                className={`text-left transition-colors duration-200 cursor-pointer ${
+                  currentTab === 'history'
+                    ? 'text-[#B8A47A] font-medium'
+                    : 'text-[rgba(243,243,241,0.65)] hover:text-[#B8A47A]'
+                }`}
+              >
+                Dataset History & DB
+              </button>
             </nav>
           </div>
 

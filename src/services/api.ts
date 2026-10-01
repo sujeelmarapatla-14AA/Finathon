@@ -669,7 +669,7 @@ export async function deleteHistoricalDataset(datasetId: string): Promise<{ succ
 /**
  * Trigger sync from live Nova Procurement Cloud API into unified history.
  */
-export async function syncNovaDataset(): Promise<{ success: boolean; dataset: UnifiedDatasetItem }> {
+export async function syncNovaDataset(): Promise<{ success: boolean; message?: string; dataset: UnifiedDatasetItem }> {
   const url = `${API_BASE_URL}/api/datasets/sync-nova`;
   const res = await authFetch(url, {
     method: 'POST',

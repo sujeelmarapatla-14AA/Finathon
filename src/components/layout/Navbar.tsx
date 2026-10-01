@@ -475,6 +475,26 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
               )}
             </div>
+
+            {/* 5. History Direct Nav Pill */}
+            <button
+              onClick={() => handleNavClick('history')}
+              className={`relative flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all ${
+                currentTab === 'history'
+                  ? 'text-[#151515] font-semibold'
+                  : 'text-[#151515]/70 hover:text-[#151515]'
+              }`}
+            >
+              {currentTab === 'history' && (
+                <motion.div
+                  layoutId="activeNavIndicator"
+                  className="absolute inset-0 bg-[#151515]/5 rounded-full border border-[#151515]/10 shadow-xs -z-10"
+                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                />
+              )}
+              <Database className={`w-3.5 h-3.5 ${currentTab === 'history' ? 'text-[#B8A47A]' : 'text-[#151515]/50'}`} />
+              <span>History</span>
+            </button>
           </nav>
         </div>
 
@@ -696,6 +716,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                   }`}
                 >
                   Audit Reports
+                </button>
+                <button
+                  onClick={() => handleNavClick('history')}
+                  className={`w-full text-left px-3 py-2 rounded-xl text-sm font-medium ${
+                    currentTab === 'history' ? 'bg-[#151515]/10 text-[#151515] font-semibold' : 'text-[#151515]/70'
+                  }`}
+                >
+                  Dataset History & DB
                 </button>
               </div>
             </div>

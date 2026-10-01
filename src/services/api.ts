@@ -24,11 +24,45 @@ import {
 } from '../types';
 
 const resolveApiBaseUrl = (): string => {
-  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
-  if (typeof window !== 'undefined' && window.location?.hostname) {
-    const port = 8000;
-    return `${window.location.protocol}//${window.location.hostname}:${port}`;
+  // 1. Check if user configured a custom URL in localStorage (e.g., from Settings)
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const customUrl = localStorage.getItem('spendintel_custom_api_url');
+      if (customUrl && customUrl.startsWith('http')) {
+        return customUrl.replace(/\/+$/, '');
+      }
+    }
+  } catch {}
+
+  const envUrl = (import.meta.env.VITE_API_URL || '').trim();
+
+  // 2. If VITE_API_URL is an obvious placeholder or contains unconfigured host
+  const isPlaceholder =
+    !envUrl ||
+    envUrl.includes('your-finathon-backend') ||
+    envUrl.includes('your-app') ||
+    envUrl.includes('placeholder') ||
+    envUrl.includes('example.com') ||
+    envUrl.includes('<') ||
+    envUrl === 'undefined' ||
+    envUrl === 'null';
+
+  if (!isPlaceholder) {
+    return envUrl.replace(/\/+$/, '');
   }
+
+  // 3. Fallback to matching window origin or 127.0.0.1
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    const isLocalhost =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname === '0.0.0.0';
+    if (isLocalhost) {
+      const port = 8000;
+      return `${window.location.protocol}//${window.location.hostname}:${port}`;
+    }
+  }
+
   return 'http://127.0.0.1:8000';
 };
 
@@ -70,7 +104,7 @@ export function setOnUnauthorized(cb: () => void): void {
 
 /**
  * Authenticated fetch wrapper that attaches Authorization header,
- * handles localhost/127.0.0.1 fallbacks, and intercepts 401 errors.
+ * handles localhost/127.0.0.1/placeholder fallbacks, and intercepts 401 errors.
  */
 export async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const token = getAuthToken();
@@ -80,32 +114,41 @@ export async function authFetch(url: string, options: RequestInit = {}): Promise
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  let response: Response;
+  let response: Response | null = null;
   try {
     response = await fetch(url, {
       ...options,
       headers,
     });
   } catch (err) {
-    // If connection failed due to localhost vs 127.0.0.1 mismatch, attempt fallback
-    let fallbackUrl: string | null = null;
+    // If connection failed due to localhost vs 127.0.0.1 mismatch or remote placeholder, attempt fallback
+    const fallbackUrls: string[] = [];
+
     if (url.includes('127.0.0.1:8000')) {
-      fallbackUrl = url.replace('127.0.0.1:8000', 'localhost:8000');
+      fallbackUrls.push(url.replace('127.0.0.1:8000', 'localhost:8000'));
     } else if (url.includes('localhost:8000')) {
-      fallbackUrl = url.replace('localhost:8000', '127.0.0.1:8000');
+      fallbackUrls.push(url.replace('localhost:8000', '127.0.0.1:8000'));
+    } else if (url.includes('onrender.com') || url.includes('your-finathon-backend')) {
+      const pathAndQuery = url.replace(/^https?:\/\/[^\/]+/, '');
+      fallbackUrls.push(`http://127.0.0.1:8000${pathAndQuery}`);
+      fallbackUrls.push(`http://localhost:8000${pathAndQuery}`);
     }
 
-    if (fallbackUrl) {
+    let lastFbErr: any = err;
+    for (const fbUrl of fallbackUrls) {
       try {
-        response = await fetch(fallbackUrl, {
+        response = await fetch(fbUrl, {
           ...options,
           headers,
         });
-      } catch {
-        throw err;
+        break;
+      } catch (fbErr) {
+        lastFbErr = fbErr;
       }
-    } else {
-      throw err;
+    }
+
+    if (!response) {
+      throw lastFbErr;
     }
   }
 

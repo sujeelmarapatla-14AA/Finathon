@@ -51,7 +51,7 @@ const resolveApiBaseUrl = (): string => {
     return envUrl.replace(/\/+$/, '');
   }
 
-  // 3. Fallback to matching window origin or 127.0.0.1
+  // 3. If running locally, use matching localhost or 127.0.0.1 port 8000
   if (typeof window !== 'undefined' && window.location?.hostname) {
     const isLocalhost =
       window.location.hostname === 'localhost' ||
@@ -60,6 +60,14 @@ const resolveApiBaseUrl = (): string => {
     if (isLocalhost) {
       const port = 8000;
       return `${window.location.protocol}//${window.location.hostname}:${port}`;
+    }
+    // If deployed on remote (Render / Vercel / Netlify), default to live backend deployment
+    if (
+      window.location.hostname.includes('onrender.com') ||
+      window.location.hostname.includes('vercel.app') ||
+      window.location.hostname.includes('netlify.app')
+    ) {
+      return 'https://finathon-1.onrender.com';
     }
   }
 

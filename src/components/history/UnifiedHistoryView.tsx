@@ -86,7 +86,7 @@ export const UnifiedHistoryView: React.FC<UnifiedHistoryViewProps> = ({
     setActionSuccess(null);
     try {
       const res = await syncNovaDataset();
-      setActionSuccess(res.message || 'Live Nova procurement synced successfully.');
+      setActionSuccess('Live Nova procurement synced successfully.');
       await loadDatasetsList();
       setTimeout(() => setActionSuccess(null), 4000);
     } catch (err: any) {

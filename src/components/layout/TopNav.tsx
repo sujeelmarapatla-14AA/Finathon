@@ -33,6 +33,7 @@ export const TopNav: React.FC<TopNavProps> = ({
     investigation: { parent: 'Intelligence', child: 'AI Investigation' },
     simulator: { parent: 'Intelligence', child: 'Recovery Simulator' },
     reports: { parent: 'Reporting', child: 'Reports' },
+    history: { parent: 'Data Repository', child: 'Dataset History & DB' },
     settings: { parent: 'System', child: 'Settings' },
     upload: { parent: 'Procurement', child: 'Import Data' },
   };

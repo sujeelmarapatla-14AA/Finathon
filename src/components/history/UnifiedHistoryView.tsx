@@ -33,7 +33,7 @@ import {
   deleteHistoricalDataset,
   syncNovaDataset,
 } from '../../services/api';
-import { formatCompactINR, formatINR, formatPercentage } from '../../utils/formatters';
+import { formatCompactINR, formatINR, formatPercent } from '../../utils/formatters';
 
 interface UnifiedHistoryViewProps {
   onSelectDataset: (datasetId: string, source: DataSource) => void;
@@ -312,8 +312,8 @@ export const UnifiedHistoryView: React.FC<UnifiedHistoryViewProps> = ({
           </div>
           <div className="text-[11px] text-[#151515]/60 mt-1">
             {summaryMetrics.totalSpend > 0
-              ? `${formatPercentage(summaryMetrics.totalLeakage / summaryMetrics.totalSpend)} Avg Exposure`
-              : '0.0% Avg Exposure'}
+              ? `${formatPercent((summaryMetrics.totalLeakage / summaryMetrics.totalSpend) * 100)} Avg Exposure`
+              : '0.00% Avg Exposure'}
           </div>
         </div>
 

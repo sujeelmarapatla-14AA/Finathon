@@ -23,7 +23,16 @@ import {
   DatasetRowItem,
 } from '../types';
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+const resolveApiBaseUrl = (): string => {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    const port = 8000;
+    return `${window.location.protocol}//${window.location.hostname}:${port}`;
+  }
+  return 'http://127.0.0.1:8000';
+};
+
+export const API_BASE_URL = resolveApiBaseUrl();
 export const DEMO_FILE_ID = 'cb8b20d5-2516-47a9-8646-317e9beee50b';
 export const AUTH_TOKEN_KEY = 'spendintel_access_token';
 
@@ -60,8 +69,8 @@ export function setOnUnauthorized(cb: () => void): void {
 }
 
 /**
- * Authenticated fetch wrapper that attaches Authorization header
- * and intercepts 401 errors.
+ * Authenticated fetch wrapper that attaches Authorization header,
+ * handles localhost/127.0.0.1 fallbacks, and intercepts 401 errors.
  */
 export async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const token = getAuthToken();
@@ -71,10 +80,34 @@ export async function authFetch(url: string, options: RequestInit = {}): Promise
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+    });
+  } catch (err) {
+    // If connection failed due to localhost vs 127.0.0.1 mismatch, attempt fallback
+    let fallbackUrl: string | null = null;
+    if (url.includes('127.0.0.1:8000')) {
+      fallbackUrl = url.replace('127.0.0.1:8000', 'localhost:8000');
+    } else if (url.includes('localhost:8000')) {
+      fallbackUrl = url.replace('localhost:8000', '127.0.0.1:8000');
+    }
+
+    if (fallbackUrl) {
+      try {
+        response = await fetch(fallbackUrl, {
+          ...options,
+          headers,
+        });
+      } catch {
+        throw err;
+      }
+    } else {
+      throw err;
+    }
+  }
 
   if (response.status === 401) {
     clearAuthToken();
@@ -209,10 +242,24 @@ export async function uploadProcurementDataset(file: File): Promise<UploadRespon
   const formData = new FormData();
   formData.append('file', file);
 
-  const res = await authFetch(`${API_BASE_URL}/api/upload`, {
-    method: 'POST',
-    body: formData,
-  });
+  let res: Response;
+  try {
+    res = await authFetch(`${API_BASE_URL}/api/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+  } catch (err: any) {
+    try {
+      res = await authFetch(`${API_BASE_URL}/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+    } catch {
+      throw new Error(
+        `Unable to reach SpendIntel backend server at ${API_BASE_URL}. Please ensure the server is online on port 8000.`
+      );
+    }
+  }
 
   if (!res.ok) {
     const msg = await parseErrorMessage(res, 'Upload failed');

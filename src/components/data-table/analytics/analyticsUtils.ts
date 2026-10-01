@@ -166,22 +166,22 @@ export interface ProcurementAnalytics {
   totalAlertsCount: number;
 }
 
-// Color tokens aligned with SpendIntel design system
+// Color tokens strictly adhering to SpendIntel 3-color design system (Ink, Soft Gray, Champagne)
 export const RISK_COLORS: Record<string, string> = {
-  CRITICAL: '#EF4444', // Red
-  HIGH: '#D96B4A',     // Terracotta / Warning coral
-  MEDIUM: '#E5A93C',   // Gold / Amber
-  LOW: '#73C69A',      // Mint / Green
+  CRITICAL: '#B8A47A',
+  HIGH: 'rgba(184,164,122,0.85)',
+  MEDIUM: 'rgba(21,21,21,0.6)',
+  LOW: 'rgba(21,21,21,0.3)',
 };
 
 export const ALERT_TYPE_COLORS: Record<string, string> = {
-  PRICE_ANOMALY: '#73C69A',            // Mint
-  POSSIBLE_DUPLICATE: '#D96B4A',       // Terracotta
-  SUPPLIER_FRAGMENTATION: '#A78BFA',   // Purple
-  MISSED_DISCOUNT: '#E5A93C',          // Gold
-  CONTRACT_NON_COMPLIANCE: '#60A5FA',  // Blue
-  OFF_CONTRACT_PURCHASE: '#F59E0B',    // Amber
-  UNUSUAL_PATTERN: '#F472B6',          // Pink
+  PRICE_ANOMALY: '#B8A47A',
+  POSSIBLE_DUPLICATE: 'rgba(184,164,122,0.8)',
+  SUPPLIER_FRAGMENTATION: 'rgba(21,21,21,0.75)',
+  MISSED_DISCOUNT: 'rgba(184,164,122,0.6)',
+  CONTRACT_NON_COMPLIANCE: 'rgba(21,21,21,0.55)',
+  OFF_CONTRACT_PURCHASE: 'rgba(184,164,122,0.4)',
+  UNUSUAL_PATTERN: 'rgba(21,21,21,0.35)',
 };
 
 export const ALERT_TYPE_LABELS: Record<string, string> = {
@@ -484,7 +484,7 @@ export function computeProcurementAnalytics(
       count: riskMap[r].count,
       potentialLeakage: Math.round(riskMap[r].leakage * 100) / 100,
       percentage: Math.round((riskMap[r].count / totalTxCount) * 1000) / 10,
-      color: RISK_COLORS[r] || '#8A8A84',
+      color: RISK_COLORS[r] || 'rgba(21,21,21,0.5)',
     }));
 
   // 9. GRAPH 5: Leakage by Alert Type (Derived from findings)
@@ -504,7 +504,7 @@ export function computeProcurementAnalytics(
       count: data.count,
       potentialLeakage: Math.round(data.leakage * 100) / 100,
       percentage: Math.round((data.leakage / alertTotalLeakage) * 1000) / 10,
-      color: ALERT_TYPE_COLORS[type] || '#73C69A',
+      color: ALERT_TYPE_COLORS[type] || '#B8A47A',
     }))
     .sort((a, b) => b.potentialLeakage - a.potentialLeakage);
 

@@ -67,22 +67,19 @@ export const ProcurementAnalyticsSuite: React.FC<ProcurementAnalyticsSuiteProps>
 
   const hasInteractiveFilters = activeChips.length > 0;
 
-  const sourceLabels: Record<DataSource, { label: string; dotClass: string }> = {
-    demo: { label: 'DEMO DATASET', dotClass: 'bg-[#73C69A]' },
-    nova: { label: 'LIVE NOVA', dotClass: 'bg-[#5E81AC] animate-pulse shadow-[0_0_6px_rgba(94,129,172,0.8)]' },
-    upload: { label: 'UPLOADED DATA', dotClass: 'bg-[#E5A93C]' },
-    manual: { label: 'MANUAL DATA', dotClass: 'bg-[#73C69A]' },
-  };
-
-  const currentSourceInfo = sourceLabels[source] || sourceLabels.demo;
+  const displaySourceLabel =
+    source === 'nova' ? 'LIVE NOVA' :
+    source === 'upload' ? 'UPLOADED DATA' :
+    source === 'manual' ? 'MANUAL DATA' :
+    'DEMO DATASET';
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-[28px] border border-[#E8E8E3] p-12 text-center shadow-sm space-y-4">
-        <RefreshCw className="w-6 h-6 animate-spin text-[#73C69A] mx-auto" />
+      <div className="bg-[#F3F3F1] rounded-[28px] border border-[#151515]/10 p-12 text-center shadow-sm space-y-4">
+        <RefreshCw className="w-6 h-6 animate-spin text-[#B8A47A] mx-auto" />
         <div className="space-y-1">
-          <h4 className="text-sm font-medium text-[#111111]">UPDATING PROCUREMENT ANALYTICS...</h4>
-          <p className="text-xs text-[#8A8A84]">Synchronizing visualizations with active data source.</p>
+          <h4 className="text-sm font-medium text-[#151515]">UPDATING PROCUREMENT ANALYTICS...</h4>
+          <p className="text-xs text-[#151515]/60">Synchronizing visualizations with active data source.</p>
         </div>
       </div>
     );
@@ -98,21 +95,20 @@ export const ProcurementAnalyticsSuite: React.FC<ProcurementAnalyticsSuiteProps>
       {/* Analytics Suite Section Header & Interactive Filter Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-[#111111] flex items-center justify-center text-white">
-            <BarChart2 className="w-4 h-4 text-[#73C69A]" />
+          <div className="w-8 h-8 rounded-full bg-[#151515] flex items-center justify-center text-[#F3F3F1] border border-[#B8A47A]/30">
+            <BarChart2 className="w-4 h-4 text-[#B8A47A]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl sm:text-2xl font-sans font-medium text-[#111111]">
+              <h2 className="text-xl sm:text-2xl font-sans font-medium text-[#151515]">
                 Procurement Intelligence Analytics
               </h2>
-              {/* Dynamic Source Indicator (Section 2 & 33) */}
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white border border-[#E8E8E3] text-[10px] font-mono font-semibold text-[#111111] shadow-xs">
-                <span className={`w-1.5 h-1.5 rounded-full ${currentSourceInfo.dotClass}`} />
-                <span>{currentSourceInfo.label}</span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#151515]/5 border border-[#151515]/10 text-[10px] font-mono font-semibold text-[#151515] shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#B8A47A] shadow-[0_0_6px_rgba(184,164,122,0.8)]" />
+                <span>{displaySourceLabel}</span>
               </span>
             </div>
-            <p className="text-xs text-[#5E5E5A] mt-0.5">
+            <p className="text-xs text-[#151515]/60 mt-0.5">
               Interactive deterministic visual discovery linked directly to audit line items below.
             </p>
           </div>
@@ -120,19 +116,19 @@ export const ProcurementAnalyticsSuite: React.FC<ProcurementAnalyticsSuiteProps>
 
         {/* Active Chart Filter Badges */}
         {hasInteractiveFilters && (
-          <div className="flex flex-wrap items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-[#E8E8E3] shadow-xs">
-            <span className="text-[10px] font-mono text-[#8A8A84] flex items-center gap-1">
-              <Filter className="w-3 h-3 text-[#111111]" /> Filtered:
+          <div className="flex flex-wrap items-center gap-2 bg-[#F3F3F1] px-3 py-1.5 rounded-full border border-[#151515]/10 shadow-xs">
+            <span className="text-[10px] font-mono text-[#151515]/50 flex items-center gap-1">
+              <Filter className="w-3 h-3 text-[#151515]" /> Filtered:
             </span>
             {activeChips.map((chip) => (
               <span
                 key={chip.type}
-                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#0A0A0A] text-white text-[11px] font-sans font-medium"
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#151515] text-[#F3F3F1] text-[11px] font-sans font-medium"
               >
                 <span>{chip.label}</span>
                 <button
                   onClick={() => onClearInteractiveFilter?.(chip.type)}
-                  className="hover:text-[#D96B4A] transition-colors"
+                  className="hover:text-[#B8A47A] transition-colors"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -140,7 +136,7 @@ export const ProcurementAnalyticsSuite: React.FC<ProcurementAnalyticsSuiteProps>
             ))}
             <button
               onClick={onClearAllInteractiveFilters}
-              className="text-[10px] font-mono text-[#D96B4A] hover:underline px-1"
+              className="text-[10px] font-mono text-[#B8A47A] hover:underline px-1"
             >
               Reset
             </button>
@@ -148,17 +144,17 @@ export const ProcurementAnalyticsSuite: React.FC<ProcurementAnalyticsSuiteProps>
         )}
       </div>
 
-      {/* 1. TOP KEY METRICS (Section 6 & 7) */}
+      {/* 1. TOP KEY METRICS */}
       <AnalyticsKpiBar kpis={analytics.kpis} />
 
-      {/* 2. GRAPH 1: ACTUAL VS BENCHMARK PRICE (Section 8) */}
+      {/* 2. GRAPH 1: ACTUAL VS BENCHMARK PRICE */}
       <ActualVsBenchmarkChart
         data={analytics.actualVsBenchmark}
         selectedProduct={selectedProduct}
         onSelectProduct={onSelectProduct}
       />
 
-      {/* 3. GRAPHS 2 & 3: SUPPLIER LEAKAGE + PRODUCT LEAKAGE (Section 9 & 10) */}
+      {/* 3. GRAPHS 2 & 3: SUPPLIER LEAKAGE + PRODUCT LEAKAGE */}
       <SupplierAndProductLeakageCharts
         suppliers={analytics.supplierLeakage}
         products={analytics.productLeakage}
@@ -168,7 +164,7 @@ export const ProcurementAnalyticsSuite: React.FC<ProcurementAnalyticsSuiteProps>
         onSelectProduct={onSelectProduct}
       />
 
-      {/* 4. GRAPHS 4 & 5: RISK DISTRIBUTION + ALERT TYPE (Section 11 & 12) */}
+      {/* 4. GRAPHS 4 & 5: RISK DISTRIBUTION + ALERT TYPE */}
       <RiskAndAlertDistributionCharts
         riskData={analytics.riskDistribution}
         alertData={analytics.alertTypeDistribution}
@@ -179,21 +175,21 @@ export const ProcurementAnalyticsSuite: React.FC<ProcurementAnalyticsSuiteProps>
         onSelectAlertType={onSelectAlertType}
       />
 
-      {/* 5. GRAPH 6: PRICE VARIANCE DISTRIBUTION (Section 13) */}
+      {/* 5. GRAPH 6: PRICE VARIANCE DISTRIBUTION */}
       <VarianceDistributionChart
         buckets={analytics.varianceDistribution}
         selectedBucket={selectedBucket}
         onSelectBucket={onSelectBucket}
       />
 
-      {/* 6. GRAPHS 7 & 9: QUANTITY VS LEAKAGE + TOP TRANSACTIONS (Section 14 & 16) */}
+      {/* 6. GRAPHS 7 & 9: QUANTITY VS LEAKAGE + TOP TRANSACTIONS */}
       <QuantityVsLeakageAndTopTransactions
         scatterData={analytics.quantityLeakage}
         topTransactions={analytics.topTransactions}
         onInvestigateTransaction={onInvestigateTransaction}
       />
 
-      {/* 7. GRAPH 8 & TIME SERIES: ACTUAL VS REFERENCE SPEND + PROCUREMENT TREND (Section 15 & 17) */}
+      {/* 7. GRAPH 8 & TIME SERIES: ACTUAL VS REFERENCE SPEND + PROCUREMENT TREND */}
       <SpendComparisonAndTrend
         spendComparison={analytics.spendComparison}
         timeSeries={analytics.timeSeries}

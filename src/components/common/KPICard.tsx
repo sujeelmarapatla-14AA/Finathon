@@ -5,7 +5,7 @@ interface KPICardProps {
   value: string | number;
   subtext?: string;
   comparison?: string;
-  highlight?: 'terracotta' | 'forest' | 'gold' | 'default';
+  highlight?: 'terracotta' | 'forest' | 'gold' | 'default' | 'champagne';
 }
 
 export const KPICard: React.FC<KPICardProps> = ({
@@ -16,20 +16,21 @@ export const KPICard: React.FC<KPICardProps> = ({
   highlight = 'default',
 }) => {
   const highlightStyles = {
-    terracotta: 'text-brand-terracotta',
-    forest: 'text-brand-forest-bright',
-    gold: 'text-brand-gold',
-    default: 'text-text-primary',
+    terracotta: 'text-[#B8A47A]',
+    forest: 'text-[#151515]',
+    gold: 'text-[#B8A47A]',
+    champagne: 'text-[#B8A47A]',
+    default: 'text-[#151515]',
   };
 
   return (
-    <div className="flex flex-col justify-between py-6 px-6 transition-colors duration-150 hover:bg-dark-elevated/40">
+    <div className="flex flex-col justify-between py-6 px-6 transition-colors duration-150 hover:bg-[#151515]/5 rounded-2xl">
       <div>
-        <span className="text-[10px] uppercase font-sans font-semibold tracking-micro text-text-muted block mb-2">
+        <span className="text-[11px] uppercase font-sans font-semibold tracking-wider text-[#151515]/60 block mb-2">
           {label}
         </span>
         <div className="flex items-baseline gap-2">
-          <span className={`font-serif text-3xl sm:text-4xl tracking-tight font-normal tnum ${highlightStyles[highlight]}`}>
+          <span className={`font-sans text-3xl sm:text-4xl tracking-tight font-semibold tnum ${highlightStyles[highlight]}`}>
             {value}
           </span>
         </div>
@@ -37,14 +38,12 @@ export const KPICard: React.FC<KPICardProps> = ({
 
       <div className="mt-3">
         {comparison && (
-          <span className={`text-[11px] font-sans font-medium flex items-center gap-1 ${
-            highlight === 'terracotta' ? 'text-brand-terracotta-soft' : 'text-brand-forest-bright'
-          }`}>
+          <span className="text-[12px] font-sans font-medium flex items-center gap-1 text-[#B8A47A]">
             {comparison}
           </span>
         )}
         {subtext && (
-          <p className="text-xs font-sans text-text-muted mt-1 leading-relaxed">
+          <p className="text-xs font-sans text-[#151515]/60 mt-1 leading-relaxed">
             {subtext}
           </p>
         )}

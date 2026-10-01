@@ -28,7 +28,6 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  // Height & padding system (Section 4 & 5: 44px default, 36px small, 48px large)
   const sizeStyles: Record<ButtonSize, string> = {
     sm: 'h-9 px-3.5 text-xs rounded-full gap-1.5',
     md: 'h-11 px-5 text-xs font-semibold uppercase tracking-wider rounded-full gap-2',
@@ -39,17 +38,17 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variantStyles: Record<ButtonVariant, string> = {
     primary:
-      'bg-[#0A0A0A] hover:bg-black text-white shadow-sm border border-transparent hover:-translate-y-0.5',
+      'bg-[#151515] hover:bg-[#151515]/90 text-[#F3F3F1] shadow-sm border border-[#151515] hover:-translate-y-0.5',
     secondary:
-      'bg-white hover:bg-[#FAFAF8] border border-[#E8E8E3] hover:border-[#DCDCD7] text-[#111111] hover:-translate-y-0.5',
+      'bg-white hover:bg-[#F3F3F1] border border-[#151515]/15 text-[#151515] hover:-translate-y-0.5',
     'dark-primary':
-      'bg-white hover:bg-[#FAFAF8] text-[#0A0A0A] shadow-md border border-transparent hover:-translate-y-0.5',
+      'bg-[#B8A47A] hover:bg-[#B8A47A]/90 text-[#151515] shadow-md border border-[#B8A47A] hover:-translate-y-0.5',
     'dark-secondary':
-      'bg-white/10 hover:bg-white/15 border border-white/20 text-white hover:-translate-y-0.5',
+      'bg-[#F3F3F1]/10 hover:bg-[#F3F3F1]/15 border border-[#F3F3F1]/20 text-[#F3F3F1] hover:-translate-y-0.5',
     ghost:
-      'bg-transparent hover:bg-[#F5F5F2] text-[#5E5E5A] hover:text-[#111111]',
+      'bg-transparent hover:bg-[#151515]/5 text-[#151515]/70 hover:text-[#151515]',
     accent:
-      'bg-[#73C69A] hover:bg-[#85d3aa] text-[#0A0A0A] font-semibold shadow-sm border border-transparent hover:-translate-y-0.5',
+      'bg-[#B8A47A] hover:bg-[#B8A47A]/90 text-[#151515] font-semibold shadow-sm border border-[#B8A47A] hover:-translate-y-0.5',
   };
 
   return (

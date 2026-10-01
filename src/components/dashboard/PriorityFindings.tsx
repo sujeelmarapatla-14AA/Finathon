@@ -68,16 +68,16 @@ export const PriorityFindings: React.FC<PriorityFindingsProps> = ({
       ];
 
   return (
-    <div className="bg-white rounded-[28px] border border-[#E8E8E3] p-6 sm:p-8 shadow-sm">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#F0F0EB] gap-4">
+    <div className="bg-[#F3F3F1] rounded-[28px] border border-[#151515]/10 p-6 sm:p-8 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#151515]/10 gap-4">
         <div>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8A8A84] block mb-1">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#151515]/50 block mb-1">
             Deterministic Flags
           </span>
-          <h2 className="text-2xl font-sans font-medium text-[#111111]">
+          <h2 className="text-2xl font-sans font-medium text-[#151515]">
             Findings worth investigating.
           </h2>
-          <p className="text-xs text-[#5E5E5A] mt-1 font-sans">
+          <p className="text-xs text-[#151515]/60 mt-1 font-sans">
             Ranked by financial leakage exposure and contract benchmark variance.
           </p>
         </div>
@@ -85,16 +85,16 @@ export const PriorityFindings: React.FC<PriorityFindingsProps> = ({
         {onViewAll && (
           <button
             onClick={onViewAll}
-            className="text-xs font-semibold text-[#111111] hover:text-black flex items-center gap-1.5 group shrink-0"
+            className="text-xs font-semibold text-[#151515] hover:text-[#B8A47A] flex items-center gap-1.5 group shrink-0 transition-colors"
           >
             <span>View all transactions</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-3.5 h-3.5 text-[#B8A47A] group-hover:translate-x-1 transition-transform" />
           </button>
         )}
       </div>
 
-      {/* Clean fintech transaction list (Section 10) */}
-      <div className="divide-y divide-[#F0F0EB]">
+      {/* Clean fintech transaction list */}
+      <div className="divide-y divide-[#151515]/10">
         {displayItems.map((item, idx) => {
           const key = item.transaction_id || item.id || item.findingRef || `item-${idx}`;
           const idToPass = item.transaction_id || item.findingRef || 'TX10013';
@@ -109,7 +109,7 @@ export const PriorityFindings: React.FC<PriorityFindingsProps> = ({
             <div
               key={key}
               onClick={() => onInvestigate(idToPass)}
-              className="py-4 px-3 -mx-3 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#FAFAF8] transition-all cursor-pointer group"
+              className="py-4 px-3 -mx-3 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#151515]/5 transition-all cursor-pointer group"
             >
               {/* Left: Risk pill, Product & Supplier */}
               <div className="flex items-center gap-4">
@@ -117,13 +117,13 @@ export const PriorityFindings: React.FC<PriorityFindingsProps> = ({
                   <Badge size="md">{item.risk || item.priority || 'MEDIUM'}</Badge>
                 </div>
                 <div>
-                  <h4 className="text-base font-semibold text-[#111111] group-hover:text-black transition-colors">
+                  <h4 className="text-base font-semibold text-[#151515] group-hover:text-[#B8A47A] transition-colors">
                     {item.product || 'Industrial Laptop'}
                   </h4>
-                  <div className="flex items-center gap-2 text-sm text-[#5E5E5A] mt-0.5">
+                  <div className="flex items-center gap-2 text-sm text-[#151515]/60 mt-0.5">
                     <span>{item.supplier || 'TechWorld Solutions'}</span>
-                    <span className="text-[#DCDCD7]">·</span>
-                    <span className="font-mono text-xs text-[#8A8A84]">{idToPass}</span>
+                    <span className="text-[#151515]/20">·</span>
+                    <span className="font-mono text-xs text-[#151515]/50">{idToPass}</span>
                   </div>
                 </div>
               </div>
@@ -131,17 +131,17 @@ export const PriorityFindings: React.FC<PriorityFindingsProps> = ({
               {/* Right: Variance, Leakage, Investigate CTA */}
               <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
                 <div className="text-right">
-                  <span className="text-sm font-mono font-semibold text-[#D96B4A] tnum">
+                  <span className="text-sm font-mono font-semibold text-[#B8A47A] tnum">
                     {variance}
                   </span>
-                  <div className="text-xs text-[#8A8A84]">variance</div>
+                  <div className="text-xs text-[#151515]/50">variance</div>
                 </div>
 
                 <div className="text-right min-w-[100px]">
-                  <span className="text-base font-semibold text-[#111111] tnum">
+                  <span className="text-base font-semibold text-[#151515] tnum">
                     {leakageFormatted}
                   </span>
-                  <div className="text-xs text-[#8A8A84]">potential leakage</div>
+                  <div className="text-xs text-[#151515]/50">potential leakage</div>
                 </div>
 
                 <button
@@ -149,7 +149,7 @@ export const PriorityFindings: React.FC<PriorityFindingsProps> = ({
                     e.stopPropagation();
                     onInvestigate(idToPass);
                   }}
-                  className="h-9 px-4 rounded-full text-xs font-semibold bg-[#FAFAF8] group-hover:bg-[#0A0A0A] border border-[#E8E8E3] group-hover:border-[#0A0A0A] text-[#111111] group-hover:text-white transition-all flex items-center gap-1.5 shrink-0"
+                  className="h-9 px-4 rounded-full text-xs font-semibold bg-[#151515]/5 group-hover:bg-[#151515] border border-[#151515]/10 group-hover:border-[#151515] text-[#151515] group-hover:text-[#F3F3F1] transition-all flex items-center gap-1.5 shrink-0"
                 >
                   <span>Investigate</span>
                   <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />

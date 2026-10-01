@@ -3,6 +3,7 @@ import { TabType, DashboardData, DataSource, ApiSupplierItem } from './types';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthScreen } from './components/auth/AuthScreen';
 import { Navbar } from './components/layout/Navbar';
+import { Footer } from './components/layout/Footer';
 import { PageTransition } from './components/layout/PageTransition';
 import { EditorialHero } from './components/landing/EditorialHero';
 import { ExecutiveDashboard } from './components/dashboard/ExecutiveDashboard';
@@ -14,6 +15,8 @@ import { UploadZone } from './components/upload/UploadZone';
 import { ReportsScreen } from './components/reports/ReportsScreen';
 import { SettingsScreen } from './components/settings/SettingsScreen';
 import { LeakageExplorer } from './components/leakage/LeakageExplorer';
+import { ProductIntelligenceView } from './components/product-intelligence/ProductIntelligenceView';
+import { UnifiedHistoryView } from './components/history/UnifiedHistoryView';
 import { EmptyState } from './components/common/EmptyState';
 import { ErrorState } from './components/common/ErrorState';
 import {
@@ -30,12 +33,14 @@ const TAB_ORDER: Record<TabType, number> = {
   overview: 0,
   table: 1,
   leakage: 2,
-  suppliers: 3,
-  investigation: 4,
-  simulator: 5,
-  reports: 6,
-  upload: 7,
-  settings: 8,
+  'product-intelligence': 3,
+  suppliers: 4,
+  investigation: 5,
+  simulator: 6,
+  reports: 7,
+  history: 8,
+  upload: 9,
+  settings: 10,
 };
 
 function SpendIntelWorkspace() {
@@ -270,6 +275,16 @@ function SpendIntelWorkspace() {
           />
         );
 
+      case 'product-intelligence':
+        return (
+          <ProductIntelligenceView
+            dataSource={dataSource}
+            fileId={fileId}
+            onNavigate={handleNavigate}
+            onInvestigate={handleInvestigateFinding}
+          />
+        );
+
       case 'suppliers':
         return (
           <SupplierComparison
@@ -297,6 +312,17 @@ function SpendIntelWorkspace() {
 
       case 'reports':
         return <ReportsScreen />;
+
+      case 'history':
+        return (
+          <UnifiedHistoryView
+            currentDatasetId={fileId}
+            onSelectDataset={(newId, src) => {
+              handleUploadComplete(newId, src);
+            }}
+            onNavigate={handleNavigate}
+          />
+        );
 
       case 'upload':
         return (
@@ -346,9 +372,9 @@ function SpendIntelWorkspace() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#FAFAF8] flex flex-col items-center justify-center p-6 text-center selection:bg-[#73C69A]/30">
-        <div className="w-10 h-10 border-2 border-[#111111] border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-xs font-mono tracking-widest uppercase text-[#5E5E5A]">
+      <div className="min-h-screen bg-[#F3F3F1] flex flex-col items-center justify-center p-6 text-center selection:bg-[#B8A47A]/30">
+        <div className="w-10 h-10 border-2 border-[#151515] border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-xs font-mono tracking-widest uppercase text-[#151515]/60">
           Verifying SpendIntel Authentication...
         </p>
       </div>
@@ -360,7 +386,7 @@ function SpendIntelWorkspace() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] text-[#111111] font-sans flex flex-col antialiased selection:bg-[#73C69A]/30 selection:text-[#0A0A0A] overflow-x-clip">
+    <div className="min-h-screen bg-[#F3F3F1] text-[#151515] font-sans flex flex-col antialiased selection:bg-[#B8A47A]/30 selection:text-[#151515] overflow-x-clip">
       {/* Global Fixed Navigation Bar with Mega-Menus (permanently pinned to top) */}
       <Navbar
         currentTab={currentTab}
@@ -383,32 +409,15 @@ function SpendIntelWorkspace() {
         </PageTransition>
       </main>
 
-      {/* Editorial Premium Fintech Footer */}
-      <footer className="border-t border-[#E8E8E3] bg-white py-8 px-5 sm:px-8 lg:px-12 mt-16 transition-colors">
-        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-[#5E5E5A]">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="font-semibold text-[#111111] tracking-tight">SpendIntel</span>
-            <span className="text-[#DCDCD7]">·</span>
-            <span>Procurement intelligence for every rupee you spend.</span>
-            <span className="text-[#DCDCD7]">·</span>
-            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-[#111111] bg-[#FAFAF8] border border-[#E8E8E3] px-2.5 py-0.5 rounded-full shadow-xs">
-              <span className={`w-1.5 h-1.5 rounded-full ${
-                backendSourceLabel.includes('NOVA') ? 'bg-[#5E81AC] animate-pulse' :
-                backendSourceLabel.includes('UPLOAD') ? 'bg-[#E5A93C]' : 'bg-[#73C69A]'
-              }`} />
-              <span>{backendSourceLabel}</span>
-            </span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-6 font-mono text-[11px] text-[#8A8A84]">
-            <span className="text-[#111111] font-medium">{totalSpendFormatted} Audited Spend</span>
-            <span>•</span>
-            <span className="text-[#D96B4A] font-medium">{potentialLeakageFormatted} Potential Leakage</span>
-            <span>•</span>
-            <span>SOC2 Type II & ISO 27001 Certified</span>
-          </div>
-        </div>
-      </footer>
+      {/* Enterprise Executive Footer */}
+      <Footer
+        currentTab={currentTab}
+        dataSource={dataSource}
+        backendSourceLabel={backendSourceLabel}
+        isBackendOperational={isBackendOperational}
+        onSelectTab={handleNavigate}
+        onSwitchSource={handleSwitchSource}
+      />
     </div>
   );
 }

@@ -33,11 +33,13 @@ else:
     load_dotenv()
 
 try:
-    from app.routes import dashboard, findings, investigation, simulation, suppliers, nova, manual, auth
+    from app.routes import dashboard, findings, investigation, simulation, suppliers, nova, manual, auth, product_intelligence, datasets
     from app.routes.upload import router as upload_router
+    from app.services.dataset_service import init_dataset_db, seed_baseline_demo_dataset
 except ImportError:
-    from backend.app.routes import dashboard, findings, investigation, simulation, suppliers, nova, manual, auth
+    from backend.app.routes import dashboard, findings, investigation, simulation, suppliers, nova, manual, auth, product_intelligence, datasets
     from backend.app.routes.upload import router as upload_router
+    from backend.app.services.dataset_service import init_dataset_db, seed_baseline_demo_dataset
 
 
 def validate_config(log_output: bool = True) -> Dict[str, str]:
@@ -71,6 +73,13 @@ async def lifespan(app: FastAPI):
     # Ensure .env is loaded on startup
     if ENV_PATH.exists():
         load_dotenv(dotenv_path=ENV_PATH)
+
+    # Initialize unified dataset database & seed baseline demo
+    try:
+        init_dataset_db()
+        seed_baseline_demo_dataset()
+    except Exception as e:
+        print(f"[Startup Database Error] {e}")
 
     # Startup validation reporting configuration status
     validate_config(log_output=True)
@@ -129,6 +138,20 @@ app.include_router(
 )
 app.include_router(
     auth.router,
+)
+app.include_router(
+    product_intelligence.router,
+    prefix="/api",
+)
+app.include_router(
+    product_intelligence.router,
+)
+app.include_router(
+    datasets.router,
+    prefix="/api",
+)
+app.include_router(
+    datasets.router,
 )
 
 

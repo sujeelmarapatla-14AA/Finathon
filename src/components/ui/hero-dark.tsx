@@ -1,6 +1,5 @@
 import React from 'react';
 import TechText from './TechText';
-import { Button } from './button';
 
 export interface DarkHeroProps {
   title?: string;
@@ -24,23 +23,23 @@ export const DarkHero: React.FC<DarkHeroProps> = ({
   onSignUpClick,
 }) => {
   return (
-    <div className="relative min-h-screen bg-[#000000] text-white flex flex-col justify-between selection:bg-white/20 selection:text-white overflow-hidden font-sans">
+    <div className="relative min-h-screen bg-[#151515] text-[#F3F3F1] flex flex-col justify-between selection:bg-[#B8A47A]/30 selection:text-[#F3F3F1] overflow-hidden font-sans">
       {/* Top Navbar */}
       <header className="relative z-20 w-full max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <span className="font-bold text-xl tracking-tight text-white">Logo</span>
+          <span className="font-bold text-xl tracking-tight text-[#F3F3F1]">Logo</span>
         </div>
 
         {/* Center Nav Links */}
-        <nav className="hidden md:flex items-center gap-8 text-sm text-[#A1A1AA]">
-          <a href="#getting-started" className="hover:text-white transition-colors duration-200">
+        <nav className="hidden md:flex items-center gap-8 text-sm text-[#F3F3F1]/70">
+          <a href="#getting-started" className="hover:text-[#F3F3F1] transition-colors duration-200">
             Getting started
           </a>
-          <a href="#components" className="hover:text-white transition-colors duration-200">
+          <a href="#components" className="hover:text-[#F3F3F1] transition-colors duration-200">
             Components
           </a>
-          <a href="#documentation" className="hover:text-white transition-colors duration-200">
+          <a href="#documentation" className="hover:text-[#F3F3F1] transition-colors duration-200">
             Documentation
           </a>
         </nav>
@@ -49,13 +48,13 @@ export const DarkHero: React.FC<DarkHeroProps> = ({
         <div className="flex items-center gap-5">
           <button
             onClick={onSignInClick}
-            className="text-sm font-medium text-[#A1A1AA] hover:text-white transition-colors"
+            className="text-sm font-medium text-[#F3F3F1]/70 hover:text-[#F3F3F1] transition-colors"
           >
             Sign in
           </button>
           <button
             onClick={onSignUpClick}
-            className="h-9 px-5 rounded-full bg-white text-black text-sm font-medium hover:bg-[#EAEAEA] active:scale-95 transition-all shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+            className="h-9 px-5 rounded-full bg-[#B8A47A] text-[#151515] text-sm font-semibold hover:bg-[#B8A47A]/90 active:scale-95 transition-all shadow-[0_0_15px_rgba(184,164,122,0.2)]"
           >
             Sign Up
           </button>
@@ -65,12 +64,12 @@ export const DarkHero: React.FC<DarkHeroProps> = ({
       {/* Main Hero Body */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 pt-12 pb-20 max-w-5xl mx-auto">
         {/* Big Editorial Headline */}
-        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[76px] font-semibold tracking-[-0.03em] leading-[1.08] text-white max-w-4xl mx-auto whitespace-pre-line">
+        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[76px] font-semibold tracking-[-0.03em] leading-[1.08] text-[#F3F3F1] max-w-4xl mx-auto whitespace-pre-line">
           {title}
         </h1>
 
         {/* Subtitle */}
-        <p className="mt-6 text-base sm:text-lg text-[#8E8E93] max-w-2xl mx-auto font-normal leading-relaxed">
+        <p className="mt-6 text-base sm:text-lg text-[#F3F3F1]/70 max-w-2xl mx-auto font-normal leading-relaxed">
           {subtitle}
         </p>
 
@@ -78,7 +77,7 @@ export const DarkHero: React.FC<DarkHeroProps> = ({
         <div className="mt-10">
           <button
             onClick={onCtaClick}
-            className="relative group px-8 py-3.5 rounded-xl bg-gradient-to-b from-white to-[#E2E2E2] text-black font-semibold text-sm tracking-tight shadow-[0_10px_30px_rgba(255,255,255,0.15)] hover:shadow-[0_15px_35px_rgba(255,255,255,0.25)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 border border-white/80"
+            className="relative group px-8 py-3.5 rounded-xl bg-[#B8A47A] text-[#151515] font-semibold text-sm tracking-tight shadow-[0_10px_30px_rgba(184,164,122,0.25)] hover:shadow-[0_15px_35px_rgba(184,164,122,0.35)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 border border-[#B8A47A]"
           >
             <span>{ctaText}</span>
           </button>
@@ -96,8 +95,8 @@ export const DarkHero: React.FC<DarkHeroProps> = ({
               dashGap={2}
               specks={15}
               fontFamily=""
-              color="#ffffff"
-              accentColor="#ffffff"
+              color="#F3F3F1"
+              accentColor="#B8A47A"
               letterSpacing={-0.05}
               reach={200}
               softness={0.7}
@@ -113,11 +112,11 @@ export const DarkHero: React.FC<DarkHeroProps> = ({
         )}
       </main>
 
-      {/* Bottom Warm Ambient Glow (Amber / Golden Glow rising from bottom) */}
+      {/* Bottom Warm Ambient Champagne Glow */}
       <div
-        className="pointer-events-none absolute bottom-0 inset-x-0 h-[380px] z-0 opacity-80"
+        className="pointer-events-none absolute bottom-0 inset-x-0 h-[380px] z-0 opacity-40"
         style={{
-          background: 'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(215, 130, 40, 0.22) 0%, rgba(160, 80, 20, 0.08) 50%, rgba(0, 0, 0, 0) 100%)',
+          background: 'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(184, 164, 122, 0.25) 0%, rgba(184, 164, 122, 0.05) 50%, rgba(21, 21, 21, 0) 100%)',
         }}
       />
     </div>

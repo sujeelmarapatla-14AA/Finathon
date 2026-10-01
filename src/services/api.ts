@@ -10,7 +10,18 @@
  * - Handles all HTTP status codes (400, 401, 404, 409, 422, 429, 500, 502) with clean messages.
  */
 
-import { DataSource, DashboardData, ApiSupplierItem, ApiInvestigationData, User, AuthResponse, SignupResponse } from '../types';
+import {
+  DataSource,
+  DashboardData,
+  ApiSupplierItem,
+  ApiInvestigationData,
+  ProductIntelligenceData,
+  User,
+  AuthResponse,
+  SignupResponse,
+  UnifiedDatasetItem,
+  DatasetRowItem,
+} from '../types';
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 export const DEMO_FILE_ID = 'cb8b20d5-2516-47a9-8646-317e9beee50b';
@@ -290,6 +301,59 @@ export async function fetchSuppliersData(
 }
 
 /**
+ * Retrieve product similarity & differentiation intelligence matrix for active data source.
+ */
+export async function fetchProductIntelligence(
+  source: DataSource = 'demo',
+  fileId?: string,
+  forceRefresh: boolean = false
+): Promise<ProductIntelligenceData> {
+  let url: string;
+
+  if (source === 'nova') {
+    url = `${API_BASE_URL}/api/nova/product-intelligence${forceRefresh ? '?force_refresh=true' : ''}`;
+  } else {
+    const targetId = source === 'demo' ? 'demo' : fileId || DEMO_FILE_ID;
+    url = `${API_BASE_URL}/api/product-intelligence/${targetId}`;
+  }
+
+  const res = await authFetch(url);
+  if (!res.ok) {
+    const msg = await parseErrorMessage(res, 'Failed to fetch product intelligence');
+    throw new Error(msg);
+  }
+
+  return res.json();
+}
+
+/**
+ * Real-time pairwise multi-factor product similarity comparison with custom weights.
+ */
+export async function compareProductPair(
+  productA: any,
+  productB: any,
+  customWeights?: Record<string, number>
+): Promise<{ product_a: any; product_b: any; comparison: any }> {
+  const url = `${API_BASE_URL}/api/product-similarity/compare`;
+  const res = await authFetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      product_a: productA,
+      product_b: productB,
+      custom_weights: customWeights,
+    }),
+  });
+
+  if (!res.ok) {
+    const msg = await parseErrorMessage(res, 'Failed to compute pairwise product similarity');
+    throw new Error(msg);
+  }
+
+  return res.json();
+}
+
+/**
  * Execute forensic transaction investigation with AI explanation over verified evidence.
  */
 export async function fetchTransactionInvestigation(
@@ -504,6 +568,120 @@ export function logout(): void {
   clearAuthToken();
 }
 
+/**
+ * Retrieve list of all historical datasets from the unified database.
+ */
+export async function fetchDatasets(
+  sourceType?: string,
+  limit: number = 100
+): Promise<{ count: number; source_filter: string; datasets: UnifiedDatasetItem[] }> {
+  let url = `${API_BASE_URL}/api/datasets?limit=${limit}`;
+  if (sourceType && sourceType !== 'ALL') {
+    url += `&source_type=${encodeURIComponent(sourceType)}`;
+  }
+
+  const res = await authFetch(url);
+  if (!res.ok) {
+    const msg = await parseErrorMessage(res, 'Failed to fetch historical datasets');
+    throw new Error(msg);
+  }
+
+  return res.json();
+}
+
+/**
+ * Retrieve metadata and summary for a specific dataset ID.
+ */
+export async function fetchDatasetDetails(
+  datasetId: string
+): Promise<{ dataset: UnifiedDatasetItem }> {
+  const url = `${API_BASE_URL}/api/datasets/${encodeURIComponent(datasetId)}`;
+  const res = await authFetch(url);
+  if (!res.ok) {
+    const msg = await parseErrorMessage(res, 'Failed to retrieve dataset details');
+    throw new Error(msg);
+  }
+
+  return res.json();
+}
+
+/**
+ * Retrieve preserved raw rows and structured fields for a historical dataset.
+ */
+export async function fetchDatasetRows(
+  datasetId: string,
+  limit: number = 200,
+  offset: number = 0
+): Promise<{
+  dataset_id: string;
+  dataset_name: string;
+  source_type: string;
+  total_rows: number;
+  rows: DatasetRowItem[];
+}> {
+  const url = `${API_BASE_URL}/api/datasets/${encodeURIComponent(datasetId)}/rows?limit=${limit}&offset=${offset}`;
+  const res = await authFetch(url);
+  if (!res.ok) {
+    const msg = await parseErrorMessage(res, 'Failed to fetch preserved raw rows');
+    throw new Error(msg);
+  }
+
+  return res.json();
+}
+
+/**
+ * Retrieve stored product comparisons for a dataset.
+ */
+export async function fetchDatasetComparisons(
+  datasetId: string
+): Promise<{
+  dataset_id: string;
+  dataset_name: string;
+  total_comparisons: number;
+  comparisons: any[];
+}> {
+  const url = `${API_BASE_URL}/api/datasets/${encodeURIComponent(datasetId)}/comparisons`;
+  const res = await authFetch(url);
+  if (!res.ok) {
+    const msg = await parseErrorMessage(res, 'Failed to fetch dataset comparisons');
+    throw new Error(msg);
+  }
+
+  return res.json();
+}
+
+/**
+ * Delete a dataset from the unified database and history.
+ */
+export async function deleteHistoricalDataset(datasetId: string): Promise<{ success: boolean; message: string }> {
+  const url = `${API_BASE_URL}/api/datasets/${encodeURIComponent(datasetId)}`;
+  const res = await authFetch(url, {
+    method: 'DELETE',
+  });
+  if (!res.ok) {
+    const msg = await parseErrorMessage(res, 'Failed to delete dataset');
+    throw new Error(msg);
+  }
+
+  return res.json();
+}
+
+/**
+ * Trigger sync from live Nova Procurement Cloud API into unified history.
+ */
+export async function syncNovaDataset(): Promise<{ success: boolean; dataset: UnifiedDatasetItem }> {
+  const url = `${API_BASE_URL}/api/datasets/sync-nova`;
+  const res = await authFetch(url, {
+    method: 'POST',
+  });
+  if (!res.ok) {
+    const msg = await parseErrorMessage(res, 'Failed to sync Nova procurement data');
+    throw new Error(msg);
+  }
+
+  return res.json();
+}
+
 // Aliases matching prompt conventions
 export const uploadFile = uploadProcurementDataset;
 export const getDashboard = fetchDashboardData;
@@ -514,4 +692,7 @@ export const getNovaProcurement = () => fetchDashboardData('nova');
 export const getHealth = checkHealth;
 export const getConfigStatus = checkConfigStatus;
 export const manualAnalysis = submitManualAnalysis;
+export const getDatasets = fetchDatasets;
+export const getDatasetRows = fetchDatasetRows;
+export const deleteDataset = deleteHistoricalDataset;
 

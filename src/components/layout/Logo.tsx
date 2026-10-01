@@ -30,7 +30,7 @@ export const Logo: React.FC<LogoProps> = ({
       {/* Geometric SpendIntel Abstract 'S' & Flow Mark */}
       <div
         className={`${iconSizes[size]} rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-105 ${
-          isDark ? 'bg-white text-black' : 'bg-[#0A0A0A] text-white'
+          isDark ? 'bg-white text-[#151515]' : 'bg-[#151515] text-[#F3F3F1]'
         } p-1.5 shadow-sm`}
       >
         <svg
@@ -47,8 +47,8 @@ export const Logo: React.FC<LogoProps> = ({
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          {/* Mint green intelligence dot */}
-          <circle cx="16.5" cy="17" r="2" fill="#73C69A" />
+          {/* Champagne intelligence dot */}
+          <circle cx="16.5" cy="17" r="2" fill="#B8A47A" />
         </svg>
       </div>
 
@@ -56,24 +56,24 @@ export const Logo: React.FC<LogoProps> = ({
         <div className="flex items-center tracking-tight">
           <span
             className={`font-sans font-bold ${textSizes[size]} ${
-              isDark ? 'text-white' : 'text-[#0A0A0A]'
+              isDark ? 'text-white' : 'text-[#151515]'
             }`}
           >
             Spend
           </span>
           <span
             className={`font-sans font-medium ${textSizes[size]} ${
-              isDark ? 'text-zinc-400' : 'text-[#5E5E5A]'
+              isDark ? 'text-[#F3F3F1]/60' : 'text-[#151515]/65'
             }`}
           >
             Intel
           </span>
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#73C69A] ml-1 mb-1 self-center" />
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#B8A47A] ml-1 mb-1 self-center" />
         </div>
         {showSubtitle && (
           <span
-            className={`text-[10px] tracking-wide uppercase font-sans font-medium -mt-0.5 ${
-              isDark ? 'text-zinc-400' : 'text-[#8A8A84]'
+            className={`text-xs tracking-wide uppercase font-sans font-medium -mt-0.5 ${
+              isDark ? 'text-[#F3F3F1]/50' : 'text-[#151515]/50'
             }`}
           >
             Procurement Intelligence

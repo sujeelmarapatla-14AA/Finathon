@@ -77,32 +77,32 @@ export const SupplierComparison: React.FC<SupplierComparisonProps> = ({
         title="Know your suppliers."
         description="Evaluate vendor pricing discipline, delivery reliability SLAs, and leakage concentration across active contracts."
         actions={
-          <span className="text-xs font-mono text-[#8A8A84] bg-white px-3.5 py-1.5 rounded-full border border-[#E8E8E3] shrink-0">
+          <span className="text-xs font-mono text-[#151515] bg-[#151515]/5 px-3.5 py-1.5 rounded-full border border-[#151515]/10 shrink-0">
             {suppliersList.length} Active Vendors
           </span>
         }
       />
 
       {/* 2. Search & Filters Bar */}
-      <div className="p-4 sm:p-5 rounded-[24px] bg-white border border-[#E8E8E3] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+      <div className="p-4 sm:p-5 rounded-[24px] bg-[#F3F3F1] border border-[#151515]/10 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 text-[#8A8A84] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#151515]/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search supplier name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 pl-9 pr-4 rounded-full bg-[#FAFAF8] border border-[#E8E8E3] text-xs font-sans text-[#111111] placeholder-[#8A8A84] focus:outline-none focus:border-[#111111] transition-colors"
+            className="w-full h-10 pl-9 pr-4 rounded-full bg-[#151515]/5 border border-[#151515]/10 text-xs font-sans text-[#151515] placeholder-[#151515]/40 focus:outline-none focus:border-[#151515] transition-colors"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#8A8A84] font-medium">Risk:</span>
+            <span className="text-xs text-[#151515]/60 font-medium">Risk:</span>
             <select
               value={riskFilter}
               onChange={(e) => setRiskFilter(e.target.value)}
-              className="h-10 px-4 text-xs rounded-full bg-[#FAFAF8] border border-[#E8E8E3] text-[#111111] focus:outline-none focus:border-[#111111] transition-colors"
+              className="h-10 px-4 text-xs rounded-full bg-[#151515]/5 border border-[#151515]/10 text-[#151515] focus:outline-none focus:border-[#151515] transition-colors"
             >
               <option value="All">All Risks</option>
               <option value="HIGH">High Risk</option>
@@ -114,11 +114,11 @@ export const SupplierComparison: React.FC<SupplierComparisonProps> = ({
       </div>
 
       {/* 3. Supplier Comparison Table */}
-      <div className="bg-white rounded-[24px] border border-[#E8E8E3] overflow-hidden shadow-sm">
+      <div className="bg-[#F3F3F1] rounded-[24px] border border-[#151515]/10 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[960px]">
             <thead>
-              <tr className="border-b border-[#F0F0EB] bg-[#FAFAF8]/90 text-[11px] font-sans font-semibold uppercase tracking-wider text-[#8A8A84] h-12">
+              <tr className="border-b border-[#151515]/10 bg-[#151515]/5 text-[11px] font-sans font-semibold uppercase tracking-wider text-[#151515]/60 h-12">
                 <th className="px-6 text-left">Supplier</th>
                 <th className="px-5 text-right">Average Price</th>
                 <th className="px-5 text-right">Quantity</th>
@@ -128,10 +128,10 @@ export const SupplierComparison: React.FC<SupplierComparisonProps> = ({
                 <th className="px-6 text-right">Inspect</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#F0F0EB] text-xs font-sans">
+            <tbody className="divide-y divide-[#151515]/10 text-xs font-sans">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-[#8A8A84]">
+                  <td colSpan={7} className="py-12 text-center text-[#151515]/50">
                     No supplier records match the selected filter.
                   </td>
                 </tr>
@@ -143,13 +143,13 @@ export const SupplierComparison: React.FC<SupplierComparisonProps> = ({
                       setSelectedSupplier(s);
                       setIsDetailOpen(true);
                     }}
-                    className="h-14 hover:bg-[#FAFAF8] transition-colors cursor-pointer group"
+                    className="h-14 hover:bg-[#151515]/5 transition-colors cursor-pointer group"
                   >
                     <td className="px-6">
-                      <div className="font-medium text-[#111111] text-sm">
+                      <div className="font-medium text-[#151515] text-sm">
                         {s.supplier}
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-[#8A8A84] mt-0.5">
+                      <div className="flex items-center gap-2 text-xs text-[#151515]/60 mt-0.5">
                         <span className="font-mono">
                           {s.normalized_supplier && s.normalized_supplier !== s.supplier ? `Normalized: ${s.normalized_supplier}` : 'Verified Entity'}
                         </span>
@@ -158,19 +158,19 @@ export const SupplierComparison: React.FC<SupplierComparisonProps> = ({
                       </div>
                     </td>
 
-                    <td className="px-5 text-right font-mono font-medium text-[#111111] tnum">
+                    <td className="px-5 text-right font-mono font-medium text-[#151515] tnum">
                       {s.average_unit_price ? formatINR(s.average_unit_price) : '—'}
                     </td>
 
-                    <td className="px-5 text-right font-mono text-[#5E5E5A] tnum">
+                    <td className="px-5 text-right font-mono text-[#151515]/70 tnum">
                       {s.total_quantity?.toLocaleString('en-IN') || '—'}
                     </td>
 
-                    <td className="px-5 text-right font-mono font-medium text-[#111111] tnum">
+                    <td className="px-5 text-right font-mono font-medium text-[#151515] tnum">
                       {formatCompactINR(s.total_spend || 0)}
                     </td>
 
-                    <td className="px-5 text-right font-mono font-medium text-[#D96B4A] tnum">
+                    <td className="px-5 text-right font-mono font-medium text-[#B8A47A] tnum">
                       {s.potential_leakage > 0 ? formatINR(s.potential_leakage) : '—'}
                     </td>
 
@@ -187,7 +187,7 @@ export const SupplierComparison: React.FC<SupplierComparisonProps> = ({
                           setSelectedSupplier(s);
                           setIsDetailOpen(true);
                         }}
-                        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-medium bg-[#FAFAF8] group-hover:bg-[#0A0A0A] border border-[#E8E8E3] group-hover:border-[#0A0A0A] text-[#111111] group-hover:text-white transition-all"
+                        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-medium bg-[#151515]/5 group-hover:bg-[#151515] border border-[#151515]/10 group-hover:border-[#151515] text-[#151515] group-hover:text-[#F3F3F1] transition-all"
                       >
                         <span>Inspect</span>
                         <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -203,65 +203,65 @@ export const SupplierComparison: React.FC<SupplierComparisonProps> = ({
 
       {/* 4. SUPPLIER DETAIL MODAL */}
       {isDetailOpen && activeDetail && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-[28px] border border-[#E8E8E3] max-w-2xl w-full p-6 lg:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto space-y-6 animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 bg-[#151515]/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#F3F3F1] rounded-[28px] border border-[#151515]/10 max-w-2xl w-full p-6 lg:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto space-y-6 animate-in fade-in zoom-in-95 duration-200">
             {/* Close Button */}
             <button
               onClick={() => setIsDetailOpen(false)}
-              className="absolute right-6 top-6 w-9 h-9 rounded-full bg-[#FAFAF8] border border-[#E8E8E3] flex items-center justify-center text-[#5E5E5A] hover:text-[#111111] transition-colors"
+              className="absolute right-6 top-6 w-9 h-9 rounded-full bg-[#151515]/5 border border-[#151515]/10 flex items-center justify-center text-[#151515]/60 hover:text-[#151515] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
 
             {/* Supplier Hero */}
-            <div className="space-y-2 pb-6 border-b border-[#F0F0EB]">
+            <div className="space-y-2 pb-6 border-b border-[#151515]/10">
               <div className="flex items-center gap-3">
-                <span className="font-mono text-xs text-[#8A8A84] uppercase">
+                <span className="font-mono text-xs text-[#151515]/50 uppercase">
                   {activeDetail.normalized_supplier ? `Normalized: ${activeDetail.normalized_supplier}` : 'VENDOR DOSSIER'}
                 </span>
                 <Badge variant={String(activeDetail.risk).toLowerCase() === 'high' ? 'high' : String(activeDetail.risk).toLowerCase() === 'medium' ? 'medium' : 'low'}>
                   {activeDetail.risk || 'MEDIUM'}
                 </Badge>
               </div>
-              <h2 className="text-3xl font-sans font-medium text-[#111111] tracking-tight">
+              <h2 className="text-3xl font-sans font-medium text-[#151515] tracking-tight">
                 {activeDetail.supplier}
               </h2>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3]">
-                <span className="text-[10px] uppercase font-semibold text-[#8A8A84] block mb-2">
+              <div className="p-4 rounded-2xl bg-[#151515]/5 border border-[#151515]/10">
+                <span className="text-[10px] uppercase font-semibold text-[#151515]/50 block mb-2">
                   TOTAL SPEND
                 </span>
-                <span className="text-xl font-sans font-medium text-[#111111] tnum">
+                <span className="text-xl font-sans font-medium text-[#151515] tnum">
                   {formatCompactINR(activeDetail.total_spend || 0)}
                 </span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3]">
-                <span className="text-[10px] uppercase font-semibold text-[#8A8A84] block mb-2">
+              <div className="p-4 rounded-2xl bg-[#151515]/5 border border-[#151515]/10">
+                <span className="text-[10px] uppercase font-semibold text-[#151515]/50 block mb-2">
                   TRANSACTIONS
                 </span>
-                <span className="text-xl font-sans font-medium text-[#111111] tnum">
+                <span className="text-xl font-sans font-medium text-[#151515] tnum">
                   {(activeDetail.transaction_count || 0).toLocaleString('en-IN')}
                 </span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3]">
-                <span className="text-[10px] uppercase font-semibold text-[#8A8A84] block mb-2">
+              <div className="p-4 rounded-2xl bg-[#151515]/5 border border-[#151515]/10">
+                <span className="text-[10px] uppercase font-semibold text-[#151515]/50 block mb-2">
                   AVG UNIT PRICE
                 </span>
-                <span className="text-xl font-sans font-medium text-[#111111] tnum">
+                <span className="text-xl font-sans font-medium text-[#151515] tnum">
                   {activeDetail.average_unit_price ? formatINR(activeDetail.average_unit_price) : '—'}
                 </span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3]">
-                <span className="text-[10px] uppercase font-semibold text-[#D96B4A] block mb-2">
+              <div className="p-4 rounded-2xl bg-[#151515]/5 border border-[#151515]/10">
+                <span className="text-[10px] uppercase font-semibold text-[#B8A47A] block mb-2">
                   LEAKAGE
                 </span>
-                <span className="text-xl font-sans font-medium text-[#D96B4A] tnum">
+                <span className="text-xl font-sans font-medium text-[#B8A47A] tnum">
                   {activeDetail.potential_leakage ? formatINR(activeDetail.potential_leakage) : '₹0'}
                 </span>
               </div>
@@ -270,14 +270,14 @@ export const SupplierComparison: React.FC<SupplierComparisonProps> = ({
             {/* Products Supplied */}
             {activeDetail.products_supplied && activeDetail.products_supplied.length > 0 && (
               <div className="space-y-3 pt-2">
-                <span className="text-xs uppercase font-semibold tracking-wider text-[#8A8A84] block">
+                <span className="text-xs uppercase font-semibold tracking-wider text-[#151515]/50 block">
                   Commodities Procured
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {activeDetail.products_supplied.map((prod, i) => (
                     <span
                       key={i}
-                      className="px-3 py-1.5 rounded-full bg-[#FAFAF8] border border-[#E8E8E3] text-xs font-medium text-[#111111]"
+                      className="px-3 py-1.5 rounded-full bg-[#151515]/5 border border-[#151515]/10 text-xs font-medium text-[#151515]"
                     >
                       {prod}
                     </span>
@@ -288,47 +288,47 @@ export const SupplierComparison: React.FC<SupplierComparisonProps> = ({
 
             {/* Analytical Dimensions */}
             <div className="space-y-3 pt-2">
-              <span className="text-xs uppercase font-semibold tracking-wider text-[#8A8A84] block">
+              <span className="text-xs uppercase font-semibold tracking-wider text-[#151515]/50 block">
                 Commercial Audit Dimensions
               </span>
 
-              <div className="divide-y divide-[#F0F0EB] border border-[#E8E8E3] rounded-2xl overflow-hidden">
-                <div className="p-4 flex items-center justify-between text-xs bg-white">
+              <div className="divide-y divide-[#151515]/10 border border-[#151515]/10 rounded-2xl overflow-hidden">
+                <div className="p-4 flex items-center justify-between text-xs bg-[#F3F3F1]">
                   <div>
-                    <span className="font-semibold text-[#111111] block mb-0.5">PRICE ANOMALY EXPOSURE</span>
-                    <span className="text-[#5E5E5A]">Transactions flagged with price deviations exceeding baseline tolerance</span>
+                    <span className="font-semibold text-[#151515] block mb-0.5">PRICE ANOMALY EXPOSURE</span>
+                    <span className="text-[#151515]/60">Transactions flagged with price deviations exceeding baseline tolerance</span>
                   </div>
-                  <span className="font-mono text-[#D96B4A] font-medium tnum">
+                  <span className="font-mono text-[#B8A47A] font-medium tnum">
                     {activeDetail.anomaly_count || 0} flagged
                   </span>
                 </div>
 
-                <div className="p-4 flex items-center justify-between text-xs bg-white">
+                <div className="p-4 flex items-center justify-between text-xs bg-[#F3F3F1]">
                   <div>
-                    <span className="font-semibold text-[#111111] block mb-0.5">MISSED DISCOUNT VALUE</span>
-                    <span className="text-[#5E5E5A]">Unclaimed early-payment or contractual volume discounts</span>
+                    <span className="font-semibold text-[#151515] block mb-0.5">MISSED DISCOUNT VALUE</span>
+                    <span className="text-[#151515]/60">Unclaimed early-payment or contractual volume discounts</span>
                   </div>
-                  <span className="font-mono text-[#111111] font-medium tnum">
+                  <span className="font-mono text-[#151515] font-medium tnum">
                     {activeDetail.missed_discount_amount ? formatINR(activeDetail.missed_discount_amount) : '₹0'}
                   </span>
                 </div>
 
-                <div className="p-4 flex items-center justify-between text-xs bg-white">
+                <div className="p-4 flex items-center justify-between text-xs bg-[#F3F3F1]">
                   <div>
-                    <span className="font-semibold text-[#111111] block mb-0.5">OFF-CONTRACT ORDERS</span>
-                    <span className="text-[#5E5E5A]">Purchase orders issued without an active negotiated rate card</span>
+                    <span className="font-semibold text-[#151515] block mb-0.5">OFF-CONTRACT ORDERS</span>
+                    <span className="text-[#151515]/60">Purchase orders issued without an active negotiated rate card</span>
                   </div>
-                  <span className="font-mono text-[#111111] font-medium tnum">
+                  <span className="font-mono text-[#151515] font-medium tnum">
                     {activeDetail.off_contract_count || 0} orders
                   </span>
                 </div>
 
-                <div className="p-4 flex items-center justify-between text-xs bg-white">
+                <div className="p-4 flex items-center justify-between text-xs bg-[#F3F3F1]">
                   <div>
-                    <span className="font-semibold text-[#111111] block mb-0.5">CONTRACT STATUS</span>
-                    <span className="text-[#5E5E5A]">Master agreement or contracted vendor standing</span>
+                    <span className="font-semibold text-[#151515] block mb-0.5">CONTRACT STATUS</span>
+                    <span className="text-[#151515]/60">Master agreement or contracted vendor standing</span>
                   </div>
-                  <span className={`font-mono font-medium ${activeDetail.contracted_supplier ? 'text-[#73C69A]' : 'text-[#8A8A84]'}`}>
+                  <span className={`font-mono font-medium ${activeDetail.contracted_supplier ? 'text-[#B8A47A]' : 'text-[#151515]/50'}`}>
                     {activeDetail.contracted_supplier ? 'Contracted Partner' : 'Spot Supplier'}
                   </span>
                 </div>

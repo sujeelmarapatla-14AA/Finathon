@@ -4,21 +4,23 @@
 
 @layer base {
   :root {
-    --bg-main: #FAFAF8;
-    --text-main: #111111;
-    --text-muted: #5E5E5A;
-    --accent: #73C69A;
-    --border-color: #E8E8E3;
+    --bg-main: #F3F3F1;
+    --text-main: #151515;
+    --text-muted: rgba(21, 21, 21, 0.78);
+    --accent: #B8A47A;
+    --border-color: rgba(21, 21, 21, 0.12);
   }
 
   html {
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
+    background-color: #F3F3F1;
+    color: #151515;
   }
 
   body {
-    background-color: #FAFAF8;
-    color: #111111;
+    background-color: #F3F3F1;
+    color: #151515;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-size: 16px;
     line-height: 1.5;
@@ -27,10 +29,18 @@
     overflow-x: clip;
   }
 
-  /* Refined typography hierarchy */
+  /* Refined typography hierarchy with clear contrast and visibility */
   h1, h2, h3, h4 {
     letter-spacing: -0.02em;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    color: #151515;
+    font-weight: 600;
+  }
+
+  /* High-legibility minimum sizes for small labels and tags */
+  .text-\[10px\], .text-\[11px\] {
+    font-size: 11.5px !important;
+    line-height: 1.4 !important;
   }
 }
 
@@ -40,25 +50,25 @@
   font-feature-settings: "tnum" 1;
 }
 
-/* Dark hero section fine grid (from Moneliq reference) */
+/* Dark hero section fine grid */
 .bg-dark-grid {
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(to right, rgba(243, 243, 241, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(243, 243, 241, 0.04) 1px, transparent 1px);
   background-size: 36px 36px;
 }
 
 /* Light container fine grid */
 .bg-light-grid {
   background-image: 
-    linear-gradient(to right, rgba(0, 0, 0, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+    linear-gradient(to right, rgba(21, 21, 21, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(21, 21, 21, 0.03) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
-/* Subtle corner aurora glow for dark hero */
+/* Subtle Champagne corner aurora glow for dark hero */
 .bg-hero-aurora {
-  background: radial-gradient(circle at 10% 20%, rgba(115, 198, 154, 0.09) 0%, rgba(10, 10, 10, 0) 65%);
+  background: radial-gradient(circle at 10% 20%, rgba(184, 164, 122, 0.12) 0%, rgba(21, 21, 21, 0) 65%);
 }
 
 /* Minimalist scrollbars */
@@ -67,14 +77,14 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #FAFAF8;
+  background: #F3F3F1;
 }
 ::-webkit-scrollbar-thumb {
-  background: #DCDCD7;
+  background: rgba(21, 21, 21, 0.18);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #B8B8B2;
+  background: rgba(21, 21, 21, 0.3);
 }
 
 /* Micro-Interactions (Section 10) */

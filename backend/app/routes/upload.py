@@ -7,6 +7,13 @@ from typing import Any, Dict
 from fastapi import APIRouter, File, HTTPException, UploadFile
 import pandas as pd
 
+try:
+    from app.services.normalization import standardize_raw_procurement_dataframe
+    from app.services.dataset_service import process_and_persist_dataset_pipeline
+except ImportError:
+    from backend.app.services.normalization import standardize_raw_procurement_dataframe
+    from backend.app.services.dataset_service import process_and_persist_dataset_pipeline
+
 router = APIRouter(tags=["upload"])
 
 # Resolve target upload directory: backend/app/data/uploads
@@ -21,13 +28,15 @@ ALLOWED_EXTENSIONS = {".csv", ".xlsx", ".xls"}
 @router.post("/upload")
 async def upload_procurement_file(file: UploadFile = File(...)) -> Dict[str, Any]:
     """
-    Handle procurement dataset upload.
+    Handle procurement dataset upload with SpendIntel schema standardization and database persistence.
 
     - Accepts only .csv, .xlsx, and .xls files (rejects others with HTTP 400).
     - Generates a unique UUID while preserving the file extension.
     - Saves the uploaded file into backend/app/data/uploads/.
     - Validates that the file can be parsed with pandas.read_csv() or pandas.read_excel().
-    - Deletes invalid files and returns HTTP 400 if parsing fails.
+    - Validates required procurement input schema (Product, Supplier, Quantity, Unit Price).
+    - Normalizes product names, generates stable product & transaction IDs.
+    - Persists raw input data and product similarity comparisons in unified database (datasets & dataset_rows).
     - Returns JSON metadata with file_id, filename, row count, and column headers.
     """
     original_filename = file.filename or ""
@@ -66,9 +75,9 @@ async def upload_procurement_file(file: UploadFile = File(...)) -> Dict[str, Any
     # Validate that the file can actually be parsed by pandas
     try:
         if ext_lower in {".xlsx", ".xls"}:
-            df = pd.read_excel(file_path)
+            df_raw = pd.read_excel(file_path)
         else:
-            df = pd.read_csv(file_path)
+            df_raw = pd.read_csv(file_path)
     except Exception as e:
         # Delete corrupted/unreadable file on failure
         if file_path.exists():
@@ -78,27 +87,59 @@ async def upload_procurement_file(file: UploadFile = File(...)) -> Dict[str, Any
             detail=f"Uploaded file could not be parsed: {str(e)}",
         )
 
-    # Extract row count and cleaned column names
-    rows_count = int(len(df))
-    columns_list = [str(col).strip() for col in df.columns.tolist()]
+    # Extract row count and raw column names
+    rows_count = int(len(df_raw))
+    columns_list = [str(col).strip() for col in df_raw.columns.tolist()]
+    file_size_bytes = os.path.getsize(file_path) if file_path.exists() else 0
 
-    # Validate core procurement schema
-    required_cols = ["transaction_id", "product_id", "product_name", "supplier", "quantity", "unit_price", "benchmark_unit_price"]
-    col_lookup = {col.strip().lower().replace(" ", "_"): col for col in df.columns}
-    missing_cols = [req for req in required_cols if req not in col_lookup]
-
-    if missing_cols:
+    # Validate core procurement schema and standardize dataframe
+    try:
+        df_standard = standardize_raw_procurement_dataframe(df_raw)
+    except ValueError as e:
         if file_path.exists():
             file_path.unlink(missing_ok=True)
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid procurement schema. Missing required columns: {', '.join(missing_cols)}.",
+            detail=str(e),
         )
+
+    # Save standardized dataframe to disk so downstream services read clean canonical columns
+    try:
+        if ext_lower in {".xlsx", ".xls"}:
+            df_standard.to_excel(file_path, index=False)
+        else:
+            df_standard.to_csv(file_path, index=False)
+    except Exception:
+        # If saving standardized fails, preserve raw file
+        pass
+
+    # Determine source_type
+    source_type = "EXCEL" if ext_lower in {".xlsx", ".xls"} else "CSV"
+
+    # Persist in Unified Database
+    try:
+        dataset_name = original_filename if original_filename else f"Procurement Upload ({file_id[:8]})"
+        raw_records = df_raw.to_dict(orient="records")
+        process_and_persist_dataset_pipeline(
+            dataset_id=file_id,
+            name=dataset_name,
+            source_type=source_type,
+            raw_df=df_standard,
+            raw_records_list=raw_records,
+            original_filename=original_filename,
+            file_type=ext_lower.replace(".", ""),
+            source_reference="uploaded_file",
+            file_size=file_size_bytes,
+        )
+    except Exception as db_err:
+        # Log error but don't fail upload if DB persistence encountered non-fatal issue
+        print(f"[Upload DB Warning] Could not persist dataset: {db_err}")
 
     return {
         "success": True,
         "file_id": file_id,
         "filename": original_filename,
+        "source_type": source_type,
         "rows": rows_count,
         "columns": columns_list,
     }

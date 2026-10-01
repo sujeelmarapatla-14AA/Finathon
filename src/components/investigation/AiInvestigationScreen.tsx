@@ -157,16 +157,16 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
           description="Autonomous procurement analysis explaining the root cause, financial impact, and actionable recovery steps for each transaction."
         />
 
-        <div className="bg-white rounded-[28px] border border-[#E8E8E3] p-12 sm:p-16 text-center max-w-2xl mx-auto shadow-sm space-y-6">
-          <div className="w-16 h-16 rounded-full bg-[#FAFAF8] border border-[#E8E8E3] flex items-center justify-center mx-auto text-[#73C69A] shadow-xs">
+        <div className="bg-[#F3F3F1] rounded-[28px] border border-[#151515]/10 p-12 sm:p-16 text-center max-w-2xl mx-auto shadow-sm space-y-6">
+          <div className="w-16 h-16 rounded-full bg-[#151515]/5 border border-[#151515]/10 flex items-center justify-center mx-auto text-[#B8A47A] shadow-xs">
             <Sparkles className="w-8 h-8" />
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-xl sm:text-2xl font-sans font-medium text-[#111111]">
+            <h3 className="text-xl sm:text-2xl font-sans font-medium text-[#151515]">
               Select a finding to investigate.
             </h3>
-            <p className="text-sm text-[#5E5E5A] max-w-md mx-auto leading-relaxed">
+            <p className="text-sm text-[#151515]/60 max-w-md mx-auto leading-relaxed">
               Explore detected leakage anomalies, contract rate non-compliance, or duplicates in the Findings Explorer to launch an AI forensic investigation.
             </p>
           </div>
@@ -175,7 +175,7 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
             <Button
               variant="dark-primary"
               size="lg"
-              icon={<ArrowRight className="w-4 h-4" />}
+              icon={<ArrowRight className="w-4 h-4 text-[#B8A47A]" />}
               onClick={() => onNavigate('leakage')}
             >
               View Findings
@@ -229,11 +229,11 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
     <div className="space-y-8">
       {/* Export Toast Notification */}
       {exportToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#0A0A0A] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/10 animate-in fade-in slide-in-from-bottom-2">
-          <CheckCircle2 className="w-5 h-5 text-[#73C69A]" />
+        <div className="fixed bottom-6 right-6 z-50 bg-[#151515] text-[#F3F3F1] px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-[#B8A47A]/30 animate-in fade-in slide-in-from-bottom-2">
+          <CheckCircle2 className="w-5 h-5 text-[#B8A47A]" />
           <div className="text-xs">
-            <p className="font-semibold text-white">Forensic Finding Exported</p>
-            <p className="text-[#8A8A84]">Audit dossier PDF generated for {activeTxId}.</p>
+            <p className="font-semibold text-[#F3F3F1]">Forensic Finding Exported</p>
+            <p className="text-[#F3F3F1]/60">Audit dossier PDF generated for {activeTxId}.</p>
           </div>
         </div>
       )}
@@ -251,9 +251,9 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
                 placeholder="Lookup PO / Tx ID..."
                 value={customInputId}
                 onChange={(e) => setCustomInputId(e.target.value)}
-                className="h-9 w-44 pl-8 pr-3 rounded-full bg-white border border-[#E8E8E3] text-xs text-[#111111] focus:outline-none focus:border-[#111111] shadow-xs"
+                className="h-9 w-44 pl-8 pr-3 rounded-full bg-[#151515]/5 border border-[#151515]/10 text-xs text-[#151515] focus:outline-none focus:border-[#151515] shadow-xs"
               />
-              <Search className="w-3.5 h-3.5 text-[#8A8A84] absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-[#151515]/40 absolute left-2.5 top-1/2 -translate-y-1/2" />
             </form>
 
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 shrink-0 scrollbar-none">
@@ -263,8 +263,8 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
                   onClick={() => handleSelectTab(tab.id)}
                   className={`h-9 px-3.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
                     activeTxId === tab.id
-                      ? 'bg-[#0A0A0A] text-white shadow-sm font-semibold'
-                      : 'bg-white hover:bg-[#FAFAF8] text-[#5E5E5A] hover:text-[#111111] border border-[#E8E8E3]'
+                      ? 'bg-[#151515] text-[#F3F3F1] shadow-sm font-semibold'
+                      : 'bg-[#151515]/5 hover:bg-[#151515]/10 text-[#151515]/70 hover:text-[#151515] border border-[#151515]/10'
                   }`}
                 >
                   <span className="font-mono">{tab.id}</span>
@@ -277,21 +277,21 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
 
       {/* 2. LOADING STATE */}
       {loading && (
-        <div className="bg-white rounded-[28px] border border-[#E8E8E3] p-12 sm:p-16 text-center max-w-2xl mx-auto shadow-sm space-y-6 animate-in fade-in duration-200">
+        <div className="bg-[#F3F3F1] rounded-[28px] border border-[#151515]/10 p-12 sm:p-16 text-center max-w-2xl mx-auto shadow-sm space-y-6 animate-in fade-in duration-200">
           <div className="relative w-16 h-16 mx-auto flex items-center justify-center">
-            <div className="w-16 h-16 rounded-full border-2 border-[#E8E8E3] border-t-[#0A0A0A] animate-spin" />
-            <Sparkles className="w-6 h-6 text-[#73C69A] absolute" />
+            <div className="w-16 h-16 rounded-full border-2 border-[#151515]/10 border-t-[#B8A47A] animate-spin" />
+            <Sparkles className="w-6 h-6 text-[#B8A47A] absolute" />
           </div>
 
           <div className="space-y-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAFAF8] border border-[#E8E8E3] text-[10px] font-mono font-semibold tracking-wider text-[#111111] uppercase">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#73C69A] animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#151515]/5 border border-[#151515]/10 text-[10px] font-mono font-semibold tracking-wider text-[#151515] uppercase">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#B8A47A] animate-pulse" />
               ANALYZING FINDING...
             </span>
-            <h3 className="text-xl font-sans font-medium text-[#111111] pt-1">
+            <h3 className="text-xl font-sans font-medium text-[#151515] pt-1">
               Forensic Investigation in Progress
             </h3>
-            <p className="text-xs sm:text-sm text-[#5E5E5A] max-w-md mx-auto font-mono">
+            <p className="text-xs sm:text-sm text-[#151515]/60 max-w-md mx-auto font-mono">
               Verifying transaction evidence and synthesizing AI commercial intelligence for {activeTxId}...
             </p>
           </div>
@@ -300,19 +300,19 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
 
       {/* 3. ERROR STATE */}
       {errorMessage && !investigationData && !loading && (
-        <div className="bg-white rounded-[28px] border border-[#E8E8E3] p-12 text-center max-w-2xl mx-auto shadow-sm space-y-6 animate-in fade-in duration-200">
-          <div className="w-16 h-16 rounded-full bg-[#FAFAF8] border border-[#E8E8E3] flex items-center justify-center mx-auto text-[#D96B4A]">
+        <div className="bg-[#F3F3F1] rounded-[28px] border border-[#151515]/10 p-12 text-center max-w-2xl mx-auto shadow-sm space-y-6 animate-in fade-in duration-200">
+          <div className="w-16 h-16 rounded-full bg-[#151515]/5 border border-[#151515]/10 flex items-center justify-center mx-auto text-[#B8A47A]">
             <AlertCircle className="w-8 h-8" />
           </div>
 
           <div className="space-y-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAFAF8] border border-[#E8E8E3] text-[10px] font-mono font-semibold tracking-wider text-[#D96B4A] uppercase">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#151515]/5 border border-[#151515]/10 text-[10px] font-mono font-semibold tracking-wider text-[#B8A47A] uppercase">
               INVESTIGATION NOTICE
             </span>
-            <h3 className="text-xl font-sans font-medium text-[#111111]">
+            <h3 className="text-xl font-sans font-medium text-[#151515]">
               SpendIntel couldn't complete this investigation.
             </h3>
-            <p className="text-sm text-[#5E5E5A] max-w-md mx-auto leading-relaxed">
+            <p className="text-sm text-[#151515]/60 max-w-md mx-auto leading-relaxed">
               {errorMessage}
             </p>
           </div>
@@ -321,7 +321,7 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
             <Button
               variant="dark-primary"
               size="md"
-              icon={<RefreshCw className="w-3.5 h-3.5" />}
+              icon={<RefreshCw className="w-3.5 h-3.5 text-[#B8A47A]" />}
               onClick={() => loadInvestigation(activeTxId)}
             >
               Retry Investigation
@@ -341,16 +341,16 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
       {/* 4. MAIN INVESTIGATION RESULTS (when data is loaded) */}
       {!loading && investigationData && (
         <div className="space-y-8 animate-in fade-in duration-300">
-          {/* AI Graceful Degradation Notice (if AI API is offline but deterministic audit is ready) */}
+          {/* AI Graceful Degradation Notice */}
           {!isAiActive && (
-            <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3] text-xs text-[#5E5E5A] flex items-center justify-between gap-4">
+            <div className="p-4 rounded-2xl bg-[#151515]/5 border border-[#151515]/10 text-xs text-[#151515]/70 flex items-center justify-between gap-4">
               <div className="flex items-center gap-2.5">
-                <AlertCircle className="w-4 h-4 text-[#8A8A84] shrink-0" />
+                <AlertCircle className="w-4 h-4 text-[#B8A47A] shrink-0" />
                 <span>AI analysis is temporarily unavailable. Verified deterministic evidence and financial calculations are fully operational below.</span>
               </div>
               <button
                 onClick={() => loadInvestigation(activeTxId)}
-                className="text-xs font-semibold text-[#111111] underline hover:no-underline shrink-0"
+                className="text-xs font-semibold text-[#151515] underline hover:no-underline shrink-0"
               >
                 Retry AI Analysis
               </button>
@@ -360,13 +360,13 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
           {/* Two-Column Editorial Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* LEFT COLUMN (5 Columns): Finding Summary */}
-            <div className="lg:col-span-5 bg-white rounded-[24px] border border-[#E8E8E3] p-6 lg:p-8 shadow-sm space-y-6">
-              <div className="pb-6 border-b border-[#F0F0EB] flex items-center justify-between">
+            <div className="lg:col-span-5 bg-[#F3F3F1] rounded-[24px] border border-[#151515]/10 p-6 lg:p-8 shadow-sm space-y-6">
+              <div className="pb-6 border-b border-[#151515]/10 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#8A8A84] block mb-1">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#151515]/50 block mb-1">
                     Transaction Reference
                   </span>
-                  <span className="text-xl font-sans font-medium text-[#111111]">
+                  <span className="text-xl font-sans font-medium text-[#151515]">
                     {activeTxId}
                   </span>
                 </div>
@@ -378,64 +378,64 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
 
               {/* Product & Supplier Details */}
               <div>
-                <span className="text-[10px] uppercase font-semibold tracking-wider text-[#8A8A84] block mb-1">
+                <span className="text-[10px] uppercase font-semibold tracking-wider text-[#151515]/50 block mb-1">
                   Procured Product
                 </span>
-                <h2 className="text-2xl font-sans font-medium text-[#111111]">
+                <h2 className="text-2xl font-sans font-medium text-[#151515]">
                   {productName}
                 </h2>
-                <div className="flex items-center gap-2 text-xs text-[#5E5E5A] mt-1.5">
+                <div className="flex items-center gap-2 text-xs text-[#151515]/60 mt-1.5">
                   <span>{supplierName}</span>
-                  <span className="text-[#DCDCD7]">·</span>
+                  <span className="text-[#151515]/20">·</span>
                   <span className="font-mono">{quantity} units invoiced</span>
                 </div>
               </div>
 
               {/* Core Comparison Metrics */}
               <div className="grid grid-cols-2 gap-4 pt-1">
-                <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3]">
-                  <span className="text-[10px] uppercase font-semibold text-[#8A8A84] block mb-2">
+                <div className="p-4 rounded-2xl bg-[#151515]/5 border border-[#151515]/10">
+                  <span className="text-[10px] uppercase font-semibold text-[#151515]/50 block mb-2">
                     Actual price
                   </span>
-                  <span className="text-xl font-sans font-medium text-[#111111] tnum">
+                  <span className="text-xl font-sans font-medium text-[#151515] tnum">
                     {formatINR(actualPrice)}
                   </span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3]">
-                  <span className="text-[10px] uppercase font-semibold text-[#8A8A84] block mb-2">
+                <div className="p-4 rounded-2xl bg-[#151515]/5 border border-[#151515]/10">
+                  <span className="text-[10px] uppercase font-semibold text-[#151515]/50 block mb-2">
                     Benchmark
                   </span>
-                  <span className="text-xl font-sans font-medium text-[#111111] tnum">
+                  <span className="text-xl font-sans font-medium text-[#151515] tnum">
                     {formatINR(benchmarkPrice)}
                   </span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3]">
-                  <span className="text-[10px] uppercase font-semibold text-[#8A8A84] block mb-2">
+                <div className="p-4 rounded-2xl bg-[#151515]/5 border border-[#151515]/10">
+                  <span className="text-[10px] uppercase font-semibold text-[#151515]/50 block mb-2">
                     Variance
                   </span>
-                  <span className="text-xl font-sans font-medium text-[#D96B4A] tnum">
+                  <span className="text-xl font-sans font-medium text-[#B8A47A] tnum">
                     +{variancePct.toFixed(2)}%
                   </span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3]">
-                  <span className="text-[10px] uppercase font-semibold text-[#8A8A84] block mb-2">
+                <div className="p-4 rounded-2xl bg-[#151515]/5 border border-[#151515]/10">
+                  <span className="text-[10px] uppercase font-semibold text-[#151515]/50 block mb-2">
                     Potential leakage
                   </span>
-                  <span className="text-xl font-sans font-medium text-[#111111] tnum">
+                  <span className="text-xl font-sans font-medium text-[#151515] tnum">
                     {formatINR(potentialLeakage)}
                   </span>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-6 border-t border-[#F0F0EB] grid grid-cols-2 gap-3">
+              <div className="pt-6 border-t border-[#151515]/10 grid grid-cols-2 gap-3">
                 <Button
                   variant="secondary"
                   size="sm"
-                  icon={<FileText className="w-3.5 h-3.5" />}
+                  icon={<FileText className="w-3.5 h-3.5 text-[#151515]/70" />}
                   onClick={() => setShowTimeline(!showTimeline)}
                   className="w-full justify-center"
                 >
@@ -445,7 +445,7 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
                 <Button
                   variant="secondary"
                   size="sm"
-                  icon={<GitCompare className="w-3.5 h-3.5" />}
+                  icon={<GitCompare className="w-3.5 h-3.5 text-[#151515]/70" />}
                   onClick={() => onNavigate('suppliers')}
                   className="w-full justify-center"
                 >
@@ -455,7 +455,7 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
                 <Button
                   variant="secondary"
                   size="sm"
-                  icon={<Calculator className="w-3.5 h-3.5" />}
+                  icon={<Calculator className="w-3.5 h-3.5 text-[#151515]/70" />}
                   onClick={() => onNavigate('simulator')}
                   className="w-full justify-center"
                 >
@@ -465,7 +465,7 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
                 <Button
                   variant="dark-primary"
                   size="sm"
-                  icon={<Download className="w-3.5 h-3.5" />}
+                  icon={<Download className="w-3.5 h-3.5 text-[#B8A47A]" />}
                   onClick={handleExportFinding}
                   className="w-full justify-center"
                 >
@@ -476,58 +476,58 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
 
             {/* RIGHT COLUMN (7 Columns): "SpendIntel Analyst" Report */}
             <div className="lg:col-span-7 space-y-6">
-              <div className="bg-white rounded-[24px] border border-[#E8E8E3] p-6 lg:p-8 shadow-sm space-y-6">
+              <div className="bg-[#F3F3F1] rounded-[24px] border border-[#151515]/10 p-6 lg:p-8 shadow-sm space-y-6">
                 {/* Analyst Header */}
-                <div className="flex items-center justify-between pb-6 border-b border-[#F0F0EB]">
+                <div className="flex items-center justify-between pb-6 border-b border-[#151515]/10">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-[#0A0A0A] text-white flex items-center justify-center text-xs font-mono font-bold">
+                    <div className="w-9 h-9 rounded-full bg-[#151515] text-[#F3F3F1] flex items-center justify-center text-xs font-mono font-bold border border-[#B8A47A]/30">
                       SI
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-[#111111]">
+                      <h3 className="text-base font-semibold text-[#151515]">
                         SpendIntel Analyst
                       </h3>
-                      <p className="text-xs text-[#8A8A84]">
+                      <p className="text-xs text-[#151515]/60">
                         Deterministic verification & structured commercial intelligence
                       </p>
                     </div>
                   </div>
 
-                  <span className="text-xs font-mono text-[#73C69A] bg-[#73C69A]/10 border border-[#73C69A]/20 px-3 py-1 rounded-full flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-[#73C69A]" />
+                  <span className="text-xs font-mono text-[#B8A47A] bg-[#B8A47A]/15 border border-[#B8A47A]/30 px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#B8A47A]" />
                     Audit-Ready
                   </span>
                 </div>
 
                 {/* 1. Summary Block */}
                 <div className="space-y-2">
-                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#8A8A84] block">
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#151515]/50 block">
                     Summary
                   </span>
-                  <p className="text-sm text-[#111111] font-sans leading-relaxed">
+                  <p className="text-sm text-[#151515] font-sans leading-relaxed">
                     {summaryText}
                   </p>
                 </div>
 
                 {/* 2. Root Cause Block */}
-                <div className="space-y-2 p-5 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3]">
-                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#D96B4A] block">
+                <div className="space-y-2 p-5 rounded-2xl bg-[#151515]/5 border border-[#151515]/10">
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#B8A47A] block">
                     Root Cause
                   </span>
-                  <p className="text-xs sm:text-sm text-[#5E5E5A] font-sans leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#151515]/70 font-sans leading-relaxed">
                     {rootCauseText}
                   </p>
                 </div>
 
                 {/* 3. Evidence Points Block */}
                 <div className="space-y-3">
-                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#8A8A84] block">
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#151515]/50 block">
                     Evidence Ledger
                   </span>
                   <div className="space-y-2">
                     {evidencePoints.map((point, i) => (
-                      <div key={i} className="flex items-start gap-3 text-xs sm:text-sm text-[#111111]">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#73C69A] mt-2 shrink-0" />
+                      <div key={i} className="flex items-start gap-3 text-xs sm:text-sm text-[#151515]">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#B8A47A] mt-2 shrink-0" />
                         <span className="leading-relaxed">{point}</span>
                       </div>
                     ))}
@@ -535,21 +535,21 @@ export const AiInvestigationScreen: React.FC<AiInvestigationScreenProps> = ({
                 </div>
 
                 {/* 4. Recommended Actions Block */}
-                <div className="space-y-3 pt-4 border-t border-[#F0F0EB]">
-                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#111111] block">
+                <div className="space-y-3 pt-4 border-t border-[#151515]/10">
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#151515] block">
                     Recommended Actions
                   </span>
                   <div className="space-y-2.5">
                     {recommendedActions.map((action, i) => (
                       <div
                         key={i}
-                        className="p-3.5 rounded-xl bg-[#FAFAF8] border border-[#E8E8E3] flex items-center justify-between gap-4 text-xs font-medium text-[#111111]"
+                        className="p-3.5 rounded-xl bg-[#151515]/5 border border-[#151515]/10 flex items-center justify-between gap-4 text-xs font-medium text-[#151515]"
                       >
                         <div className="flex items-center gap-2.5">
-                          <span className="font-mono text-[11px] text-[#8A8A84]">0{i + 1}</span>
+                          <span className="font-mono text-[11px] text-[#151515]/50">0{i + 1}</span>
                           <span>{action}</span>
                         </div>
-                        <ArrowRight className="w-3.5 h-3.5 text-[#8A8A84] shrink-0" />
+                        <ArrowRight className="w-3.5 h-3.5 text-[#B8A47A] shrink-0" />
                       </div>
                     ))}
                   </div>

@@ -81,6 +81,35 @@ def get_nova_procurement_suppliers(force_refresh: bool = Query(False, descriptio
         )
 
 
+@router.get("/product-intelligence")
+def get_nova_product_intelligence(force_refresh: bool = Query(False, description="Force fresh fetch from Nova API")) -> Dict[str, Any]:
+    """
+    Retrieve product similarity & differentiation intelligence for live Nova procurement records.
+    """
+    try:
+        try:
+            from app.services.product_similarity import analyze_product_intelligence
+        except ImportError:
+            from backend.app.services.product_similarity import analyze_product_intelligence
+
+        df = fetch_and_normalize_nova_procurement(force_refresh=force_refresh)
+        product_intel = analyze_product_intelligence(df)
+        return {
+            "source": "nova",
+            "source_label": "LIVE NOVA",
+            "file_id": "nova",
+            "summary_kpis": product_intel["summary_kpis"],
+            "comparisons": product_intel["comparisons"],
+            "findings": product_intel["findings"],
+            "comparable_groups": product_intel["comparable_groups"],
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"SpendIntel couldn't retrieve live Nova product intelligence: {str(e)}",
+        )
+
+
 @router.post("/investigate/{transaction_id}")
 @router.get("/investigate/{transaction_id}")
 def investigate_nova_procurement_transaction(

@@ -121,7 +121,21 @@ def test_financial_deduplication():
 def test_missing_column_validation():
     print("\n--- 3. Testing Schema Validation on Incomplete Data ---")
     df = pd.read_csv(DEMO_FILE_PATH)
-    incomplete_df = df.drop(columns=["benchmark_unit_price"])
+
+    # 1. Dropping benchmark_unit_price should SUCCEED because benchmark is an analytical output
+    df_no_bench = df.drop(columns=["benchmark_unit_price", "product_id"])
+    temp_no_bench = CURRENT_DIR / "app" / "data" / "uploads" / "temp_no_bench.csv"
+    df_no_bench.to_csv(temp_no_bench, index=False)
+    try:
+        res = analyze_procurement(temp_no_bench)
+        assert res["transactions"] == len(df)
+        print("  PASS: Missing benchmark_unit_price / product_id successfully auto-calculated without error.")
+    finally:
+        if temp_no_bench.exists():
+            temp_no_bench.unlink()
+
+    # 2. Dropping a required field (e.g. supplier) should properly raise ValueError
+    incomplete_df = df.drop(columns=["supplier"])
     temp_path = CURRENT_DIR / "app" / "data" / "uploads" / "temp_incomplete.csv"
     incomplete_df.to_csv(temp_path, index=False)
 
@@ -129,13 +143,14 @@ def test_missing_column_validation():
         analyze_procurement(temp_path)
         assert False, "Failed to raise ValueError for missing required column"
     except ValueError as e:
-        assert "benchmark_unit_price" in str(e)
+        assert "Supplier" in str(e)
+        assert "Missing required procurement fields" in str(e)
         print(f"  Caught expected ValueError: {e}")
     finally:
         if temp_path.exists():
             temp_path.unlink()
 
-    print("PASS: Column validation correctly rejects missing required schemas.")
+    print("PASS: Column validation correctly requires (product, supplier, quantity, unit_price).")
 
 
 def run_all():

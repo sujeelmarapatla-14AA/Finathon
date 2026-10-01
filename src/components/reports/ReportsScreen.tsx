@@ -56,11 +56,11 @@ export const ReportsScreen: React.FC = () => {
     <div className="space-y-8 max-w-5xl mx-auto py-2">
       {/* Toast Notification */}
       {downloadToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#0A0A0A] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/10 animate-in fade-in slide-in-from-bottom-2">
-          <CheckCircle2 className="w-5 h-5 text-[#73C69A]" />
+        <div className="fixed bottom-6 right-6 z-50 bg-[#151515] text-[#F3F3F1] px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-[#B8A47A]/30 animate-in fade-in slide-in-from-bottom-2">
+          <CheckCircle2 className="w-5 h-5 text-[#B8A47A]" />
           <div className="text-xs">
-            <p className="font-semibold text-white">Dossier Exported</p>
-            <p className="text-[#8A8A84]">{downloadToast}</p>
+            <p className="font-semibold text-[#F3F3F1]">Dossier Exported</p>
+            <p className="text-[#F3F3F1]/70">{downloadToast}</p>
           </div>
         </div>
       )}
@@ -71,32 +71,32 @@ export const ReportsScreen: React.FC = () => {
         title="Procurement Reports"
         subtitle="Audit-ready forensic spend packages prepared for the Chief Financial Officer and Procurement Audit Committee."
         actions={
-          <span className="text-xs font-mono text-[#8A8A84] bg-white px-3.5 py-1.5 rounded-full border border-[#E8E8E3] shrink-0">
+          <span className="text-xs font-mono text-[#151515]/70 bg-white px-3.5 py-1.5 rounded-full border border-[#151515]/10 shrink-0">
             SOC2 & ISO 27001 Formatted
           </span>
         }
       />
 
-      {/* Clean Editorial Report Rows */}
-      <div className="bg-white rounded-[24px] border border-[#E8E8E3] divide-y divide-[#F0F0EB] overflow-hidden shadow-sm">
+      {/* Clean Executive Report Rows */}
+      <div className="bg-white rounded-[24px] border border-[#151515]/10 divide-y divide-[#151515]/5 overflow-hidden shadow-sm">
         {reports.map((rep) => (
           <div
             key={rep.name}
-            className="p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-[#FAFAF8] transition-colors group"
+            className="p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-[#151515]/[0.02] transition-colors group"
           >
             <div className="space-y-1.5 max-w-xl">
               <div className="flex items-center gap-3">
-                <h3 className="text-base sm:text-lg font-sans font-semibold text-[#111111] group-hover:text-black">
+                <h3 className="text-base sm:text-lg font-sans font-semibold text-[#151515] group-hover:text-[#151515]">
                   {rep.name}
                 </h3>
                 <Badge variant={rep.status === 'ACTIONABLE' ? 'high' : 'low'}>
                   {rep.status}
                 </Badge>
               </div>
-              <p className="text-xs text-[#5E5E5A] font-sans leading-relaxed">
+              <p className="text-xs text-[#151515]/70 font-sans leading-relaxed">
                 {rep.description}
               </p>
-              <div className="flex items-center gap-4 text-xs font-mono text-[#8A8A84] pt-1">
+              <div className="flex items-center gap-4 text-xs font-mono text-[#151515]/50 pt-1">
                 <span>Updated: {rep.date}</span>
                 <span>•</span>
                 <span>{rep.records}</span>
@@ -108,7 +108,7 @@ export const ReportsScreen: React.FC = () => {
               <Button
                 variant="secondary"
                 size="sm"
-                icon={<Download className="w-3.5 h-3.5 text-[#5E5E5A]" />}
+                icon={<Download className="w-3.5 h-3.5 text-[#151515]/60" />}
                 onClick={() => handleExport(rep.name, 'PDF')}
               >
                 Export PDF
@@ -129,4 +129,3 @@ export const ReportsScreen: React.FC = () => {
     </div>
   );
 };
-

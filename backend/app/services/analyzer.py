@@ -2,15 +2,22 @@
 SpendIntel - Master Procurement Spend Leakage Analyzer.
 
 Orchestrates the complete deterministic leakage audit pipeline:
-1. Data Ingestion: Validates CSV/Excel formats, header whitespace, and required schemas.
+1. Data Ingestion & Schema Standardization:
+   - Validates 4 required input fields: product, supplier, quantity, unit_price.
+   - Automatically maps column aliases.
+   - Deterministically generates product_id and transaction_id if omitted.
+   - Treats benchmark_unit_price as an analytical output (never required as input).
 2. Supplier Normalization: Standardizes vendor entity names while preserving original raw values.
-3. Product Normalization: Resolves commodity naming while maintaining SKU identity (product_id).
-4. Price Benchmarking: Actual-vs-benchmark unit rate variance calculations.
-5. Duplicate Auditing: Duplicate purchase orders matching on SKU, supplier, quantity, and price.
-6. Supplier Fragmentation: Multi-vendor product line analysis and vendor concentration.
-7. Contract Compliance: Rate card baseline variance and off-contract purchasing.
-8. Missed Discount Analysis: Unapplied negotiated contractual volume rebates.
-9. Unusual Pattern Detection: Price spikes, sudden vendor switches, and volume outliers.
+3. Product Normalization & Attribute Extraction: Resolves commodity naming, extracts specifications & pack sizes.
+4. Product Similarity & Comparability Engine: Calculates multi-factor product similarity (Category, Description, Specs, Pack Size, Brand, Quality, Reviews). Price is NEVER used as a similarity signal.
+5. Benchmark Formulation: Groups genuinely comparable products for valid price benchmarking.
+6. Price Benchmarking: Actual-vs-benchmark unit rate variance calculations on normalized units.
+7. Duplicate Auditing: Duplicate purchase orders matching on SKU, supplier, quantity, and price.
+8. Supplier Fragmentation: Multi-vendor product line analysis and vendor concentration.
+9. Contract Compliance: Rate card baseline variance and off-contract purchasing.
+10. Missed Discount Analysis: Unapplied negotiated contractual volume rebates.
+11. Unusual Pattern Detection: Price spikes, sudden vendor switches, and volume outliers.
+12. Equal-Price / Different-Spec Detection: Dedicated detection of identical-price items with divergent specifications.
 
 CRITICAL FINANCIAL INTEGRITY:
 Strictly separates:
@@ -32,9 +39,13 @@ try:
         detect_supplier_fragmentation,
         compute_canonical_leakage,
     )
-    from backend.app.services.normalization import normalize_procurement_dataframe
+    from backend.app.services.normalization import (
+        normalize_procurement_dataframe,
+        standardize_raw_procurement_dataframe,
+    )
     from backend.app.services.contracts import detect_contract_findings
     from backend.app.services.patterns import detect_unusual_patterns
+    from backend.app.services.product_similarity import analyze_product_intelligence
 except ImportError:
     try:
         from app.services.leakage import (
@@ -43,9 +54,13 @@ except ImportError:
             detect_supplier_fragmentation,
             compute_canonical_leakage,
         )
-        from app.services.normalization import normalize_procurement_dataframe
+        from app.services.normalization import (
+            normalize_procurement_dataframe,
+            standardize_raw_procurement_dataframe,
+        )
         from app.services.contracts import detect_contract_findings
         from app.services.patterns import detect_unusual_patterns
+        from app.services.product_similarity import analyze_product_intelligence
     except ImportError:
         from .leakage import (
             detect_price_anomalies,
@@ -53,68 +68,67 @@ except ImportError:
             detect_supplier_fragmentation,
             compute_canonical_leakage,
         )
-        from .normalization import normalize_procurement_dataframe
+        from .normalization import (
+            normalize_procurement_dataframe,
+            standardize_raw_procurement_dataframe,
+        )
         from .contracts import detect_contract_findings
         from .patterns import detect_unusual_patterns
+        from .product_similarity import analyze_product_intelligence
 
 REQUIRED_COLUMNS: List[str] = [
-    "transaction_id",
-    "product_id",
-    "product_name",
+    "product",
     "supplier",
     "quantity",
     "unit_price",
-    "benchmark_unit_price",
 ]
 
 
 def analyze_procurement_dataframe(df: pd.DataFrame) -> Dict[str, Any]:
     """
-    Execute comprehensive procurement spend leakage analysis on an in-memory DataFrame.
+    Execute comprehensive procurement spend leakage & product intelligence analysis.
 
     Pipeline:
-    1. Normalization: Canonicalizes suppliers and products.
-    2. Detection: Executes all 6 audit engines independently.
-    3. Deduplication: Calculates canonical transaction financial leakage.
-    4. Aggregation: Formats backwards-compatible and enriched response.
+    1. Schema Standardization & Validation: Standardizes aliases, generates missing IDs, computes benchmarks.
+    2. Normalization: Canonicalizes suppliers and products.
+    3. Product Similarity Engine: Evaluates multi-factor comparability and equal-price/different-spec scenarios.
+    4. Detection: Executes price anomaly, duplicate, fragmentation, contract, discount, and pattern audits.
+    5. Deduplication: Calculates canonical transaction financial leakage.
+    6. Aggregation: Formats backwards-compatible and enriched response.
 
     Returns:
-        JSON-serializable dictionary with summary KPIs, normalized counts, and detailed findings.
+        JSON-serializable dictionary with summary KPIs, normalized counts, detailed findings, and product intelligence.
     """
-    df_clean = df.copy()
-    df_clean.columns = df_clean.columns.astype(str).str.strip()
+    # 1. STANDARDIZE SCHEMA & VALIDATE REQUIRED INPUTS
+    df_clean = standardize_raw_procurement_dataframe(df)
 
-    # Validate required columns
-    missing_columns = [col for col in REQUIRED_COLUMNS if col not in df_clean.columns]
-    if missing_columns:
-        raise ValueError(
-            f"Missing required columns: {', '.join(missing_columns)}. "
-            f"Expected columns: {', '.join(REQUIRED_COLUMNS)}."
-        )
-
-    # 1 & 2. SUPPLIER & PRODUCT NORMALIZATION
+    # 2. SUPPLIER & PRODUCT NORMALIZATION
     df_clean = normalize_procurement_dataframe(df_clean)
 
     # Safe numeric conversion
-    numeric_columns = ["quantity", "unit_price", "benchmark_unit_price"]
-    for col in numeric_columns:
-        df_clean[col] = pd.to_numeric(df_clean[col], errors="coerce").fillna(0.0)
+    df_clean["quantity"] = pd.to_numeric(df_clean["quantity"], errors="coerce").fillna(1.0)
+    df_clean["unit_price"] = pd.to_numeric(df_clean["unit_price"], errors="coerce").fillna(0.0)
+    if "benchmark_unit_price" in df_clean.columns:
+        df_clean["benchmark_unit_price"] = pd.to_numeric(df_clean["benchmark_unit_price"], errors="coerce")
 
-    # 3. PRICE ANOMALY DETECTION (Actual vs Benchmark Baseline)
+    # 3. PRODUCT SIMILARITY & DIFFERENTIATION INTELLIGENCE
+    product_intelligence = analyze_product_intelligence(df_clean)
+
+    # 4. PRICE ANOMALY DETECTION (Actual vs Benchmark Baseline)
     price_anomalies = detect_price_anomalies(df_clean)
 
-    # 4. DUPLICATE TRANSACTION DETECTION
+    # 5. DUPLICATE TRANSACTION DETECTION
     duplicates = detect_duplicates(df_clean)
 
-    # 5. SUPPLIER FRAGMENTATION ANALYSIS
+    # 6. SUPPLIER FRAGMENTATION ANALYSIS
     fragmentation = detect_supplier_fragmentation(df_clean)
 
-    # 6 & 7. CONTRACT COMPLIANCE & MISSED DISCOUNT ANALYSIS
+    # 7 & 8. CONTRACT COMPLIANCE & MISSED DISCOUNT ANALYSIS
     contract_audit = detect_contract_findings(df_clean)
     missed_discounts = contract_audit.get("missed_discounts", [])
     contract_findings = contract_audit.get("contract_compliance", [])
 
-    # 8. UNUSUAL PROCUREMENT PATTERN DETECTION
+    # 9. UNUSUAL PROCUREMENT PATTERN DETECTION
     pattern_findings = detect_unusual_patterns(df_clean)
 
     # -------------------------------------------------------------------------
@@ -140,7 +154,7 @@ def analyze_procurement_dataframe(df: pd.DataFrame) -> Dict[str, Any]:
     # Counts & normalization metadata
     transactions_count = int(len(df_clean))
     suppliers_count = int(df_clean["supplier"].nunique())
-    products_count = int(df_clean["product_id"].nunique())
+    products_count = int(df_clean["product_id"].nunique()) if "product_id" in df_clean.columns else int(df_clean["normalized_product_name"].nunique())
     norm_suppliers_count = int(df_clean["normalized_supplier"].nunique())
     norm_products_count = int(df_clean["normalized_product_name"].nunique())
 
@@ -160,6 +174,10 @@ def analyze_procurement_dataframe(df: pd.DataFrame) -> Dict[str, Any]:
         "contract_findings": contract_findings,
         "discount_findings": missed_discounts,
         "pattern_findings": pattern_findings,
+
+        # Product Similarity & Differentiation Intelligence
+        "product_intelligence": product_intelligence,
+        "product_similarity_findings": product_intelligence.get("findings", []),
 
         # Normalization metadata
         "normalized_supplier_count": norm_suppliers_count,
@@ -211,4 +229,3 @@ def analyze_procurement(filepath: Union[str, os.PathLike]) -> Dict[str, Any]:
         df = pd.read_csv(filepath_obj)
 
     return analyze_procurement_dataframe(df)
-

@@ -133,7 +133,8 @@ def fetch_and_normalize_nova_procurement(force_refresh: bool = False) -> pd.Data
 
 def get_nova_analysis(force_refresh: bool = False) -> Dict[str, Any]:
     """
-    Execute SpendIntel deterministic analysis on live Nova procurement dataset.
+    Execute SpendIntel deterministic analysis on live Nova procurement dataset,
+    and persist into unified SQLite database under source_type='NOVA_API'.
     """
     global _NOVA_ANALYSIS_CACHE
     if not force_refresh and _NOVA_ANALYSIS_CACHE is not None:
@@ -145,6 +146,28 @@ def get_nova_analysis(force_refresh: bool = False) -> Dict[str, Any]:
 
     analysis = analyze_procurement_dataframe(df)
     _NOVA_ANALYSIS_CACHE = analysis
+
+    # Persist in Unified Database under NOVA_API
+    try:
+        from app.services.dataset_service import process_and_persist_dataset_pipeline
+    except ImportError:
+        from backend.app.services.dataset_service import process_and_persist_dataset_pipeline
+
+    try:
+        process_and_persist_dataset_pipeline(
+            dataset_id="nova-live",
+            name="Nova Procurement Analysis (Live Cloud Feed)",
+            source_type="NOVA_API",
+            raw_df=df,
+            raw_records_list=df.to_dict(orient="records"),
+            original_filename="nova_live_feed.json",
+            file_type="api",
+            source_reference="nova_cloud_rest_api",
+            file_size=len(df) * 140,
+        )
+    except Exception as db_err:
+        print(f"[Nova DB Warning] Could not persist Nova dataset: {db_err}")
+
     return analysis
 
 

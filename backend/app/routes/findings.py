@@ -59,7 +59,7 @@ def _standardize_finding(raw: Dict[str, Any], default_type: str) -> Dict[str, An
         "risk": str(raw.get("risk", "MEDIUM")).upper(),
         "transaction_id": tx_id,
         "product_id": pid,
-        "product": str(raw.get("product", raw.get("product_name", ""))),
+        "product": str(raw.get("product", raw.get("product_name", f"{raw.get('product_a', '')} vs {raw.get('product_b', '')}".strip(" vs ")))),
         "supplier": str(raw.get("supplier", "")),
         "quantity": raw.get("quantity"),
         "actual_price": round(float(actual), 2) if actual is not None else None,
@@ -67,8 +67,18 @@ def _standardize_finding(raw: Dict[str, Any], default_type: str) -> Dict[str, An
         "expected_price": round(float(expected), 2) if expected is not None else None,
         "variance_percent": round(float(variance), 2) if variance is not None else 0.0,
         "potential_leakage": round(float(leakage), 2) if leakage is not None else 0.0,
-        "reason": raw.get("reason", f"{finding_type} detected during procurement audit"),
+        "reason": raw.get("reason", raw.get("explanation", f"{finding_type} detected during procurement audit")),
         "evidence": raw.get("evidence", []),
+        "similarity_score": raw.get("similarity_score"),
+        "comparability": raw.get("comparability"),
+        "product_a": raw.get("product_a"),
+        "product_b": raw.get("product_b"),
+        "price_a": raw.get("price_a"),
+        "price_b": raw.get("price_b"),
+        "matching_attributes": raw.get("matching_attributes"),
+        "different_attributes": raw.get("different_attributes"),
+        "explanation": raw.get("explanation"),
+        "confidence": raw.get("confidence"),
     }
 
     # Clean None values in evidence if string
@@ -137,6 +147,10 @@ def get_findings(file_id: str) -> Dict[str, Any]:
     # 6. Unusual procurement patterns
     for item in result.get("pattern_findings", []):
         combined_findings.append(_standardize_finding(item, "UNUSUAL_PATTERN"))
+
+    # 7. Product similarity & differentiation findings
+    for item in result.get("product_similarity_findings", []):
+        combined_findings.append(_standardize_finding(item, item.get("type", "PRODUCT_SIMILARITY")))
 
     is_demo = target_id == "cb8b20d5-2516-47a9-8646-317e9beee50b"
     is_manual = str(target_id).startswith("manual_")

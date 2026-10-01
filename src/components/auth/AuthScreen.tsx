@@ -156,7 +156,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
   };
 
   return (
-    <div className="relative min-h-screen bg-[#000000] text-white flex flex-col justify-between selection:bg-[#73C69A]/30 selection:text-white overflow-x-hidden font-sans">
+    <div className="relative min-h-screen bg-[#151515] text-[#F3F3F1] flex flex-col justify-between selection:bg-[#B8A47A]/30 selection:text-[#F3F3F1] overflow-x-hidden font-sans">
       {/* Top Navbar */}
       <header className="relative z-20 w-full max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -164,14 +164,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-mono text-[#A1A1AA]">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#73C69A]" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#F3F3F1]/5 border border-[#F3F3F1]/10 text-[11px] font-mono text-[#F3F3F1]/70">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#B8A47A]" />
             <span>ENTERPRISE GATEWAY</span>
           </div>
 
           <button
             onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}
-            className="h-9 px-5 rounded-full bg-white text-black text-xs font-semibold hover:bg-[#EAEAEA] active:scale-95 transition-all shadow-[0_0_15px_rgba(255,255,255,0.15)]"
+            className="h-9 px-5 rounded-full bg-[#B8A47A] text-[#151515] text-xs font-semibold hover:bg-[#B8A47A]/90 active:scale-95 transition-all shadow-[0_0_15px_rgba(184,164,122,0.15)]"
           >
             {mode === 'login' ? 'Sign Up' : 'Sign In'}
           </button>
@@ -191,8 +191,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
             dashGap={2}
             specks={15}
             fontFamily=""
-            color="#ffffff"
-            accentColor="#73C69A"
+            color="#F3F3F1"
+            accentColor="#B8A47A"
             letterSpacing={-0.04}
             reach={180}
             softness={0.7}
@@ -207,20 +207,20 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
         </div>
 
         {/* Dark Frosted Glass Auth Card */}
-        <div className="w-full max-w-md bg-[#0A0E0C]/90 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-2xl p-7 sm:p-9 relative overflow-hidden">
-          {/* Subtle Corner Glow */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#73C69A]/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="w-full max-w-md bg-[#151515]/95 backdrop-blur-2xl rounded-2xl border border-[#F3F3F1]/10 shadow-2xl p-7 sm:p-9 relative overflow-hidden">
+          {/* Subtle Champagne Corner Glow */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#B8A47A]/10 rounded-full blur-2xl pointer-events-none" />
 
           {/* Heading */}
           <div className="mb-6 text-center">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono tracking-widest uppercase text-[#73C69A] mb-2">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#B8A47A]/10 border border-[#B8A47A]/20 text-[10px] font-mono tracking-widest uppercase text-[#B8A47A] mb-2">
               <Sparkles className="w-3 h-3" />
               <span>Forensic Procurement Access</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-serif font-normal text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-serif font-normal text-[#F3F3F1] tracking-tight">
               {mode === 'login' ? 'Welcome back.' : 'Create your account.'}
             </h1>
-            <p className="mt-1.5 text-xs text-[#A1A1AA] leading-relaxed">
+            <p className="mt-1.5 text-xs text-[#F3F3F1]/70 leading-relaxed">
               {mode === 'login'
                 ? 'Sign in to access your procurement intelligence workspace.'
                 : 'Use your approved company email to join SpendIntel.'}
@@ -229,7 +229,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
 
           {/* Success Banner */}
           {successMessage && (
-            <div className="mb-5 p-3.5 rounded-xl bg-[#73C69A]/15 border border-[#73C69A]/30 flex items-start gap-2.5 text-xs text-[#73C69A]">
+            <div className="mb-5 p-3.5 rounded-xl bg-[#B8A47A]/15 border border-[#B8A47A]/30 flex items-start gap-2.5 text-xs text-[#B8A47A]">
               <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
               <div className="flex-1 leading-relaxed">{successMessage}</div>
             </div>
@@ -237,15 +237,15 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
 
           {/* Error Banner */}
           {errorMessage && (
-            <div className="mb-5 p-3.5 rounded-xl bg-[#EF4444]/15 border border-[#EF4444]/30 flex items-start gap-2.5 text-xs text-[#FCA5A5]">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <div className="mb-5 p-3.5 rounded-xl bg-[#F3F3F1]/10 border border-[#B8A47A]/30 flex items-start gap-2.5 text-xs text-[#F3F3F1]">
+              <AlertCircle className="w-4 h-4 text-[#B8A47A] shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="leading-relaxed">{errorMessage}</p>
                 {isBackendOffline && (
                   <button
                     type="button"
                     onClick={() => setErrorMessage(null)}
-                    className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-white underline hover:no-underline"
+                    className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-[#B8A47A] underline hover:no-underline"
                   >
                     <RefreshCw className="w-3 h-3" />
                     <span>Retry connection</span>
@@ -257,10 +257,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
 
           {/* Forgot Password Notice */}
           {forgotPasswordNotice && (
-            <div className="mb-5 p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs text-[#A1A1AA] leading-relaxed flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-[#73C69A] shrink-0 mt-0.5" />
+            <div className="mb-5 p-3.5 rounded-xl bg-[#F3F3F1]/5 border border-[#F3F3F1]/10 text-xs text-[#F3F3F1]/70 leading-relaxed flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-[#B8A47A] shrink-0 mt-0.5" />
               <div>
-                <span className="font-semibold text-white">Password recovery is not configured.</span>
+                <span className="font-semibold text-[#F3F3F1]">Password recovery is not configured.</span>
                 <p className="mt-0.5">Please contact your corporate procurement administrator.</p>
               </div>
             </div>
@@ -270,7 +270,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
           {mode === 'login' ? (
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-semibold text-[#D4D4D8] uppercase tracking-wider mb-1.5">
+                <label className="block text-[11px] font-semibold text-[#F3F3F1]/80 uppercase tracking-wider mb-1.5">
                   Work Email
                 </label>
                 <div className="relative">
@@ -280,21 +280,21 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="lead@company.com"
                     required
-                    className="w-full h-[46px] px-4 pl-10 rounded-xl border border-white/15 bg-white/[0.05] text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#73C69A] focus:bg-white/[0.08] transition-all"
+                    className="w-full h-[46px] px-4 pl-10 rounded-xl border border-[#F3F3F1]/15 bg-[#F3F3F1]/[0.05] text-[#F3F3F1] text-sm placeholder:text-[#F3F3F1]/40 focus:outline-none focus:ring-2 focus:ring-[#B8A47A] focus:bg-[#F3F3F1]/[0.08] transition-all"
                   />
-                  <Mail className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Mail className="w-4 h-4 text-[#F3F3F1]/40 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-[11px] font-semibold text-[#D4D4D8] uppercase tracking-wider">
+                  <label className="block text-[11px] font-semibold text-[#F3F3F1]/80 uppercase tracking-wider">
                     Password
                   </label>
                   <button
                     type="button"
                     onClick={() => setForgotPasswordNotice(true)}
-                    className="text-[11px] text-[#A1A1AA] hover:text-white transition-colors"
+                    className="text-[11px] text-[#F3F3F1]/60 hover:text-[#F3F3F1] transition-colors"
                   >
                     Forgot password?
                   </button>
@@ -306,13 +306,13 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
                     required
-                    className="w-full h-[46px] px-4 pl-10 pr-10 rounded-xl border border-white/15 bg-white/[0.05] text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#73C69A] focus:bg-white/[0.08] transition-all font-mono"
+                    className="w-full h-[46px] px-4 pl-10 pr-10 rounded-xl border border-[#F3F3F1]/15 bg-[#F3F3F1]/[0.05] text-[#F3F3F1] text-sm placeholder:text-[#F3F3F1]/40 focus:outline-none focus:ring-2 focus:ring-[#B8A47A] focus:bg-[#F3F3F1]/[0.08] transition-all font-mono"
                   />
-                  <Lock className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Lock className="w-4 h-4 text-[#F3F3F1]/40 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition-colors"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#F3F3F1]/40 hover:text-[#F3F3F1] transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -323,11 +323,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-[46px] mt-2 rounded-xl bg-gradient-to-b from-white to-[#E2E2E2] hover:to-white text-black font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-50 shadow-md"
+                className="w-full h-[46px] mt-2 rounded-xl bg-[#B8A47A] text-[#151515] font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all hover:bg-[#B8A47A]/90 hover:shadow-[0_0_20px_rgba(184,164,122,0.3)] hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-50 shadow-md"
               >
                 {isLoading ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin text-black" />
+                    <RefreshCw className="w-4 h-4 animate-spin text-[#151515]" />
                     <span>SIGNING IN...</span>
                   </>
                 ) : (
@@ -338,12 +338,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
                 )}
               </button>
 
-              <div className="pt-3 border-t border-white/10 text-center text-xs text-[#A1A1AA]">
+              <div className="pt-3 border-t border-[#F3F3F1]/10 text-center text-xs text-[#F3F3F1]/70">
                 Don't have an account?{' '}
                 <button
                   type="button"
                   onClick={() => switchMode('signup')}
-                  className="font-semibold text-white hover:underline transition-all"
+                  className="font-semibold text-[#F3F3F1] hover:underline transition-all"
                 >
                   Create account
                 </button>
@@ -351,13 +351,13 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
             </form>
           ) : (
             <form onSubmit={handleSignupSubmit} className="space-y-3.5">
-              <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10 flex items-start gap-2 text-[11px] text-[#A1A1AA]">
-                <Building className="w-4 h-4 text-[#73C69A] shrink-0 mt-0.5" />
+              <div className="p-3 rounded-xl bg-[#F3F3F1]/[0.04] border border-[#F3F3F1]/10 flex items-start gap-2 text-[11px] text-[#F3F3F1]/70">
+                <Building className="w-4 h-4 text-[#B8A47A] shrink-0 mt-0.5" />
                 <p>SpendIntel access is limited to authorized company email addresses (@company.com).</p>
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-[#D4D4D8] uppercase tracking-wider mb-1">
+                <label className="block text-[11px] font-semibold text-[#F3F3F1]/80 uppercase tracking-wider mb-1">
                   Full Name
                 </label>
                 <div className="relative">
@@ -367,14 +367,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Sarah Jenkins"
                     required
-                    className="w-full h-[46px] px-4 pl-10 rounded-xl border border-white/15 bg-white/[0.05] text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#73C69A] transition-all"
+                    className="w-full h-[46px] px-4 pl-10 rounded-xl border border-[#F3F3F1]/15 bg-[#F3F3F1]/[0.05] text-[#F3F3F1] text-sm placeholder:text-[#F3F3F1]/40 focus:outline-none focus:ring-2 focus:ring-[#B8A47A] transition-all"
                   />
-                  <UserIcon className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <UserIcon className="w-4 h-4 text-[#F3F3F1]/40 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-[#D4D4D8] uppercase tracking-wider mb-1">
+                <label className="block text-[11px] font-semibold text-[#F3F3F1]/80 uppercase tracking-wider mb-1">
                   Work Email
                 </label>
                 <div className="relative">
@@ -384,15 +384,15 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="s.jenkins@company.com"
                     required
-                    className="w-full h-[46px] px-4 pl-10 rounded-xl border border-white/15 bg-white/[0.05] text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#73C69A] transition-all"
+                    className="w-full h-[46px] px-4 pl-10 rounded-xl border border-[#F3F3F1]/15 bg-[#F3F3F1]/[0.05] text-[#F3F3F1] text-sm placeholder:text-[#F3F3F1]/40 focus:outline-none focus:ring-2 focus:ring-[#B8A47A] transition-all"
                   />
-                  <Mail className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Mail className="w-4 h-4 text-[#F3F3F1]/40 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-[#D4D4D8] uppercase tracking-wider mb-1">
+                  <label className="block text-[11px] font-semibold text-[#F3F3F1]/80 uppercase tracking-wider mb-1">
                     Password
                   </label>
                   <div className="relative">
@@ -402,14 +402,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Min 8 chars"
                       required
-                      className="w-full h-[46px] px-3.5 pl-9 rounded-xl border border-white/15 bg-white/[0.05] text-white text-sm font-mono placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#73C69A] transition-all"
+                      className="w-full h-[46px] px-3.5 pl-9 rounded-xl border border-[#F3F3F1]/15 bg-[#F3F3F1]/[0.05] text-[#F3F3F1] text-sm font-mono placeholder:text-[#F3F3F1]/40 focus:outline-none focus:ring-2 focus:ring-[#B8A47A] transition-all"
                     />
-                    <Lock className="w-3.5 h-3.5 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <Lock className="w-3.5 h-3.5 text-[#F3F3F1]/40 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-[#D4D4D8] uppercase tracking-wider mb-1">
+                  <label className="block text-[11px] font-semibold text-[#F3F3F1]/80 uppercase tracking-wider mb-1">
                     Confirm
                   </label>
                   <div className="relative">
@@ -419,9 +419,9 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Re-enter"
                       required
-                      className="w-full h-[46px] px-3.5 pl-9 rounded-xl border border-white/15 bg-white/[0.05] text-white text-sm font-mono placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#73C69A] transition-all"
+                      className="w-full h-[46px] px-3.5 pl-9 rounded-xl border border-[#F3F3F1]/15 bg-[#F3F3F1]/[0.05] text-[#F3F3F1] text-sm font-mono placeholder:text-[#F3F3F1]/40 focus:outline-none focus:ring-2 focus:ring-[#B8A47A] transition-all"
                     />
-                    <Lock className="w-3.5 h-3.5 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <Lock className="w-3.5 h-3.5 text-[#F3F3F1]/40 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
                 </div>
               </div>
@@ -429,11 +429,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-[46px] mt-2 rounded-xl bg-gradient-to-b from-white to-[#E2E2E2] hover:to-white text-black font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-50 shadow-md"
+                className="w-full h-[46px] mt-2 rounded-xl bg-[#B8A47A] text-[#151515] font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all hover:bg-[#B8A47A]/90 hover:shadow-[0_0_20px_rgba(184,164,122,0.3)] hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-50 shadow-md"
               >
                 {isLoading ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin text-black" />
+                    <RefreshCw className="w-4 h-4 animate-spin text-[#151515]" />
                     <span>CREATING ACCOUNT...</span>
                   </>
                 ) : (
@@ -444,12 +444,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
                 )}
               </button>
 
-              <div className="pt-2.5 border-t border-white/10 text-center text-xs text-[#A1A1AA]">
+              <div className="pt-2.5 border-t border-[#F3F3F1]/10 text-center text-xs text-[#F3F3F1]/70">
                 Already have an account?{' '}
                 <button
                   type="button"
                   onClick={() => switchMode('login')}
-                  className="font-semibold text-white hover:underline transition-all"
+                  className="font-semibold text-[#F3F3F1] hover:underline transition-all"
                 >
                   Sign in
                 </button>
@@ -458,13 +458,13 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
           )}
 
           {/* 1-Click Instant Test Authentication Section */}
-          <div className="mt-6 pt-5 border-t border-white/10">
-            <div className="flex items-center justify-between font-mono text-[10px] text-[#A1A1AA] mb-2.5">
-              <span className="flex items-center gap-1.5 text-white font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#73C69A] animate-pulse" />
+          <div className="mt-6 pt-5 border-t border-[#F3F3F1]/10">
+            <div className="flex items-center justify-between font-mono text-[10px] text-[#F3F3F1]/70 mb-2.5">
+              <span className="flex items-center gap-1.5 text-[#F3F3F1] font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#B8A47A] animate-pulse" />
                 <span>1-Click Test Sign In:</span>
               </span>
-              <span className="text-[#73C69A] bg-[#73C69A]/10 px-2 py-0.5 rounded-full border border-[#73C69A]/20">
+              <span className="text-[#B8A47A] bg-[#B8A47A]/10 px-2 py-0.5 rounded-full border border-[#B8A47A]/20">
                 FAST DEV ACCESS
               </span>
             </div>
@@ -474,55 +474,55 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
                 type="button"
                 disabled={isLoading}
                 onClick={() => handleQuickLogin('lead@company.com', 'LeadPassword123!')}
-                className="p-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-[#73C69A]/50 transition-all text-left group active:scale-95"
+                className="p-2 rounded-lg bg-[#F3F3F1]/[0.05] hover:bg-[#F3F3F1]/[0.12] border border-[#F3F3F1]/10 hover:border-[#B8A47A]/50 transition-all text-left group active:scale-95"
               >
-                <div className="text-xs font-semibold text-white group-hover:text-[#73C69A] flex items-center justify-between">
+                <div className="text-xs font-semibold text-[#F3F3F1] group-hover:text-[#B8A47A] flex items-center justify-between">
                   <span>⚡ Lead</span>
                 </div>
-                <div className="text-[9px] font-mono text-[#71717A] truncate mt-0.5">lead@company.com</div>
+                <div className="text-[9px] font-mono text-[#F3F3F1]/50 truncate mt-0.5">lead@company.com</div>
               </button>
 
               <button
                 type="button"
                 disabled={isLoading}
                 onClick={() => handleQuickLogin('analyst@company.com', 'AnalystPassword123!')}
-                className="p-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-[#73C69A]/50 transition-all text-left group active:scale-95"
+                className="p-2 rounded-lg bg-[#F3F3F1]/[0.05] hover:bg-[#F3F3F1]/[0.12] border border-[#F3F3F1]/10 hover:border-[#B8A47A]/50 transition-all text-left group active:scale-95"
               >
-                <div className="text-xs font-semibold text-white group-hover:text-[#73C69A] flex items-center justify-between">
+                <div className="text-xs font-semibold text-[#F3F3F1] group-hover:text-[#B8A47A] flex items-center justify-between">
                   <span>⚡ Analyst</span>
                 </div>
-                <div className="text-[9px] font-mono text-[#71717A] truncate mt-0.5">analyst@company.com</div>
+                <div className="text-[9px] font-mono text-[#F3F3F1]/50 truncate mt-0.5">analyst@company.com</div>
               </button>
 
               <button
                 type="button"
                 disabled={isLoading}
                 onClick={() => handleQuickLogin('admin@company.com', 'AdminPassword123!')}
-                className="p-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-[#73C69A]/50 transition-all text-left group active:scale-95"
+                className="p-2 rounded-lg bg-[#F3F3F1]/[0.05] hover:bg-[#F3F3F1]/[0.12] border border-[#F3F3F1]/10 hover:border-[#B8A47A]/50 transition-all text-left group active:scale-95"
               >
-                <div className="text-xs font-semibold text-white group-hover:text-[#73C69A] flex items-center justify-between">
+                <div className="text-xs font-semibold text-[#F3F3F1] group-hover:text-[#B8A47A] flex items-center justify-between">
                   <span>⚡ Admin</span>
                 </div>
-                <div className="text-[9px] font-mono text-[#71717A] truncate mt-0.5">admin@company.com</div>
+                <div className="text-[9px] font-mono text-[#F3F3F1]/50 truncate mt-0.5">admin@company.com</div>
               </button>
             </div>
           </div>
         </div>
       </main>
 
-      {/* Ambient Bottom Glow (Amber/Golden radial glow from bottom) */}
+      {/* Ambient Bottom Champagne Glow */}
       <div
-        className="pointer-events-none fixed bottom-0 inset-x-0 h-[400px] z-0 opacity-70"
+        className="pointer-events-none fixed bottom-0 inset-x-0 h-[350px] z-0 opacity-40"
         style={{
           background:
-            'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(215, 130, 40, 0.22) 0%, rgba(160, 80, 20, 0.08) 50%, rgba(0, 0, 0, 0) 100%)',
+            'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(184, 164, 122, 0.25) 0%, rgba(184, 164, 122, 0.05) 50%, rgba(21, 21, 21, 0) 100%)',
         }}
       />
 
       {/* Footer */}
-      <footer className="relative z-10 h-14 border-t border-white/10 px-6 sm:px-12 flex items-center justify-between text-xs text-[#71717A]">
+      <footer className="relative z-10 h-14 border-t border-[#F3F3F1]/10 px-6 sm:px-12 flex items-center justify-between text-xs text-[#F3F3F1]/60">
         <span>SpendIntel Enterprise Procurement Intelligence</span>
-        <span className="font-mono text-[11px] text-[#A1A1AA]">v2.4.0 • HS256 JWT AUTH</span>
+        <span className="font-mono text-[11px] text-[#B8A47A]">v2.4.0 • HS256 JWT AUTH</span>
       </footer>
     </div>
   );

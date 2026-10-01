@@ -19,7 +19,7 @@ export const LEAKAGE_CATEGORIES_DATA = [
     amount: '₹18.2 L',
     amountRaw: 1820000,
     percentage: 57.6,
-    color: '#C8541E', // Terracotta
+    color: '#B8A47A', // Champagne
     description: 'Unit prices exceeding contract index or historical peer averages across identical SKU purchases.',
     findingsCount: 68,
   },
@@ -28,7 +28,7 @@ export const LEAKAGE_CATEGORIES_DATA = [
     amount: '₹7.4 L',
     amountRaw: 740000,
     percentage: 23.4,
-    color: '#A08328', // Antique Gold
+    color: 'rgba(184, 164, 122, 0.75)', // Champagne tint
     description: 'Tiered volume rebates and prompt payment cash terms uncaptured at invoice settlement.',
     findingsCount: 34,
   },
@@ -37,7 +37,7 @@ export const LEAKAGE_CATEGORIES_DATA = [
     amount: '₹4.1 L',
     amountRaw: 410000,
     percentage: 13.0,
-    color: '#2A6849', // Forest Sage
+    color: 'rgba(184, 164, 122, 0.5)', // Champagne soft
     description: 'Identical categories distributed across rogue non-preferred vendors without aggregated pricing.',
     findingsCount: 26,
   },
@@ -46,7 +46,7 @@ export const LEAKAGE_CATEGORIES_DATA = [
     amount: '₹1.9 L',
     amountRaw: 190000,
     percentage: 6.0,
-    color: '#1F4F3B', // Deep Forest
+    color: '#151515', // Primary Ink
     description: 'Double PO issuances and overlapping milestone billings detected via fuzzy matching.',
     findingsCount: 15,
   },
@@ -55,7 +55,7 @@ export const LEAKAGE_CATEGORIES_DATA = [
     amount: '₹0.0 L',
     amountRaw: 0,
     percentage: 0.0,
-    color: '#77736B', // Muted
+    color: 'rgba(21, 21, 21, 0.3)', // Muted Ink
     description: 'Deviation from contracted SLAs or unapproved freight and ancillary surcharges.',
     findingsCount: 0,
   },

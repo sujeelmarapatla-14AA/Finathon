@@ -94,10 +94,22 @@ def _format_inr(val: float) -> str:
 
 
 def _normalize_finding_type(raw_type: Any) -> Optional[str]:
-    """Map variants and synonyms into one of the 11 canonical finding types."""
+    """Map variants and synonyms into one of the canonical finding types."""
     if not isinstance(raw_type, str):
         return None
     t = str(raw_type).strip().upper()
+    if t in ["EQUAL_PRICE_DIFFERENT_SPECIFICATION", "EQUAL_PRICE_DIFFERENT_SPEC", "EQUAL_PRICE", "EQP"]:
+        return "EQUAL_PRICE_DIFFERENT_SPECIFICATION"
+    if t in ["SPECIFICATION_DIFFERENCE", "SPEC_DIFFERENCE", "SPECIFICATION_DELTA", "SPEC"]:
+        return "SPECIFICATION_DIFFERENCE"
+    if t in ["PACK_SIZE_DIFFERENCE", "UNIT_NORMALIZATION_VARIANCE", "PACK_SIZE", "PCK"]:
+        return "PACK_SIZE_DIFFERENCE"
+    if t in ["QUALITY_DIFFERENCE", "QUALITY_DELTA", "WARRANTY_DIFFERENCE", "QUAL"]:
+        return "QUALITY_DIFFERENCE"
+    if t in ["INSUFFICIENT_COMPARISON_DATA", "INSUFFICIENT_DATA", "INSUFFICIENT_EVIDENCE", "INSUF"]:
+        return "INSUFFICIENT_COMPARISON_DATA"
+    if t in ["PRODUCT_SIMILARITY", "COMPARABLE_ALTERNATIVE", "SIMILARITY", "SIM"]:
+        return "PRODUCT_SIMILARITY"
     if t in ["PRICE_SPIKE", "UNUSUAL_PRICE_PATTERN"]:
         return "UNUSUAL_PRICE_PATTERN"
     if t in ["EXCESSIVE_SUPPLIER_FRAGMENTATION", "FRAGMENTATION", "SUPPLIER_FRAGMENTATION"]:
@@ -249,6 +261,13 @@ def investigate_dataframe(
     raw_query = target_id_str
     prefix_detected_type = None
     prefix_map = [
+        ("FND-EQP-", "EQUAL_PRICE_DIFFERENT_SPECIFICATION"),
+        ("FND-SPEC-", "SPECIFICATION_DIFFERENCE"),
+        ("FND-PCK-", "PACK_SIZE_DIFFERENCE"),
+        ("FND-QUAL-", "QUALITY_DIFFERENCE"),
+        ("FND-INSUF-", "INSUFFICIENT_COMPARISON_DATA"),
+        ("FND-SIM-", "PRODUCT_SIMILARITY"),
+        ("SIM-", "PRODUCT_SIMILARITY"),
         ("DISC-", "MISSED_DISCOUNT"),
         ("DUP-", "POSSIBLE_DUPLICATE"),
         ("FRAG-", "SUPPLIER_FRAGMENTATION"),
@@ -844,6 +863,147 @@ def investigate_dataframe(
             {"source": "Supplier Baseline", "field": "lowest_price", "value": f"₹{min_price:,.2f}", "relationship": "Lowest verified rate"},
             {"source": "Alternative Vendor", "field": "unit_price", "value": f"₹{actual_price:,.2f}", "relationship": "Alternative rate"},
             {"source": "Supplier Premium", "field": "variance_percent", "value": f"+{variance_percent:.2f}%", "relationship": "Price premium"},
+        ]
+
+    # TYPE 12: EQUAL_PRICE_DIFFERENT_SPECIFICATION
+    elif target_type == "EQUAL_PRICE_DIFFERENT_SPECIFICATION":
+        variance_percent = 0.0
+        potential_leakage = 0.0
+        expected_price = actual_price
+        risk = "MEDIUM"
+
+        root_cause = (
+            f"Equal transaction price (₹{actual_price:,.2f}) does not imply equivalent procurement value. "
+            f"Item '{product_name}' was procured at identical rate to higher-tier specifications, representing "
+            f"suboptimal return on procurement spend."
+        )
+        recommended_actions = [
+            f"Audit catalog tiering for '{product_name}' to distinguish base vs high-performance configurations.",
+            "Centralize subsequent requisitions on higher-specification tier available at identical pricing.",
+            "Request vendor credit or price renegotiation reflecting actual component specification differences.",
+        ]
+        evidence_steps = [
+            {
+                "step": 1,
+                "title": "Equal Transaction Rate Invoiced",
+                "description": f"Invoiced unit rate of ₹{_format_inr(actual_price)} matches comparable peer price baseline.",
+                "value": f"₹{_format_inr(actual_price)} / unit",
+            },
+            {
+                "step": 2,
+                "title": "Specification Divergence Detected",
+                "description": f"Divergence in core technical attributes (memory, storage, wattage, or material).",
+                "value": "Material Spec Divergence",
+            },
+            {
+                "step": 3,
+                "title": "Suboptimal Value Realization",
+                "description": "Equal financial outlay incurred for lower configuration return.",
+                "value": "Zero Price Delta / Divergent Spec",
+            },
+        ]
+        field_evidence = [
+            {"source": "Transaction Price", "field": "unit_price", "value": f"₹{actual_price:,.2f}", "relationship": "Invoiced rate"},
+            {"source": "Comparability Check", "field": "spec_status", "value": "DIFFERENT_TIER", "relationship": "Specification status"},
+            {"source": "Finding Type", "field": "finding_type", "value": "EQUAL_PRICE_DIFFERENT_SPECIFICATION", "relationship": "Audit category"},
+        ]
+
+    # TYPE 13: SPECIFICATION_DIFFERENCE
+    elif target_type == "SPECIFICATION_DIFFERENCE":
+        variance_percent = round(((actual_price - benchmark_price) / benchmark_price * 100.0), 2) if benchmark_price > 0 else 0.0
+        potential_leakage = round(max(actual_price - benchmark_price, 0.0) * float(quantity), 2)
+        expected_price = benchmark_price if benchmark_price > 0 else actual_price
+        risk = "LOW"
+
+        root_cause = (
+            f"Price variation for '{product_name}' corresponds to differing specification tiers "
+            f"rather than an unjustified supplier price increase."
+        )
+        recommended_actions = [
+            "Maintain separate benchmark indices for differing technical specification tiers.",
+            "Do not benchmark lower-tier requisitions directly against premium tier configurations.",
+        ]
+        evidence_steps = [
+            {
+                "step": 1,
+                "title": "Category Family Match",
+                "description": f"Requisitioned under {department or 'General Procurement'} commodity catalog.",
+                "value": f"{product_name}",
+            },
+            {
+                "step": 2,
+                "title": "Specification Tier Context",
+                "description": "Price differential reflects technical hardware or grade differences.",
+                "value": f"Unit Rate: ₹{_format_inr(actual_price)}",
+            },
+        ]
+        field_evidence = [
+            {"source": "Specification Analysis", "field": "tier_status", "value": "CONTEXTUAL_DELTA", "relationship": "Tier status"},
+        ]
+
+    # TYPE 14: PACK_SIZE_DIFFERENCE
+    elif target_type == "PACK_SIZE_DIFFERENCE":
+        variance_percent = 0.0
+        potential_leakage = 0.0
+        expected_price = actual_price
+        risk = "MEDIUM"
+
+        root_cause = (
+            f"Purchasing quantity for '{product_name}' was billed in non-standard pack formatting. "
+            f"Transaction rates must be normalized to standard base units before evaluating price leakage."
+        )
+        recommended_actions = [
+            "Enforce standard unit-of-measure (UOM) coding in purchase orders.",
+            "Benchmark vendor quotes strictly on normalized unit basis (per piece, liter, or kg).",
+        ]
+        evidence_steps = [
+            {
+                "step": 1,
+                "title": "Pack Format Divergence",
+                "description": "Package or volume packaging differs from catalog standard.",
+                "value": f"{quantity} units billed",
+            },
+            {
+                "step": 2,
+                "title": "Unit Normalization Rule",
+                "description": "Normalized rate evaluated per single base unit.",
+                "value": f"₹{_format_inr(actual_price)} / unit",
+            },
+        ]
+        field_evidence = [
+            {"source": "UOM Audit", "field": "pack_size", "value": "VARIABLE_PACKAGING", "relationship": "Packaging format"},
+        ]
+
+    # TYPE 15: PRODUCT_SIMILARITY & QUALITY_DIFFERENCE & INSUFFICIENT_DATA
+    elif target_type in ["PRODUCT_SIMILARITY", "QUALITY_DIFFERENCE", "INSUFFICIENT_COMPARISON_DATA"]:
+        variance_percent = 0.0
+        potential_leakage = 0.0
+        expected_price = actual_price
+        risk = "LOW"
+
+        root_cause = (
+            f"Multi-factor product intelligence evaluated for '{product_name}' under {target_type} audit."
+        )
+        recommended_actions = [
+            "Review multi-attribute comparison matrix before approving supplier substitution.",
+            "Ensure full specification data is recorded in requisition forms.",
+        ]
+        evidence_steps = [
+            {
+                "step": 1,
+                "title": "Multi-Factor Similarity Analysis",
+                "description": "Evaluated across Category, Description, Specs, Pack Size, Brand, Quality, and Reviews.",
+                "value": f"Finding: {target_type}",
+            },
+            {
+                "step": 2,
+                "title": "Traceable Evidence Record",
+                "description": f"Verified procurement record for {product_name} from {supplier}.",
+                "value": f"₹{_format_inr(actual_price)} / unit",
+            },
+        ]
+        field_evidence = [
+            {"source": "Product Intelligence", "field": "audit_type", "value": target_type, "relationship": "Intelligence category"},
         ]
 
     # TYPE 11: OFF_CHANNEL_PROCUREMENT

@@ -38,49 +38,49 @@ export const SpendComparisonAndTrend: React.FC<SpendComparisonAndTrendProps> = (
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      {/* GRAPH 8: Actual Spend vs Reference Spend (Section 15) */}
-      <div className="lg:col-span-5 bg-white rounded-[24px] border border-[#E8E8E3] p-6 sm:p-8 shadow-sm space-y-6">
-        <div className="pb-3 border-b border-[#F0F0EB]">
-          <span className="text-[10px] uppercase font-semibold text-[#8A8A84] tracking-wider block">
+      {/* GRAPH 8: Actual Spend vs Reference Spend */}
+      <div className="lg:col-span-5 bg-[#F3F3F1] rounded-[24px] border border-[#151515]/10 p-6 sm:p-8 shadow-sm space-y-6">
+        <div className="pb-3 border-b border-[#151515]/10">
+          <span className="text-[10px] uppercase font-semibold text-[#151515]/50 tracking-wider block">
             Graph 8 · Baseline Reconciliation
           </span>
-          <h3 className="text-base sm:text-lg font-medium text-[#111111]">
+          <h3 className="text-base sm:text-lg font-medium text-[#151515]">
             Actual Spend vs Reference Spend
           </h3>
-          <p className="text-xs text-[#5E5E5A]">
+          <p className="text-xs text-[#151515]/60">
             Cumulative commitment compared with contract benchmark baseline.
           </p>
         </div>
 
         <div className="space-y-4">
           {/* Actual Spend Block */}
-          <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3] space-y-1">
+          <div className="p-4 rounded-2xl bg-[#151515]/5 border border-[#151515]/10 space-y-1">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-[#111111] uppercase tracking-wider text-[10px]">
+              <span className="font-semibold text-[#151515] uppercase tracking-wider text-[10px]">
                 Actual Procurement Spend
               </span>
-              <span className="font-mono text-[10px] text-[#5E5E5A]">Invoiced total</span>
+              <span className="font-mono text-[10px] text-[#151515]/60">Invoiced total</span>
             </div>
-            <div className="text-2xl sm:text-3xl font-sans font-medium text-[#111111] tnum">
+            <div className="text-2xl sm:text-3xl font-sans font-medium text-[#151515] tnum">
               {formatINR(spendComparison.actualSpend)}
             </div>
-            <div className="text-[11px] text-[#8A8A84]">
+            <div className="text-[11px] text-[#151515]/50">
               {formatCompactINR(spendComparison.actualSpend)} total commitment
             </div>
           </div>
 
           {/* Reference Spend Block */}
-          <div className="p-4 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E3] space-y-1">
+          <div className="p-4 rounded-2xl bg-[#151515]/5 border border-[#151515]/10 space-y-1">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-[#73C69A] uppercase tracking-wider text-[10px]">
+              <span className="font-semibold text-[#B8A47A] uppercase tracking-wider text-[10px]">
                 Reference Target Baseline
               </span>
-              <span className="font-mono text-[10px] text-[#73C69A]">Benchmark rate</span>
+              <span className="font-mono text-[10px] text-[#B8A47A]">Benchmark rate</span>
             </div>
-            <div className="text-2xl sm:text-3xl font-sans font-medium text-[#73C69A] tnum">
+            <div className="text-2xl sm:text-3xl font-sans font-medium text-[#B8A47A] tnum">
               {formatINR(spendComparison.referenceSpend)}
             </div>
-            <div className="text-[11px] text-[#8A8A84]">
+            <div className="text-[11px] text-[#151515]/50">
               {formatCompactINR(spendComparison.referenceSpend)} expected benchmark value
             </div>
           </div>
@@ -88,60 +88,60 @@ export const SpendComparisonAndTrend: React.FC<SpendComparisonAndTrendProps> = (
           {/* Visual Overrun Proportion Bar */}
           <div className="space-y-2 pt-1">
             <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-[#8A8A84]">Baseline Proportion</span>
-              <span className="text-[#D96B4A] font-semibold">+{overrunPct}% Overrun</span>
+              <span className="text-[#151515]/50">Baseline Proportion</span>
+              <span className="text-[#B8A47A] font-semibold">+{overrunPct}% Overrun</span>
             </div>
-            <div className="w-full h-3 rounded-full bg-[#D96B4A]/20 overflow-hidden flex">
+            <div className="w-full h-3 rounded-full bg-[#B8A47A]/20 overflow-hidden flex">
               <div
-                className="h-full bg-[#73C69A] rounded-full transition-all duration-700"
+                className="h-full bg-[#151515] rounded-full transition-all duration-700"
                 style={{ width: `${spendRatio}%` }}
                 title={`Reference spend: ${spendRatio}%`}
               />
               <div
-                className="h-full bg-[#D96B4A] transition-all duration-700"
+                className="h-full bg-[#B8A47A] transition-all duration-700"
                 style={{ width: `${100 - spendRatio}%` }}
                 title={`Price leakage overrun: ${100 - spendRatio}%`}
               />
             </div>
-            <div className="flex items-center justify-between text-[10px] text-[#8A8A84] font-mono">
+            <div className="flex items-center justify-between text-[10px] text-[#151515]/50 font-mono">
               <span>● Reference ({spendRatio}%)</span>
               <span>● Spend Variance ({100 - spendRatio}%)</span>
             </div>
           </div>
 
           {/* Variance Net Difference Callout */}
-          <div className="p-3.5 rounded-xl bg-[#D96B4A]/10 border border-[#D96B4A]/20 flex items-center justify-between">
-            <span className="text-xs font-medium text-[#111111]">Net Difference:</span>
-            <span className="text-sm font-mono font-semibold text-[#D96B4A] tnum">
+          <div className="p-3.5 rounded-xl bg-[#B8A47A]/15 border border-[#B8A47A]/30 flex items-center justify-between">
+            <span className="text-xs font-medium text-[#151515]">Net Difference:</span>
+            <span className="text-sm font-mono font-semibold text-[#B8A47A] tnum">
               +{formatINR(spendComparison.difference)}
             </span>
           </div>
         </div>
       </div>
 
-      {/* TIME SERIES: Procurement Spend Trend (Section 17) */}
-      <div className="lg:col-span-7 bg-white rounded-[24px] border border-[#E8E8E3] p-6 sm:p-8 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#F0F0EB]">
+      {/* TIME SERIES: Procurement Spend Trend */}
+      <div className="lg:col-span-7 bg-[#F3F3F1] rounded-[24px] border border-[#151515]/10 p-6 sm:p-8 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#151515]/10">
           <div>
-            <span className="text-[10px] uppercase font-semibold text-[#8A8A84] tracking-wider block">
+            <span className="text-[10px] uppercase font-semibold text-[#151515]/50 tracking-wider block">
               Time Analysis · Spend Dynamics
             </span>
-            <h3 className="text-base sm:text-lg font-medium text-[#111111]">
+            <h3 className="text-base sm:text-lg font-medium text-[#151515]">
               Procurement Spend Trend
             </h3>
-            <p className="text-xs text-[#5E5E5A]">
+            <p className="text-xs text-[#151515]/60">
               Historical timeline tracing purchase commitment and variance accumulation.
             </p>
           </div>
 
           {timeSeries.hasValidDates && (
-            <div className="flex items-center bg-[#FAFAF8] p-1 rounded-full border border-[#E8E8E3] text-xs">
+            <div className="flex items-center bg-[#151515]/5 p-1 rounded-full border border-[#151515]/10 text-xs">
               <button
                 onClick={() => setMetricView('spend')}
                 className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all ${
                   metricView === 'spend'
-                    ? 'bg-[#0A0A0A] text-white shadow-xs font-semibold'
-                    : 'text-[#5E5E5A] hover:text-[#111111]'
+                    ? 'bg-[#151515] text-[#F3F3F1] shadow-xs font-semibold'
+                    : 'text-[#151515]/70 hover:text-[#151515]'
                 }`}
               >
                 Spend vs Reference
@@ -150,8 +150,8 @@ export const SpendComparisonAndTrend: React.FC<SpendComparisonAndTrendProps> = (
                 onClick={() => setMetricView('leakage')}
                 className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all ${
                   metricView === 'leakage'
-                    ? 'bg-[#0A0A0A] text-white shadow-xs font-semibold'
-                    : 'text-[#5E5E5A] hover:text-[#111111]'
+                    ? 'bg-[#151515] text-[#F3F3F1] shadow-xs font-semibold'
+                    : 'text-[#151515]/70 hover:text-[#151515]'
                 }`}
               >
                 Leakage Trend
@@ -169,27 +169,27 @@ export const SpendComparisonAndTrend: React.FC<SpendComparisonAndTrendProps> = (
               >
                 <defs>
                   <linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#111111" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#111111" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="#151515" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#151515" stopOpacity={0.0} />
                   </linearGradient>
                   <linearGradient id="refGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#73C69A" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#73C69A" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="#B8A47A" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#B8A47A" stopOpacity={0.0} />
                   </linearGradient>
                   <linearGradient id="leakageGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#D96B4A" stopOpacity={0.35} />
-                    <stop offset="95%" stopColor="#D96B4A" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="#B8A47A" stopOpacity={0.35} />
+                    <stop offset="95%" stopColor="#B8A47A" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0EB" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(21,21,21,0.08)" vertical={false} />
                 <XAxis
                   dataKey="dateStr"
-                  stroke="#8A8A84"
+                  stroke="rgba(21,21,21,0.4)"
                   fontSize={10}
                   tickLine={false}
                 />
                 <YAxis
-                  stroke="#8A8A84"
+                  stroke="rgba(21,21,21,0.4)"
                   fontSize={10}
                   tickLine={false}
                   axisLine={false}
@@ -204,9 +204,9 @@ export const SpendComparisonAndTrend: React.FC<SpendComparisonAndTrendProps> = (
                         active={active}
                         title={`Date: ${item.dateStr}`}
                         items={[
-                          { label: 'Actual Spend', value: item.actualSpend, isCurrency: true, color: '#111111' },
-                          { label: 'Reference Baseline', value: item.referenceSpend, isCurrency: true, color: '#73C69A' },
-                          { label: 'Potential Leakage', value: item.potentialLeakage, isCurrency: true, color: '#D96B4A' },
+                          { label: 'Actual Spend', value: item.actualSpend, isCurrency: true, color: '#151515' },
+                          { label: 'Reference Baseline', value: item.referenceSpend, isCurrency: true, color: 'rgba(21,21,21,0.5)' },
+                          { label: 'Potential Leakage', value: item.potentialLeakage, isCurrency: true, color: '#B8A47A' },
                           { label: 'Transactions', value: `${item.transactionCount} POs` },
                         ]}
                       />
@@ -219,7 +219,7 @@ export const SpendComparisonAndTrend: React.FC<SpendComparisonAndTrendProps> = (
                       type="monotone"
                       dataKey="actualSpend"
                       name="Actual Spend"
-                      stroke="#111111"
+                      stroke="#151515"
                       strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#spendGrad)"
@@ -228,7 +228,7 @@ export const SpendComparisonAndTrend: React.FC<SpendComparisonAndTrendProps> = (
                       type="monotone"
                       dataKey="referenceSpend"
                       name="Reference Baseline"
-                      stroke="#73C69A"
+                      stroke="rgba(21,21,21,0.5)"
                       strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#refGrad)"
@@ -239,7 +239,7 @@ export const SpendComparisonAndTrend: React.FC<SpendComparisonAndTrendProps> = (
                     type="monotone"
                     dataKey="potentialLeakage"
                     name="Potential Leakage"
-                    stroke="#D96B4A"
+                    stroke="#B8A47A"
                     strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#leakageGrad)"
@@ -249,26 +249,26 @@ export const SpendComparisonAndTrend: React.FC<SpendComparisonAndTrendProps> = (
             </ResponsiveContainer>
           </div>
         ) : (
-          /* Graceful Fallback (Section 17 - Never fabricate dates) */
-          <div className="h-72 rounded-2xl bg-[#FAFAF8] border border-dashed border-[#DCDCD7] flex flex-col items-center justify-center p-8 text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-white border border-[#E8E8E3] flex items-center justify-center shadow-xs text-[#8A8A84]">
-              <Calendar className="w-5 h-5 text-[#8A8A84]" />
+          /* Graceful Fallback */
+          <div className="h-72 rounded-2xl bg-[#151515]/5 border border-dashed border-[#151515]/20 flex flex-col items-center justify-center p-8 text-center space-y-3">
+            <div className="w-12 h-12 rounded-full bg-[#F3F3F1] border border-[#151515]/10 flex items-center justify-center shadow-xs text-[#151515]/50">
+              <Calendar className="w-5 h-5 text-[#151515]/50" />
             </div>
             <div className="space-y-1 max-w-sm">
-              <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#8A8A84]">
+              <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#151515]/60">
                 TIME ANALYSIS UNAVAILABLE
               </span>
-              <p className="text-xs text-[#5E5E5A]">
+              <p className="text-xs text-[#151515]/60">
                 {timeSeries.unavailabilityReason || 'No valid transaction dates were provided in the active dataset.'}
               </p>
             </div>
-            <span className="text-[10px] font-mono text-[#8A8A84]">
+            <span className="text-[10px] font-mono text-[#151515]/50">
               Timelines activate automatically when date-stamped records are ingested.
             </span>
           </div>
         )}
 
-        <div className="flex items-center justify-between text-[11px] text-[#8A8A84] font-mono pt-1">
+        <div className="flex items-center justify-between text-[11px] text-[#151515]/50 font-mono pt-1">
           <span>Active dataset temporal reconciliation</span>
           <span>{timeSeries.hasValidDates ? `${timeSeries.points.length} timestamps` : 'Static audit mode'}</span>
         </div>

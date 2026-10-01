@@ -10,7 +10,6 @@ import {
   RefreshCw,
   Sparkles,
   HelpCircle,
-  X,
 } from 'lucide-react';
 import { Button } from '../common/Button';
 import { submitManualAnalysis, ManualTransactionPayload } from '../../services/api';
@@ -327,16 +326,16 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       {/* Mode Sub-Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#E8E8E3] gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#151515]/10 gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-[#73C69A] font-semibold mb-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#73C69A]" />
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-[#B8A47A] font-semibold mb-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#B8A47A]" />
             Quick Procurement Entry
           </div>
-          <h2 className="text-xl sm:text-2xl font-sans font-medium text-[#111111] tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-sans font-medium text-[#151515] tracking-tight">
             Direct Transaction Audit
           </h2>
-          <p className="text-xs sm:text-sm text-[#5E5E5A] font-sans mt-0.5">
+          <p className="text-xs sm:text-sm text-[#151515]/70 font-sans mt-0.5">
             Enter a few transactions and immediately see potential spend leakage.
           </p>
         </div>
@@ -345,10 +344,10 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
           <button
             type="button"
             onClick={handleUseExample}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E8E8E3] bg-[#FAFAF8] hover:bg-[#F0F0EB] text-xs font-sans font-medium text-[#111111] transition-all"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#151515]/10 bg-[#F3F3F1] hover:bg-[#151515]/5 text-xs font-sans font-medium text-[#151515] transition-all"
             title="Populate a realistic example transaction for quick demo"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#73C69A]" />
+            <Sparkles className="w-3.5 h-3.5 text-[#B8A47A]" />
             <span>USE EXAMPLE</span>
           </button>
 
@@ -356,7 +355,7 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
             <button
               type="button"
               onClick={handleExportCSV}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E8E8E3] bg-white hover:bg-[#FAFAF8] text-xs font-sans font-medium text-[#5E5E5A] hover:text-[#111111] transition-all"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#151515]/10 bg-white hover:bg-[#F3F3F1] text-xs font-sans font-medium text-[#151515]/70 hover:text-[#151515] transition-all"
               title="Export entered transactions as CSV"
             >
               <Download className="w-3.5 h-3.5" />
@@ -368,18 +367,18 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
 
       {/* Error Banner */}
       {submitError && (
-        <div className="p-4 rounded-2xl bg-[#D96B4A]/10 border border-[#D96B4A]/20 text-[#D96B4A] text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="p-4 rounded-2xl bg-[#151515]/5 border border-[#151515]/20 text-[#151515] text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <AlertCircle className="w-4 h-4 text-[#B8A47A] shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold">SpendIntel couldn't analyze these transactions.</p>
-              <p className="text-[#D96B4A]/80 mt-0.5">{submitError}</p>
+              <p className="font-semibold text-[#151515]">SpendIntel couldn't analyze these transactions.</p>
+              <p className="text-[#151515]/70 mt-0.5">{submitError}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={handleSubmit}
-            className="px-3 py-1.5 rounded-xl bg-[#D96B4A] text-white font-medium text-xs hover:bg-[#C25838] transition-colors self-start sm:self-auto shrink-0"
+            className="px-3 py-1.5 rounded-xl bg-[#151515] text-[#F3F3F1] font-medium text-xs hover:bg-[#151515]/80 transition-colors self-start sm:self-auto shrink-0"
           >
             TRY AGAIN
           </button>
@@ -387,101 +386,101 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
       )}
 
       {/* 2-Column Desktop Form */}
-      <div className="bg-[#FAFAF8] rounded-[24px] border border-[#E8E8E3] p-6 sm:p-8 space-y-6">
+      <div className="bg-[#F3F3F1] rounded-[24px] border border-[#151515]/10 p-6 sm:p-8 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Row 1: Transaction ID & Date */}
           <div>
-            <label className="block text-xs font-medium text-[#111111] mb-1.5">
-              Transaction ID <span className="text-[#D96B4A]">*</span>
+            <label className="block text-xs font-medium text-[#151515] mb-1.5">
+              Transaction ID <span className="text-[#B8A47A]">*</span>
             </label>
             <input
               type="text"
               value={formData.transaction_id}
               onChange={(e) => handleChange('transaction_id', e.target.value)}
               placeholder="e.g. TX-10025"
-              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#111111] placeholder-[#8A8A84] focus:outline-none transition-all ${
+              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#151515] placeholder-[#151515]/40 focus:outline-none transition-all ${
                 errors.transaction_id
-                  ? 'border-[#D96B4A] focus:ring-1 focus:ring-[#D96B4A]'
-                  : 'border-[#E8E8E3] focus:border-[#111111]'
+                  ? 'border-[#B8A47A] focus:ring-1 focus:ring-[#B8A47A]'
+                  : 'border-[#151515]/15 focus:border-[#151515]'
               }`}
             />
             {errors.transaction_id && (
-              <span className="text-[11px] text-[#D96B4A] mt-1 block">{errors.transaction_id}</span>
+              <span className="text-[11px] text-[#B8A47A] mt-1 block font-medium">{errors.transaction_id}</span>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#111111] mb-1.5 flex items-center justify-between">
+            <label className="block text-xs font-medium text-[#151515] mb-1.5 flex items-center justify-between">
               <span>Transaction Date</span>
-              <span className="text-[10px] text-[#8A8A84] font-normal">(Optional)</span>
+              <span className="text-[10px] text-[#151515]/50 font-normal">(Optional)</span>
             </label>
             <input
               type="date"
               value={formData.transaction_date}
               onChange={(e) => handleChange('transaction_date', e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E8E3] bg-white text-xs font-sans text-[#111111] focus:outline-none focus:border-[#111111] transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#151515]/15 bg-white text-xs font-sans text-[#151515] focus:outline-none focus:border-[#151515] transition-all"
             />
           </div>
 
           {/* Row 2: Product & Product ID */}
           <div>
-            <label className="block text-xs font-medium text-[#111111] mb-1.5">
-              Product <span className="text-[#D96B4A]">*</span>
+            <label className="block text-xs font-medium text-[#151515] mb-1.5">
+              Product <span className="text-[#B8A47A]">*</span>
             </label>
             <input
               type="text"
               value={formData.product}
               onChange={(e) => handleChange('product', e.target.value)}
               placeholder="e.g. Industrial Laptop"
-              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#111111] placeholder-[#8A8A84] focus:outline-none transition-all ${
+              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#151515] placeholder-[#151515]/40 focus:outline-none transition-all ${
                 errors.product
-                  ? 'border-[#D96B4A] focus:ring-1 focus:ring-[#D96B4A]'
-                  : 'border-[#E8E8E3] focus:border-[#111111]'
+                  ? 'border-[#B8A47A] focus:ring-1 focus:ring-[#B8A47A]'
+                  : 'border-[#151515]/15 focus:border-[#151515]'
               }`}
             />
             {errors.product && (
-              <span className="text-[11px] text-[#D96B4A] mt-1 block">{errors.product}</span>
+              <span className="text-[11px] text-[#B8A47A] mt-1 block font-medium">{errors.product}</span>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#111111] mb-1.5 flex items-center justify-between">
+            <label className="block text-xs font-medium text-[#151515] mb-1.5 flex items-center justify-between">
               <span>Product ID / SKU</span>
-              <span className="text-[10px] text-[#8A8A84] font-normal">(Optional)</span>
+              <span className="text-[10px] text-[#151515]/50 font-normal">(Optional)</span>
             </label>
             <input
               type="text"
               value={formData.product_id}
               onChange={(e) => handleChange('product_id', e.target.value)}
               placeholder="e.g. LAPTOP-IND-01"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E8E3] bg-white text-xs font-sans text-[#111111] placeholder-[#8A8A84] focus:outline-none focus:border-[#111111] transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#151515]/15 bg-white text-xs font-sans text-[#151515] placeholder-[#151515]/40 focus:outline-none focus:border-[#151515] transition-all"
             />
           </div>
 
           {/* Row 3: Supplier & Quantity */}
           <div>
-            <label className="block text-xs font-medium text-[#111111] mb-1.5">
-              Supplier <span className="text-[#D96B4A]">*</span>
+            <label className="block text-xs font-medium text-[#151515] mb-1.5">
+              Supplier <span className="text-[#B8A47A]">*</span>
             </label>
             <input
               type="text"
               value={formData.supplier}
               onChange={(e) => handleChange('supplier', e.target.value)}
               placeholder="e.g. TechWorld Solutions"
-              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#111111] placeholder-[#8A8A84] focus:outline-none transition-all ${
+              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#151515] placeholder-[#151515]/40 focus:outline-none transition-all ${
                 errors.supplier
-                  ? 'border-[#D96B4A] focus:ring-1 focus:ring-[#D96B4A]'
-                  : 'border-[#E8E8E3] focus:border-[#111111]'
+                  ? 'border-[#B8A47A] focus:ring-1 focus:ring-[#B8A47A]'
+                  : 'border-[#151515]/15 focus:border-[#151515]'
               }`}
             />
             {errors.supplier && (
-              <span className="text-[11px] text-[#D96B4A] mt-1 block">{errors.supplier}</span>
+              <span className="text-[11px] text-[#B8A47A] mt-1 block font-medium">{errors.supplier}</span>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#111111] mb-1.5">
-              Quantity <span className="text-[#D96B4A]">*</span>
+            <label className="block text-xs font-medium text-[#151515] mb-1.5">
+              Quantity <span className="text-[#B8A47A]">*</span>
             </label>
             <input
               type="number"
@@ -490,21 +489,21 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
               value={formData.quantity}
               onChange={(e) => handleChange('quantity', e.target.value)}
               placeholder="e.g. 20"
-              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#111111] placeholder-[#8A8A84] focus:outline-none transition-all ${
+              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#151515] placeholder-[#151515]/40 focus:outline-none transition-all ${
                 errors.quantity
-                  ? 'border-[#D96B4A] focus:ring-1 focus:ring-[#D96B4A]'
-                  : 'border-[#E8E8E3] focus:border-[#111111]'
+                  ? 'border-[#B8A47A] focus:ring-1 focus:ring-[#B8A47A]'
+                  : 'border-[#151515]/15 focus:border-[#151515]'
               }`}
             />
             {errors.quantity && (
-              <span className="text-[11px] text-[#D96B4A] mt-1 block">{errors.quantity}</span>
+              <span className="text-[11px] text-[#B8A47A] mt-1 block font-medium">{errors.quantity}</span>
             )}
           </div>
 
           {/* Row 4: Actual Unit Price & Benchmark Unit Price */}
           <div>
-            <label className="block text-xs font-medium text-[#111111] mb-1.5">
-              Actual Unit Price (₹) <span className="text-[#D96B4A]">*</span>
+            <label className="block text-xs font-medium text-[#151515] mb-1.5">
+              Actual Unit Price (₹) <span className="text-[#B8A47A]">*</span>
             </label>
             <input
               type="number"
@@ -513,20 +512,20 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
               value={formData.actual_unit_price}
               onChange={(e) => handleChange('actual_unit_price', e.target.value)}
               placeholder="e.g. 52500"
-              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#111111] placeholder-[#8A8A84] focus:outline-none transition-all ${
+              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#151515] placeholder-[#151515]/40 focus:outline-none transition-all ${
                 errors.actual_unit_price
-                  ? 'border-[#D96B4A] focus:ring-1 focus:ring-[#D96B4A]'
-                  : 'border-[#E8E8E3] focus:border-[#111111]'
+                  ? 'border-[#B8A47A] focus:ring-1 focus:ring-[#B8A47A]'
+                  : 'border-[#151515]/15 focus:border-[#151515]'
               }`}
             />
             {errors.actual_unit_price && (
-              <span className="text-[11px] text-[#D96B4A] mt-1 block">{errors.actual_unit_price}</span>
+              <span className="text-[11px] text-[#B8A47A] mt-1 block font-medium">{errors.actual_unit_price}</span>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#111111] mb-1.5">
-              Benchmark Unit Price (₹) <span className="text-[#D96B4A]">*</span>
+            <label className="block text-xs font-medium text-[#151515] mb-1.5">
+              Benchmark Unit Price (₹) <span className="text-[#B8A47A]">*</span>
             </label>
             <input
               type="number"
@@ -535,22 +534,22 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
               value={formData.benchmark_unit_price}
               onChange={(e) => handleChange('benchmark_unit_price', e.target.value)}
               placeholder="e.g. 47500"
-              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#111111] placeholder-[#8A8A84] focus:outline-none transition-all ${
+              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#151515] placeholder-[#151515]/40 focus:outline-none transition-all ${
                 errors.benchmark_unit_price
-                  ? 'border-[#D96B4A] focus:ring-1 focus:ring-[#D96B4A]'
-                  : 'border-[#E8E8E3] focus:border-[#111111]'
+                  ? 'border-[#B8A47A] focus:ring-1 focus:ring-[#B8A47A]'
+                  : 'border-[#151515]/15 focus:border-[#151515]'
               }`}
             />
             {errors.benchmark_unit_price && (
-              <span className="text-[11px] text-[#D96B4A] mt-1 block">{errors.benchmark_unit_price}</span>
+              <span className="text-[11px] text-[#B8A47A] mt-1 block font-medium">{errors.benchmark_unit_price}</span>
             )}
           </div>
 
           {/* Row 5: Contract Price & Contract Discount */}
           <div>
-            <label className="block text-xs font-medium text-[#111111] mb-1.5 flex items-center justify-between">
+            <label className="block text-xs font-medium text-[#151515] mb-1.5 flex items-center justify-between">
               <span>Contract Price (₹)</span>
-              <span className="text-[10px] text-[#8A8A84] font-normal">(Optional)</span>
+              <span className="text-[10px] text-[#151515]/50 font-normal">(Optional)</span>
             </label>
             <input
               type="number"
@@ -559,21 +558,21 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
               value={formData.contract_price}
               onChange={(e) => handleChange('contract_price', e.target.value)}
               placeholder="e.g. 48000"
-              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#111111] placeholder-[#8A8A84] focus:outline-none transition-all ${
+              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#151515] placeholder-[#151515]/40 focus:outline-none transition-all ${
                 errors.contract_price
-                  ? 'border-[#D96B4A] focus:ring-1 focus:ring-[#D96B4A]'
-                  : 'border-[#E8E8E3] focus:border-[#111111]'
+                  ? 'border-[#B8A47A] focus:ring-1 focus:ring-[#B8A47A]'
+                  : 'border-[#151515]/15 focus:border-[#151515]'
               }`}
             />
             {errors.contract_price && (
-              <span className="text-[11px] text-[#D96B4A] mt-1 block">{errors.contract_price}</span>
+              <span className="text-[11px] text-[#B8A47A] mt-1 block font-medium">{errors.contract_price}</span>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#111111] mb-1.5 flex items-center justify-between">
+            <label className="block text-xs font-medium text-[#151515] mb-1.5 flex items-center justify-between">
               <span>Contract Discount (%)</span>
-              <span className="text-[10px] text-[#8A8A84] font-normal">(Optional, 0–100%)</span>
+              <span className="text-[10px] text-[#151515]/50 font-normal">(Optional, 0–100%)</span>
             </label>
             <input
               type="number"
@@ -583,41 +582,41 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
               value={formData.contract_discount}
               onChange={(e) => handleChange('contract_discount', e.target.value)}
               placeholder="e.g. 5"
-              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#111111] placeholder-[#8A8A84] focus:outline-none transition-all ${
+              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-xs font-sans text-[#151515] placeholder-[#151515]/40 focus:outline-none transition-all ${
                 errors.contract_discount
-                  ? 'border-[#D96B4A] focus:ring-1 focus:ring-[#D96B4A]'
-                  : 'border-[#E8E8E3] focus:border-[#111111]'
+                  ? 'border-[#B8A47A] focus:ring-1 focus:ring-[#B8A47A]'
+                  : 'border-[#151515]/15 focus:border-[#151515]'
               }`}
             />
             {errors.contract_discount && (
-              <span className="text-[11px] text-[#D96B4A] mt-1 block">{errors.contract_discount}</span>
+              <span className="text-[11px] text-[#B8A47A] mt-1 block font-medium">{errors.contract_discount}</span>
             )}
           </div>
 
           {/* Row 6: Department & Procurement Channel */}
           <div>
-            <label className="block text-xs font-medium text-[#111111] mb-1.5 flex items-center justify-between">
+            <label className="block text-xs font-medium text-[#151515] mb-1.5 flex items-center justify-between">
               <span>Department</span>
-              <span className="text-[10px] text-[#8A8A84] font-normal">(Optional)</span>
+              <span className="text-[10px] text-[#151515]/50 font-normal">(Optional)</span>
             </label>
             <input
               type="text"
               value={formData.department}
               onChange={(e) => handleChange('department', e.target.value)}
               placeholder="e.g. IT & Infrastructure"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E8E3] bg-white text-xs font-sans text-[#111111] placeholder-[#8A8A84] focus:outline-none focus:border-[#111111] transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#151515]/15 bg-white text-xs font-sans text-[#151515] placeholder-[#151515]/40 focus:outline-none focus:border-[#151515] transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#111111] mb-1.5 flex items-center justify-between">
+            <label className="block text-xs font-medium text-[#151515] mb-1.5 flex items-center justify-between">
               <span>Procurement Channel</span>
-              <span className="text-[10px] text-[#8A8A84] font-normal">(Optional)</span>
+              <span className="text-[10px] text-[#151515]/50 font-normal">(Optional)</span>
             </label>
             <select
               value={formData.procurement_channel}
               onChange={(e) => handleChange('procurement_channel', e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E8E3] bg-white text-xs font-sans text-[#111111] focus:outline-none focus:border-[#111111] transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#151515]/15 bg-white text-xs font-sans text-[#151515] focus:outline-none focus:border-[#151515] transition-all"
             >
               <option value="">Select channel...</option>
               <option value="Catalog">Catalog</option>
@@ -628,74 +627,66 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
 
           {/* Row 7: PO Number & Status (Optional) */}
           <div>
-            <label className="block text-xs font-medium text-[#111111] mb-1.5 flex items-center justify-between">
+            <label className="block text-xs font-medium text-[#151515] mb-1.5 flex items-center justify-between">
               <span>PO Number</span>
-              <span className="text-[10px] text-[#8A8A84] font-normal">(Optional)</span>
+              <span className="text-[10px] text-[#151515]/50 font-normal">(Optional)</span>
             </label>
             <input
               type="text"
               value={formData.po_number}
               onChange={(e) => handleChange('po_number', e.target.value)}
               placeholder="e.g. PO-8821"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E8E3] bg-white text-xs font-sans text-[#111111] placeholder-[#8A8A84] focus:outline-none focus:border-[#111111] transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#151515]/15 bg-white text-xs font-sans text-[#151515] placeholder-[#151515]/40 focus:outline-none focus:border-[#151515] transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#111111] mb-1.5 flex items-center justify-between">
+            <label className="block text-xs font-medium text-[#151515] mb-1.5 flex items-center justify-between">
               <span>Status</span>
-              <span className="text-[10px] text-[#8A8A84] font-normal">(Optional)</span>
+              <span className="text-[10px] text-[#151515]/50 font-normal">(Optional)</span>
             </label>
             <input
               type="text"
               value={formData.status}
               onChange={(e) => handleChange('status', e.target.value)}
               placeholder="e.g. Flagged / Paid / Review"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E8E3] bg-white text-xs font-sans text-[#111111] placeholder-[#8A8A84] focus:outline-none focus:border-[#111111] transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#151515]/15 bg-white text-xs font-sans text-[#151515] placeholder-[#151515]/40 focus:outline-none focus:border-[#151515] transition-all"
             />
           </div>
         </div>
 
-        {/* Live Preview Card (Section 17) */}
+        {/* Live Preview Card */}
         {showLivePreview && (
-          <div className="p-4 rounded-2xl bg-white border border-[#E8E8E3] shadow-sm animate-in fade-in duration-200">
-            <div className="flex items-center justify-between text-[11px] font-mono text-[#8A8A84] uppercase tracking-wider mb-2">
-              <span className="flex items-center gap-1.5 text-[#111111] font-semibold">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#73C69A]" />
+          <div className="p-4 rounded-2xl bg-white border border-[#151515]/10 shadow-sm animate-in fade-in duration-200">
+            <div className="flex items-center justify-between text-[11px] font-mono text-[#151515]/50 uppercase tracking-wider mb-2">
+              <span className="flex items-center gap-1.5 text-[#151515] font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#B8A47A]" />
                 Live Ingestion Estimate
               </span>
               <span>Informational Preview</span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-left pt-1">
               <div>
-                <span className="text-[10px] uppercase text-[#8A8A84] block">Actual Spend</span>
-                <span className="text-sm font-semibold text-[#111111] tnum">
+                <span className="text-[10px] uppercase text-[#151515]/60 block">Actual Spend</span>
+                <span className="text-sm font-semibold text-[#151515] tnum">
                   {formatINR(currentActualSpend)}
                 </span>
               </div>
               <div>
-                <span className="text-[10px] uppercase text-[#8A8A84] block">Reference Spend</span>
-                <span className="text-sm font-semibold text-[#5E5E5A] tnum">
+                <span className="text-[10px] uppercase text-[#151515]/60 block">Reference Spend</span>
+                <span className="text-sm font-semibold text-[#151515]/70 tnum">
                   {formatINR(currentRefSpend)}
                 </span>
               </div>
               <div>
-                <span className="text-[10px] uppercase text-[#8A8A84] block">Variance</span>
-                <span
-                  className={`text-sm font-semibold tnum ${
-                    currentVariancePct > 0 ? 'text-[#D96B4A]' : 'text-[#73C69A]'
-                  }`}
-                >
+                <span className="text-[10px] uppercase text-[#151515]/60 block">Variance</span>
+                <span className="text-sm font-semibold tnum text-[#B8A47A]">
                   {currentVariancePct > 0 ? `+${currentVariancePct.toFixed(1)}%` : `${currentVariancePct.toFixed(1)}%`}
                 </span>
               </div>
               <div>
-                <span className="text-[10px] uppercase text-[#8A8A84] block">Potential Leakage</span>
-                <span
-                  className={`text-sm font-semibold tnum ${
-                    currentLeakage > 0 ? 'text-[#D96B4A]' : 'text-[#73C69A]'
-                  }`}
-                >
+                <span className="text-[10px] uppercase text-[#151515]/60 block">Potential Leakage</span>
+                <span className="text-sm font-semibold tnum text-[#B8A47A]">
                   {formatINR(currentLeakage)}
                 </span>
               </div>
@@ -705,9 +696,9 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
 
         {/* Form Controls: + ADD TRANSACTION / CANCEL EDIT */}
         <div className="flex items-center justify-between pt-2">
-          <div className="text-[11px] text-[#8A8A84] font-sans">
+          <div className="text-[11px] text-[#151515]/60 font-sans">
             {editingIndex !== null ? (
-              <span className="text-[#111111] font-medium">
+              <span className="text-[#151515] font-semibold">
                 Editing Transaction #{editingIndex + 1}
               </span>
             ) : (
@@ -723,7 +714,7 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
                   setEditingIndex(null);
                   setFormData(INITIAL_FORM);
                 }}
-                className="px-3 py-1.5 rounded-xl border border-[#E8E8E3] bg-white text-xs font-sans text-[#5E5E5A] hover:text-[#111111] transition-all"
+                className="px-3 py-1.5 rounded-xl border border-[#151515]/10 bg-white text-xs font-sans text-[#151515]/70 hover:text-[#151515] transition-all"
               >
                 Cancel Edit
               </button>
@@ -732,11 +723,11 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
             <button
               type="button"
               onClick={handleAddTransaction}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#111111] hover:bg-[#2B2B2B] text-white text-xs font-sans font-medium transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#151515] hover:bg-[#151515]/90 text-[#F3F3F1] text-xs font-sans font-medium transition-all shadow-sm"
             >
               {editingIndex !== null ? (
                 <>
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#B8A47A]" />
                   <span>Update Transaction</span>
                 </>
               ) : (
@@ -750,40 +741,40 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
         </div>
       </div>
 
-      {/* Demo Example Hint (Section 23) */}
-      <div className="px-4 py-3 rounded-2xl bg-[#FAFAF8] border border-[#F0F0EB] text-xs text-[#5E5E5A] font-sans flex items-center justify-between">
+      {/* Demo Example Hint */}
+      <div className="px-4 py-3 rounded-2xl bg-[#F3F3F1] border border-[#151515]/10 text-xs text-[#151515]/70 font-sans flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <HelpCircle className="w-3.5 h-3.5 text-[#8A8A84] shrink-0" />
+          <HelpCircle className="w-3.5 h-3.5 text-[#151515]/50 shrink-0" />
           <span>
-            <strong className="text-[#111111]">Example:</strong> Industrial Laptop • TechWorld Solutions • 20 units • ₹52,500 actual • ₹47,500 benchmark
+            <strong className="text-[#151515]">Example:</strong> Industrial Laptop • TechWorld Solutions • 20 units • ₹52,500 actual • ₹47,500 benchmark
           </span>
         </div>
         <button
           type="button"
           onClick={handleUseExample}
-          className="text-[#73C69A] hover:underline font-medium text-[11px] shrink-0"
+          className="text-[#B8A47A] hover:underline font-semibold text-[11px] shrink-0"
         >
           Load example
         </button>
       </div>
 
-      {/* Manual Data Table (Section 18) */}
+      {/* Manual Data Table */}
       {stagedTransactions.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-sans font-medium text-[#111111]">
+            <h3 className="text-sm font-sans font-semibold text-[#151515]">
               Review Staged Transactions ({stagedTransactions.length})
             </h3>
-            <span className="text-xs text-[#8A8A84] font-mono">
+            <span className="text-xs text-[#151515]/60 font-mono">
               Total Invoiced: {formatINR(stagedTransactions.reduce((acc, t) => acc + (t.quantity * t.unit_price), 0))}
             </span>
           </div>
 
-          <div className="rounded-2xl border border-[#E8E8E3] overflow-hidden bg-white shadow-sm">
+          <div className="rounded-2xl border border-[#151515]/10 overflow-hidden bg-white shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-[#E8E8E3] bg-[#FAFAF8] text-[#5E5E5A] font-mono text-[11px]">
+                  <tr className="border-b border-[#151515]/10 bg-[#F3F3F1] text-[#151515]/70 font-mono text-[11px]">
                     <th className="py-2.5 px-3 font-medium">ID</th>
                     <th className="py-2.5 px-3 font-medium">PRODUCT</th>
                     <th className="py-2.5 px-3 font-medium">SUPPLIER</th>
@@ -793,20 +784,20 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
                     <th className="py-2.5 px-3 font-medium text-right">ACTION</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F0F0EB] text-[#111111]">
+                <tbody className="divide-y divide-[#151515]/5 text-[#151515]">
                   {stagedTransactions.map((tx, idx) => (
                     <tr
                       key={`${tx.transaction_id}-${idx}`}
-                      className="hover:bg-[#FAFAF8] transition-colors"
+                      className="hover:bg-[#151515]/[0.02] transition-colors"
                     >
                       <td className="py-2.5 px-3 font-mono font-medium">{tx.transaction_id}</td>
                       <td className="py-2.5 px-3">{tx.product_name}</td>
-                      <td className="py-2.5 px-3 text-[#5E5E5A]">{tx.supplier}</td>
+                      <td className="py-2.5 px-3 text-[#151515]/70">{tx.supplier}</td>
                       <td className="py-2.5 px-3 text-right font-mono">{tx.quantity}</td>
                       <td className="py-2.5 px-3 text-right font-mono font-medium">
                         {formatINR(tx.unit_price)}
                       </td>
-                      <td className="py-2.5 px-3 text-right font-mono text-[#5E5E5A]">
+                      <td className="py-2.5 px-3 text-right font-mono text-[#151515]/70">
                         {formatINR(tx.benchmark_unit_price)}
                       </td>
                       <td className="py-2.5 px-3 text-right">
@@ -814,7 +805,7 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
                           <button
                             type="button"
                             onClick={() => handleEdit(idx)}
-                            className="p-1.5 rounded-lg hover:bg-[#E8E8E3] text-[#5E5E5A] hover:text-[#111111] transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-[#151515]/5 text-[#151515]/70 hover:text-[#151515] transition-colors"
                             title="Edit transaction"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
@@ -822,7 +813,7 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
                           <button
                             type="button"
                             onClick={() => handleRemove(idx)}
-                            className="p-1.5 rounded-lg hover:bg-[#D96B4A]/10 text-[#5E5E5A] hover:text-[#D96B4A] transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-[#151515]/10 text-[#151515]/50 hover:text-[#B8A47A] transition-colors"
                             title="Remove transaction"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -838,9 +829,9 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({ onCompleteAnal
         </div>
       )}
 
-      {/* Primary Action Button (Section 10) */}
-      <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#E8E8E3]">
-        <div className="text-xs text-[#8A8A84] font-sans">
+      {/* Primary Action Button */}
+      <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#151515]/10">
+        <div className="text-xs text-[#151515]/60 font-sans">
           {stagedTransactions.length > 0
             ? `${stagedTransactions.length} transaction${stagedTransactions.length > 1 ? 's' : ''} ready to analyze.`
             : 'Fill the form above and click Analyze Spend.'}

@@ -30,7 +30,7 @@ export const DataTable: React.FC<DataTableProps> = ({
   const [dataList, setDataList] = useState<any[]>(propTransactions || []);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Interactive Chart Filter State (Section 19, 20 & 21)
+  // Interactive Chart Filter State
   const [selectedSupplier, setSelectedSupplier] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [selectedRisk, setSelectedRisk] = useState<string | null>(null);
@@ -86,8 +86,7 @@ export const DataTable: React.FC<DataTableProps> = ({
     'Missed discount',
   ];
 
-  // SINGLE FILTERED DATASET (Section 20 - Filter State)
-  // All charts and the table consume this exact same filtered dataset
+  // SINGLE FILTERED DATASET
   const filteredData = useMemo(() => {
     return dataList.filter((tx) => {
       const fType = String(tx.type || tx.detection_type || '').toUpperCase();
@@ -156,12 +155,12 @@ export const DataTable: React.FC<DataTableProps> = ({
     selectedBucket,
   ]);
 
-  // Master analytics computation (Section 30 - Performance & Memoization)
+  // Master analytics computation
   const analytics = useMemo(() => {
     return computeProcurementAnalytics(filteredData, dashboardData);
   }, [filteredData, dashboardData]);
 
-  // Interactive filter toggle helpers (Section 21 - Graph -> Table)
+  // Interactive filter toggle helpers
   const handleToggleSupplier = (supplier: string) => {
     setSelectedSupplier((prev) => (prev === supplier ? null : supplier));
   };
@@ -219,23 +218,15 @@ export const DataTable: React.FC<DataTableProps> = ({
 
   return (
     <div className="space-y-12">
-      {/* 1. Header (Section 2 & 33 - Dynamic Source Indicator) */}
+      {/* 1. Header */}
       <PageHeader
         label="Procurement Analytics & Audit Center"
         title="Trace the spend."
         description="Comprehensive forensic analytics and line-item reconciliation showing unit price variance against contractual rate cards and historical benchmark purchases."
         actions={
           <div className="flex items-center gap-3">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#E8E8E3] text-[10px] font-mono font-semibold text-[#111111] shadow-xs">
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  source === 'nova'
-                    ? 'bg-[#5E81AC] animate-pulse shadow-[0_0_6px_rgba(94,129,172,0.8)]'
-                    : source === 'upload'
-                    ? 'bg-[#E5A93C] shadow-[0_0_6px_rgba(229,169,60,0.8)]'
-                    : 'bg-[#73C69A] shadow-[0_0_6px_rgba(115,198,154,0.8)]'
-                }`}
-              />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#151515]/5 border border-[#151515]/10 text-[10px] font-mono font-semibold text-[#151515] shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-[#B8A47A] shadow-[0_0_6px_rgba(184,164,122,0.8)]" />
               <span>
                 {source === 'nova'
                   ? 'LIVE NOVA'
@@ -250,7 +241,7 @@ export const DataTable: React.FC<DataTableProps> = ({
               variant="secondary"
               size="md"
               onClick={handleExportCSV}
-              icon={<Download className="w-3.5 h-3.5 text-[#5E5E5A]" />}
+              icon={<Download className="w-3.5 h-3.5 text-[#151515]/70" />}
               iconPosition="left"
             >
               Export CSV
@@ -259,8 +250,8 @@ export const DataTable: React.FC<DataTableProps> = ({
         }
       />
 
-      {/* 2. Top Filter Bar & Search Controls (Section 19 & 28 - Filter Bar at top) */}
-      <div className="p-4 sm:p-5 rounded-[24px] bg-white border border-[#E8E8E3] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+      {/* 2. Top Filter Bar & Search Controls */}
+      <div className="p-4 sm:p-5 rounded-[24px] bg-[#F3F3F1] border border-[#151515]/10 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
           {filterTabs.map((tab) => (
             <button
@@ -268,8 +259,8 @@ export const DataTable: React.FC<DataTableProps> = ({
               onClick={() => setFilterType(tab)}
               className={`px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
                 filterType === tab
-                  ? 'bg-[#0A0A0A] text-white shadow-sm font-semibold'
-                  : 'bg-[#FAFAF8] text-[#5E5E5A] hover:text-[#111111] hover:bg-[#F5F5F2] border border-[#E8E8E3]'
+                  ? 'bg-[#151515] text-[#F3F3F1] shadow-sm font-semibold'
+                  : 'bg-[#151515]/5 text-[#151515]/70 hover:text-[#151515] hover:bg-[#151515]/10 border border-[#151515]/10'
               }`}
             >
               {tab}
@@ -278,18 +269,18 @@ export const DataTable: React.FC<DataTableProps> = ({
         </div>
 
         <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 text-[#8A8A84] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#151515]/50 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search transaction, supplier, product..."
-            className="w-full h-10 pl-9 pr-4 rounded-full bg-[#FAFAF8] border border-[#E8E8E3] text-xs font-sans text-[#111111] placeholder-[#8A8A84] focus:outline-none focus:border-[#111111] transition-colors"
+            className="w-full h-10 pl-9 pr-4 rounded-full bg-[#151515]/5 border border-[#151515]/10 text-xs font-sans text-[#151515] placeholder-[#151515]/40 focus:outline-none focus:border-[#151515] transition-colors"
           />
         </div>
       </div>
 
-      {/* 3. Master Analytics Visualization Layer (Section 28 Layout) */}
+      {/* 3. Master Analytics Visualization Layer */}
       <ProcurementAnalyticsSuite
         analytics={analytics}
         source={source}
@@ -309,27 +300,27 @@ export const DataTable: React.FC<DataTableProps> = ({
         isLoading={loading}
       />
 
-      {/* 4. Transaction Evidence Table (Section 28 & 37) */}
+      {/* 4. Transaction Evidence Table */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-medium text-[#111111]">
+            <h3 className="text-lg font-medium text-[#151515]">
               Procurement Audit Line Items
             </h3>
-            <p className="text-xs text-[#5E5E5A]">
+            <p className="text-xs text-[#151515]/60">
               Underlying granular purchase orders matching active analytics filters.
             </p>
           </div>
-          <span className="text-xs font-mono text-[#8A8A84]">
+          <span className="text-xs font-mono text-[#151515]/50">
             Showing {filteredData.length} records
           </span>
         </div>
 
-        <div className="bg-white rounded-[28px] border border-[#E8E8E3] overflow-hidden shadow-sm">
+        <div className="bg-[#F3F3F1] rounded-[28px] border border-[#151515]/10 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[1020px]">
               <thead>
-                <tr className="border-b border-[#F0F0EB] bg-[#FAFAF8]/90 text-[11px] font-sans font-semibold uppercase tracking-wider text-[#8A8A84] h-12">
+                <tr className="border-b border-[#151515]/10 bg-[#151515]/5 text-[11px] font-sans font-semibold uppercase tracking-wider text-[#151515]/60 h-12">
                   <th className="px-6 text-left">Transaction</th>
                   <th className="px-5 text-left">Supplier</th>
                   <th className="px-5 text-left">Product</th>
@@ -342,21 +333,21 @@ export const DataTable: React.FC<DataTableProps> = ({
                   <th className="px-6 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F0F0EB] text-xs font-sans">
+              <tbody className="divide-y divide-[#151515]/10 text-xs font-sans">
                 {filteredData.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="py-16 text-center text-[#8A8A84]">
+                    <td colSpan={10} className="py-16 text-center text-[#151515]/50">
                       <div className="space-y-2 max-w-sm mx-auto">
-                        <span className="text-xs font-semibold text-[#111111] uppercase tracking-wider block">
+                        <span className="text-xs font-semibold text-[#151515] uppercase tracking-wider block">
                           NO DATA FOR THIS FILTER
                         </span>
-                        <p className="text-xs text-[#8A8A84]">
+                        <p className="text-xs text-[#151515]/60">
                           Try adjusting your search criteria, clearing chart filters, or resetting category tabs.
                         </p>
                         {(selectedSupplier || selectedProduct || selectedRisk || selectedAlertType || selectedBucket) && (
                           <button
                             onClick={handleClearAllInteractiveFilters}
-                            className="mt-2 text-xs font-medium text-[#73C69A] hover:underline"
+                            className="mt-2 text-xs font-medium text-[#B8A47A] hover:underline"
                           >
                             Clear interactive chart filters
                           </button>
@@ -400,38 +391,38 @@ export const DataTable: React.FC<DataTableProps> = ({
                         }}
                         className={`h-14 transition-colors cursor-pointer group ${
                           isRowSelected
-                            ? 'bg-[#5E81AC]/10'
-                            : 'hover:bg-[#FAFAF8]'
+                            ? 'bg-[#B8A47A]/15'
+                            : 'hover:bg-[#151515]/5'
                         }`}
                       >
-                        <td className="px-6 font-mono font-medium text-[#111111]">
+                        <td className="px-6 font-mono font-medium text-[#151515]">
                           {txId}
                         </td>
                         <td
-                          className="px-5 font-medium text-[#111111] max-w-[160px] truncate"
+                          className="px-5 font-medium text-[#151515] max-w-[160px] truncate"
                           title={supp}
                         >
                           {supp}
                         </td>
                         <td
-                          className="px-5 text-[#5E5E5A] max-w-[200px] truncate"
+                          className="px-5 text-[#151515]/70 max-w-[200px] truncate"
                           title={prod}
                         >
                           {prod}
                         </td>
-                        <td className="px-4 text-right font-mono text-[#5E5E5A] tnum">
+                        <td className="px-4 text-right font-mono text-[#151515]/70 tnum">
                           {qty}
                         </td>
-                        <td className="px-4 text-right font-mono font-medium text-[#111111] tnum">
+                        <td className="px-4 text-right font-mono font-medium text-[#151515] tnum">
                           {actual}
                         </td>
-                        <td className="px-4 text-right font-mono text-[#8A8A84] tnum">
+                        <td className="px-4 text-right font-mono text-[#151515]/50 tnum">
                           {bench}
                         </td>
-                        <td className="px-4 text-right font-mono font-medium text-[#D96B4A] tnum">
+                        <td className="px-4 text-right font-mono font-medium text-[#B8A47A] tnum">
                           {variance}
                         </td>
-                        <td className="px-5 text-right font-mono font-medium text-[#111111] tnum">
+                        <td className="px-5 text-right font-mono font-medium text-[#151515] tnum">
                           {leakage > 0 ? formatINR(leakage) : '—'}
                         </td>
                         <td className="px-4 text-center">
@@ -453,7 +444,7 @@ export const DataTable: React.FC<DataTableProps> = ({
                               e.stopPropagation();
                               onInvestigateTransaction?.(txId);
                             }}
-                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-[#FAFAF8] group-hover:bg-[#0A0A0A] border border-[#E8E8E3] group-hover:border-[#0A0A0A] text-[#111111] group-hover:text-white transition-all shadow-xs"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-[#151515]/5 group-hover:bg-[#151515] border border-[#151515]/10 group-hover:border-[#151515] text-[#151515] group-hover:text-[#F3F3F1] transition-all shadow-xs"
                           >
                             <span>Investigate</span>
                             <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -468,7 +459,7 @@ export const DataTable: React.FC<DataTableProps> = ({
           </div>
 
           {/* Table Footer */}
-          <div className="p-4 sm:p-5 border-t border-[#F0F0EB] bg-[#FAFAF8]/50 flex items-center justify-between text-xs text-[#8A8A84]">
+          <div className="p-4 sm:p-5 border-t border-[#151515]/10 bg-[#151515]/5 flex items-center justify-between text-xs text-[#151515]/60">
             <span>Showing {filteredData.length} procurement records</span>
             <span className="font-mono">Evidence-backed deterministic verification</span>
           </div>

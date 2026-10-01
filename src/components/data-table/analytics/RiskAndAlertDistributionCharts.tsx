@@ -37,26 +37,26 @@ export const RiskAndAlertDistributionCharts: React.FC<RiskAndAlertDistributionPr
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
       {/* GRAPH 4: Risk Distribution (Donut Chart with Center Total) */}
-      <div className="lg:col-span-5 bg-white rounded-[24px] border border-[#E8E8E3] p-6 sm:p-8 shadow-sm space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-[#F0F0EB]">
+      <div className="lg:col-span-5 bg-[#F3F3F1] rounded-[24px] border border-[#151515]/10 p-6 sm:p-8 shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[#151515]/10">
           <div>
-            <span className="text-[10px] uppercase font-semibold text-[#8A8A84] tracking-wider block">
+            <span className="text-[10px] uppercase font-semibold text-[#151515]/50 tracking-wider block">
               Graph 4 · Severity Matrix
             </span>
-            <h3 className="text-base sm:text-lg font-medium text-[#111111]">
+            <h3 className="text-base sm:text-lg font-medium text-[#151515]">
               Risk Distribution
             </h3>
-            <p className="text-xs text-[#5E5E5A]">
+            <p className="text-xs text-[#151515]/60">
               Classification by operational and financial exposure.
             </p>
           </div>
-          <span className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full bg-[#FAFAF8] border border-[#E8E8E3] text-[#111111]">
+          <span className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full bg-[#151515]/5 border border-[#151515]/10 text-[#151515]">
             {totalAlertsCount} Total Alerts
           </span>
         </div>
 
         {riskData.length === 0 ? (
-          <div className="py-20 text-center text-xs text-[#8A8A84]">
+          <div className="py-20 text-center text-xs text-[#151515]/50">
             No risk distribution data available.
           </div>
         ) : (
@@ -95,8 +95,8 @@ export const RiskAndAlertDistributionCharts: React.FC<RiskAndAlertDistributionPr
                     return (
                       <Cell
                         key={`cell-${index}`}
-                        fill={isSelected ? '#5E81AC' : entry.color}
-                        stroke="#FFFFFF"
+                        fill={entry.color}
+                        stroke="#F3F3F1"
                         strokeWidth={2}
                         opacity={selectedRisk && !isSelected ? 0.35 : 1}
                       />
@@ -106,12 +106,12 @@ export const RiskAndAlertDistributionCharts: React.FC<RiskAndAlertDistributionPr
               </PieChart>
             </ResponsiveContainer>
 
-            {/* Donut Center Display (Section 11) */}
+            {/* Donut Center Display */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-[10px] uppercase font-mono font-medium text-[#8A8A84] tracking-wider">
+              <span className="text-[10px] uppercase font-mono font-medium text-[#151515]/50 tracking-wider">
                 Total Alerts
               </span>
-              <span className="text-2xl font-sans font-medium text-[#111111] tnum mt-0.5">
+              <span className="text-2xl font-sans font-medium text-[#151515] tnum mt-0.5">
                 {totalAlertsCount}
               </span>
             </div>
@@ -119,7 +119,7 @@ export const RiskAndAlertDistributionCharts: React.FC<RiskAndAlertDistributionPr
         )}
 
         {/* Legend */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-[#F0F0EB]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-[#151515]/10">
           {riskData.map((r) => {
             const isSelected = selectedRisk === r.risk;
             return (
@@ -128,8 +128,8 @@ export const RiskAndAlertDistributionCharts: React.FC<RiskAndAlertDistributionPr
                 onClick={() => onSelectRisk?.(r.risk)}
                 className={`p-2 rounded-xl text-left border transition-all ${
                   isSelected
-                    ? 'border-[#0A0A0A] bg-[#0A0A0A] text-white shadow-xs'
-                    : 'border-[#F0F0EB] bg-[#FAFAF8] hover:bg-[#F5F5F2] text-[#111111]'
+                    ? 'border-[#151515] bg-[#151515] text-[#F3F3F1] shadow-xs'
+                    : 'border-[#151515]/10 bg-[#151515]/5 hover:bg-[#151515]/10 text-[#151515]'
                 }`}
               >
                 <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider">
@@ -142,7 +142,7 @@ export const RiskAndAlertDistributionCharts: React.FC<RiskAndAlertDistributionPr
                 <div className="text-xs font-mono font-medium mt-1 tnum">
                   {r.count} ({r.percentage}%)
                 </div>
-                <div className={`text-[10px] truncate ${isSelected ? 'text-white/80' : 'text-[#8A8A84]'}`}>
+                <div className={`text-[10px] truncate ${isSelected ? 'text-[#F3F3F1]/80' : 'text-[#151515]/60'}`}>
                   {formatCompactINR(r.potentialLeakage)}
                 </div>
               </button>
@@ -152,26 +152,26 @@ export const RiskAndAlertDistributionCharts: React.FC<RiskAndAlertDistributionPr
       </div>
 
       {/* GRAPH 5: Leakage by Alert Type */}
-      <div className="lg:col-span-7 bg-white rounded-[24px] border border-[#E8E8E3] p-6 sm:p-8 shadow-sm space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-[#F0F0EB]">
+      <div className="lg:col-span-7 bg-[#F3F3F1] rounded-[24px] border border-[#151515]/10 p-6 sm:p-8 shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[#151515]/10">
           <div>
-            <span className="text-[10px] uppercase font-semibold text-[#8A8A84] tracking-wider block">
+            <span className="text-[10px] uppercase font-semibold text-[#151515]/50 tracking-wider block">
               Graph 5 · Leakage Taxonomy
             </span>
-            <h3 className="text-base sm:text-lg font-medium text-[#111111]">
+            <h3 className="text-base sm:text-lg font-medium text-[#151515]">
               Where is the leakage coming from?
             </h3>
-            <p className="text-xs text-[#5E5E5A]">
+            <p className="text-xs text-[#151515]/60">
               Deterministic rule taxonomy breakdown across verified finding categories.
             </p>
           </div>
-          <span className="text-[11px] font-mono text-[#73C69A] bg-[#73C69A]/10 px-2.5 py-1 rounded-full border border-[#73C69A]/20">
+          <span className="text-[11px] font-mono text-[#B8A47A] bg-[#B8A47A]/10 px-2.5 py-1 rounded-full border border-[#B8A47A]/30">
             {alertData.length} Rule Categories
           </span>
         </div>
 
         {alertData.length === 0 ? (
-          <div className="py-20 text-center text-xs text-[#8A8A84]">
+          <div className="py-20 text-center text-xs text-[#151515]/50">
             No alert taxonomy data available for current selection.
           </div>
         ) : (
@@ -182,10 +182,10 @@ export const RiskAndAlertDistributionCharts: React.FC<RiskAndAlertDistributionPr
                 data={alertData}
                 margin={{ top: 8, right: 30, left: 16, bottom: 8 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0EB" horizontal={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(21,21,21,0.08)" horizontal={false} />
                 <XAxis
                   type="number"
-                  stroke="#8A8A84"
+                  stroke="rgba(21,21,21,0.4)"
                   fontSize={10}
                   tickLine={false}
                   axisLine={false}
@@ -194,11 +194,11 @@ export const RiskAndAlertDistributionCharts: React.FC<RiskAndAlertDistributionPr
                 <YAxis
                   type="category"
                   dataKey="label"
-                  stroke="#8A8A84"
+                  stroke="rgba(21,21,21,0.4)"
                   fontSize={10}
                   tickLine={false}
                   width={140}
-                  tick={{ fill: '#111111' }}
+                  tick={{ fill: '#151515' }}
                 />
                 <Tooltip
                   content={({ active, payload }) => {
@@ -220,7 +220,7 @@ export const RiskAndAlertDistributionCharts: React.FC<RiskAndAlertDistributionPr
                 <Bar
                   dataKey="potentialLeakage"
                   name="Potential Leakage"
-                  fill="#73C69A"
+                  fill="#B8A47A"
                   radius={[0, 4, 4, 0]}
                   onClick={(entry: any) => {
                     const alertType = entry?.type || entry?.payload?.type;
@@ -233,7 +233,7 @@ export const RiskAndAlertDistributionCharts: React.FC<RiskAndAlertDistributionPr
                     return (
                       <Cell
                         key={`alert-${index}`}
-                        fill={isSelected ? '#5E81AC' : entry.color}
+                        fill={entry.color}
                         opacity={selectedAlertType && !isSelected ? 0.35 : 1}
                       />
                     );
@@ -244,7 +244,7 @@ export const RiskAndAlertDistributionCharts: React.FC<RiskAndAlertDistributionPr
           </div>
         )}
 
-        <div className="flex items-center justify-between text-[11px] text-[#8A8A84] font-mono pt-1">
+        <div className="flex items-center justify-between text-[11px] text-[#151515]/50 font-mono pt-1">
           <span>Click any rule to filter the procurement transaction table</span>
           <span>Normalized canonical allocation</span>
         </div>

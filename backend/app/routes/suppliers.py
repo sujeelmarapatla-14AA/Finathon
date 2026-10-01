@@ -12,11 +12,11 @@ import pandas as pd
 
 try:
     from app.services.leakage import detect_price_anomalies
-    from app.services.normalization import normalize_procurement_dataframe
+    from app.services.normalization import normalize_procurement_dataframe, standardize_raw_procurement_dataframe
     from app.services.contracts import detect_contract_findings
 except ImportError:
     from backend.app.services.leakage import detect_price_anomalies
-    from backend.app.services.normalization import normalize_procurement_dataframe
+    from backend.app.services.normalization import normalize_procurement_dataframe, standardize_raw_procurement_dataframe
     from backend.app.services.contracts import detect_contract_findings
 
 router = APIRouter(tags=["suppliers"])
@@ -27,13 +27,10 @@ UPLOAD_DIR = BASE_DIR / "data" / "uploads"
 SUPPORTED_EXTENSIONS = [".csv", ".xlsx", ".xls"]
 
 REQUIRED_COLUMNS: List[str] = [
-    "transaction_id",
-    "product_id",
-    "product_name",
+    "product",
     "supplier",
     "quantity",
     "unit_price",
-    "benchmark_unit_price",
 ]
 
 
@@ -98,18 +95,13 @@ def get_supplier_intelligence(file_id: str) -> Dict[str, Any]:
             detail=f"Unable to parse dataset: {str(e)}",
         )
 
-    # Clean whitespace in column names
-    df.columns = df.columns.astype(str).str.strip()
-
-    # Validate required columns
-    missing_columns = [col for col in REQUIRED_COLUMNS if col not in df.columns]
-    if missing_columns:
+    # Standardize schema and validate required columns
+    try:
+        df = standardize_raw_procurement_dataframe(df)
+    except ValueError as e:
         raise HTTPException(
             status_code=400,
-            detail=(
-                f"Missing required columns: {', '.join(missing_columns)}. "
-                f"Expected columns: {', '.join(REQUIRED_COLUMNS)}."
-            ),
+            detail=str(e),
         )
 
     # Apply supplier & product normalization

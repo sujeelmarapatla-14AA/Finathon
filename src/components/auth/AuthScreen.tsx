@@ -38,6 +38,38 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [forgotPasswordNotice, setForgotPasswordNotice] = useState(false);
   const [isBackendOffline, setIsBackendOffline] = useState(false);
+  const [showApiConfig, setShowApiConfig] = useState(false);
+  const [customApiUrl, setCustomApiUrl] = useState(() => {
+    try {
+      return localStorage.getItem('spendintel_custom_api_url') || '';
+    } catch {
+      return '';
+    }
+  });
+
+  const handleSaveCustomApiUrl = (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = customApiUrl.trim().replace(/\/+$/, '');
+    if (!clean || !clean.startsWith('http')) {
+      setErrorMessage('Please enter a valid backend URL starting with https:// or http://');
+      return;
+    }
+    try {
+      localStorage.setItem('spendintel_custom_api_url', clean);
+      window.location.reload();
+    } catch {
+      setErrorMessage('Failed to persist custom API URL');
+    }
+  };
+
+  const handleClearCustomApiUrl = () => {
+    try {
+      localStorage.removeItem('spendintel_custom_api_url');
+      window.location.reload();
+    } catch {
+      // ignore
+    }
+  };
 
   const switchMode = (newMode: 'login' | 'signup') => {
     setMode(newMode);
@@ -250,6 +282,38 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
                     <RefreshCw className="w-3 h-3" />
                     <span>Retry connection</span>
                   </button>
+                )}
+                {/* Inline API URL configuration when backend URL is missing */}
+                {(showApiConfig || errorMessage.includes('VITE_API_URL') || errorMessage.includes('backend URL is not configured')) && (
+                  <form onSubmit={handleSaveCustomApiUrl} className="mt-3 pt-3 border-t border-[#F3F3F1]/15 space-y-2">
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-[#B8A47A]">
+                      FastAPI Backend URL
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        value={customApiUrl}
+                        onChange={(e) => setCustomApiUrl(e.target.value)}
+                        placeholder="https://spendintel-backend.onrender.com"
+                        className="flex-1 h-8 px-3 text-xs rounded-lg border border-[#F3F3F1]/20 bg-[#151515] text-[#F3F3F1] placeholder:text-[#F3F3F1]/40 focus:outline-none focus:border-[#B8A47A]"
+                      />
+                      <button
+                        type="submit"
+                        className="h-8 px-3 text-xs font-semibold rounded-lg bg-[#B8A47A] text-[#151515] hover:bg-[#B8A47A]/90 whitespace-nowrap"
+                      >
+                        Save & Connect
+                      </button>
+                    </div>
+                    {customApiUrl && (
+                      <button
+                        type="button"
+                        onClick={handleClearCustomApiUrl}
+                        className="text-[10px] text-[#F3F3F1]/50 hover:text-red-400 underline"
+                      >
+                        Reset to default
+                      </button>
+                    )}
+                  </form>
                 )}
               </div>
             </div>
@@ -506,6 +570,47 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ initialMode = 'login' })
                 <div className="text-[9px] font-mono text-[#F3F3F1]/50 truncate mt-0.5">admin@company.com</div>
               </button>
             </div>
+
+            {/* Custom Backend URL Toggle */}
+            <div className="mt-3 pt-2 border-t border-[#F3F3F1]/10 flex items-center justify-between text-[11px] text-[#F3F3F1]/50">
+              <span>Backend API Server</span>
+              <button
+                type="button"
+                onClick={() => setShowApiConfig(!showApiConfig)}
+                className="text-[#B8A47A] hover:underline font-mono"
+              >
+                {showApiConfig ? 'Hide Config' : '⚙️ Configure URL'}
+              </button>
+            </div>
+
+            {showApiConfig && (
+              <form onSubmit={handleSaveCustomApiUrl} className="mt-2 space-y-2">
+                <input
+                  type="url"
+                  value={customApiUrl}
+                  onChange={(e) => setCustomApiUrl(e.target.value)}
+                  placeholder="https://spendintel-backend.onrender.com"
+                  className="w-full h-8 px-3 text-xs rounded-lg border border-[#F3F3F1]/20 bg-[#151515] text-[#F3F3F1] placeholder:text-[#F3F3F1]/40 focus:outline-none focus:border-[#B8A47A]"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    className="flex-1 h-7 text-xs font-semibold rounded-lg bg-[#B8A47A] text-[#151515] hover:bg-[#B8A47A]/90"
+                  >
+                    Save & Connect
+                  </button>
+                  {customApiUrl && (
+                    <button
+                      type="button"
+                      onClick={handleClearCustomApiUrl}
+                      className="px-2 h-7 text-[10px] text-red-400 border border-red-400/30 rounded-lg hover:bg-red-400/10"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </main>

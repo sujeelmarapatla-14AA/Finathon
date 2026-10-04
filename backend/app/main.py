@@ -93,19 +93,26 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware for development frontend communication
+# CORS configuration supporting deployed Render frontend, preview domains, and local development
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
+custom_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip()]
+
+default_origins = [
+    "https://finathon-1.onrender.com",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
+allowed_origins = list(dict.fromkeys(default_origins + custom_origins))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$",
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-        "*",
-    ],
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$|^https://.*\.onrender\.com$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -199,4 +206,6 @@ def config_status() -> Dict[str, str]:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    host = os.environ.get("HOST", "0.0.0.0")
+    uvicorn.run("app.main:app", host=host, port=port, reload=True if port == 8000 else False)

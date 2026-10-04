@@ -23,20 +23,20 @@ import {
   DatasetRowItem,
 } from '../types';
 
-const resolveApiBaseUrl = (): string => {
-  // 1. Check if user configured a custom URL in localStorage (e.g., from Settings)
+export const resolveApiBaseUrl = (): string => {
+  // 1. Check if user configured a custom URL in localStorage (e.g., from Settings or debug prompt)
   try {
     if (typeof localStorage !== 'undefined') {
       const customUrl = localStorage.getItem('spendintel_custom_api_url');
       if (customUrl && customUrl.startsWith('http')) {
-        return customUrl.replace(/\/+$/, '');
+        return customUrl.trim().replace(/\/+$/, '');
       }
     }
   } catch {}
 
   const envUrl = (import.meta.env.VITE_API_URL || '').trim();
 
-  // 2. If VITE_API_URL is an obvious placeholder or contains unconfigured host
+  // 2. Validate VITE_API_URL
   const isPlaceholder =
     !envUrl ||
     envUrl.includes('your-finathon-backend') ||
@@ -51,32 +51,39 @@ const resolveApiBaseUrl = (): string => {
     return envUrl.replace(/\/+$/, '');
   }
 
-  // 3. If running locally, use matching localhost or 127.0.0.1 port 8000
-  if (typeof window !== 'undefined' && window.location?.hostname) {
-    const isLocalhost =
-      window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1' ||
-      window.location.hostname === '0.0.0.0';
-    if (isLocalhost) {
-      const port = 8000;
-      return `${window.location.protocol}//${window.location.hostname}:${port}`;
+  // 3. Local Development fallback (ONLY when running locally on localhost / 127.0.0.1)
+  const isBrowser = typeof window !== 'undefined';
+  const hostname = isBrowser ? window.location?.hostname || '' : '';
+  const isLocalhost =
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '0.0.0.0' ||
+    hostname.startsWith('192.168.') ||
+    hostname.startsWith('10.') ||
+    hostname.endsWith('.local');
+
+  if (Boolean(import.meta.env.DEV) || isLocalhost) {
+    if (isBrowser && isLocalhost && window.location?.protocol && hostname) {
+      return `${window.location.protocol}//${hostname}:8000`;
     }
-    // If deployed on remote (Render / Vercel / Netlify), default to live backend deployment
-    if (
-      window.location.hostname.includes('onrender.com') ||
-      window.location.hostname.includes('vercel.app') ||
-      window.location.hostname.includes('netlify.app')
-    ) {
-      return 'https://finathon-1.onrender.com';
-    }
+    return 'http://127.0.0.1:8000';
   }
 
-  return 'http://127.0.0.1:8000';
+  // 4. In production when VITE_API_URL is missing, return empty string.
+  // Never attempt localhost/127.0.0.1 when deployed.
+  return '';
 };
 
 export const API_BASE_URL = resolveApiBaseUrl();
 export const DEMO_FILE_ID = 'cb8b20d5-2516-47a9-8646-317e9beee50b';
 export const AUTH_TOKEN_KEY = 'spendintel_access_token';
+
+/**
+ * Helper to check if backend API URL is configured
+ */
+export function isApiConfigured(): boolean {
+  return Boolean(API_BASE_URL && API_BASE_URL.length > 0);
+}
 
 // Local storage token helpers
 export function getAuthToken(): string | null {
@@ -112,7 +119,7 @@ export function setOnUnauthorized(cb: () => void): void {
 
 /**
  * Authenticated fetch wrapper that attaches Authorization header,
- * handles localhost/127.0.0.1/placeholder fallbacks, and intercepts 401 errors.
+ * handles localhost/127.0.0.1 dev retries, and intercepts 401 errors.
  */
 export async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const token = getAuthToken();
@@ -122,41 +129,48 @@ export async function authFetch(url: string, options: RequestInit = {}): Promise
     headers.set('Authorization', `Bearer ${token}`);
   }
 
+  // Ensure valid URL
+  let fullUrl = url;
+  if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
+    if (!API_BASE_URL) {
+      throw new Error(
+        'SpendIntel backend URL is not configured. Please set the VITE_API_URL environment variable in your Render dashboard and rebuild the frontend.'
+      );
+    }
+    fullUrl = `${API_BASE_URL}${fullUrl.startsWith('/') ? '' : '/'}${fullUrl}`;
+  }
+
   let response: Response | null = null;
   try {
-    response = await fetch(url, {
+    response = await fetch(fullUrl, {
       ...options,
       headers,
     });
   } catch (err) {
-    // If connection failed due to localhost vs 127.0.0.1 mismatch or remote placeholder, attempt fallback
-    const fallbackUrls: string[] = [];
+    // Localhost fallback ONLY when running in local dev mode
+    const isBrowser = typeof window !== 'undefined';
+    const hostname = isBrowser ? window.location?.hostname || '' : '';
+    const isLocalhost =
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '0.0.0.0';
 
-    if (url.includes('127.0.0.1:8000')) {
-      fallbackUrls.push(url.replace('127.0.0.1:8000', 'localhost:8000'));
-    } else if (url.includes('localhost:8000')) {
-      fallbackUrls.push(url.replace('localhost:8000', '127.0.0.1:8000'));
-    } else if (url.includes('onrender.com') || url.includes('your-finathon-backend')) {
-      const pathAndQuery = url.replace(/^https?:\/\/[^\/]+/, '');
-      fallbackUrls.push(`http://127.0.0.1:8000${pathAndQuery}`);
-      fallbackUrls.push(`http://localhost:8000${pathAndQuery}`);
-    }
-
-    let lastFbErr: any = err;
-    for (const fbUrl of fallbackUrls) {
+    if (isLocalhost && (fullUrl.includes('127.0.0.1:8000') || fullUrl.includes('localhost:8000'))) {
+      const fallbackUrl = fullUrl.includes('127.0.0.1:8000')
+        ? fullUrl.replace('127.0.0.1:8000', 'localhost:8000')
+        : fullUrl.replace('localhost:8000', '127.0.0.1:8000');
       try {
-        response = await fetch(fbUrl, {
+        response = await fetch(fallbackUrl, {
           ...options,
           headers,
         });
-        break;
-      } catch (fbErr) {
-        lastFbErr = fbErr;
+      } catch {
+        // Keep original error
       }
     }
 
     if (!response) {
-      throw lastFbErr;
+      throw err;
     }
   }
 
@@ -263,7 +277,14 @@ async function parseErrorMessage(res: Response, defaultMsg: string): Promise<str
  * Check backend health status (GET /health).
  */
 export async function checkHealth(): Promise<{ status: string }> {
-  const res = await fetch(`${API_BASE_URL}/health`);
+  if (!API_BASE_URL) {
+    const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (!isLocal) {
+      throw new Error('SpendIntel backend URL is not configured. Please set VITE_API_URL in your deployment dashboard.');
+    }
+  }
+  const url = API_BASE_URL ? `${API_BASE_URL}/health` : '/health';
+  const res = await fetch(url);
   if (!res.ok) {
     const msg = await parseErrorMessage(res, 'Backend health check failed');
     throw new Error(msg);
@@ -278,7 +299,14 @@ export async function checkConfigStatus(): Promise<{
   nova_api_key_configured: string;
   ai_api_key_configured: string;
 }> {
-  const res = await fetch(`${API_BASE_URL}/api/config/status`);
+  if (!API_BASE_URL) {
+    const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (!isLocal) {
+      throw new Error('SpendIntel backend URL is not configured. Please set VITE_API_URL in your deployment dashboard.');
+    }
+  }
+  const url = API_BASE_URL ? `${API_BASE_URL}/api/config/status` : '/api/config/status';
+  const res = await fetch(url);
   if (!res.ok) {
     const msg = await parseErrorMessage(res, 'Failed to fetch configuration status');
     throw new Error(msg);
@@ -295,19 +323,26 @@ export async function uploadProcurementDataset(file: File): Promise<UploadRespon
 
   let res: Response;
   try {
-    res = await authFetch(`${API_BASE_URL}/api/upload`, {
+    res = await authFetch('/api/upload', {
       method: 'POST',
       body: formData,
     });
   } catch (err: any) {
     try {
-      res = await authFetch(`${API_BASE_URL}/upload`, {
+      res = await authFetch('/upload', {
         method: 'POST',
         body: formData,
       });
     } catch {
+      const isLocal =
+        typeof window !== 'undefined' &&
+        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
       throw new Error(
-        `Unable to reach SpendIntel backend server at ${API_BASE_URL}. Please ensure the server is online on port 8000.`
+        `Unable to reach SpendIntel backend server at ${API_BASE_URL || 'configured API URL'}. ${
+          isLocal
+            ? 'Please ensure the server is online on port 8000.'
+            : 'Please ensure the backend service is online and VITE_API_URL is configured.'
+        }`
       );
     }
   }
@@ -531,8 +566,18 @@ export async function submitManualAnalysis(
 export async function login(email: string, password: string): Promise<AuthResponse> {
   const cleanEmail = email.trim().toLowerCase();
   
+  if (!API_BASE_URL) {
+    const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (!isLocal) {
+      throw new Error('SpendIntel backend URL is not configured. Please set VITE_API_URL in your deployment dashboard.');
+    }
+  }
+
+  const loginUrl = API_BASE_URL ? `${API_BASE_URL}/api/auth/login` : '/api/auth/login';
+  const fallbackLoginUrl = API_BASE_URL ? `${API_BASE_URL}/api/login` : '/api/login';
+
   try {
-    let res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+    let res = await fetch(loginUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: cleanEmail, password }),
@@ -540,7 +585,7 @@ export async function login(email: string, password: string): Promise<AuthRespon
 
     if (res.status === 404) {
       // Try fallback endpoint
-      res = await fetch(`${API_BASE_URL}/api/login`, {
+      res = await fetch(fallbackLoginUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: cleanEmail, password }),
@@ -596,14 +641,24 @@ export async function signup(name: string, email: string, password: string): Pro
   const cleanEmail = email.trim().toLowerCase();
   const cleanName = name.trim();
 
-  let res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
+  if (!API_BASE_URL) {
+    const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (!isLocal) {
+      throw new Error('SpendIntel backend URL is not configured. Please set VITE_API_URL in your deployment dashboard.');
+    }
+  }
+
+  const signupUrl = API_BASE_URL ? `${API_BASE_URL}/api/auth/signup` : '/api/auth/signup';
+  const fallbackSignupUrl = API_BASE_URL ? `${API_BASE_URL}/api/signup` : '/api/signup';
+
+  let res = await fetch(signupUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: cleanName, email: cleanEmail, password }),
   });
 
   if (res.status === 404) {
-    res = await fetch(`${API_BASE_URL}/api/signup`, {
+    res = await fetch(fallbackSignupUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: cleanName, email: cleanEmail, password }),
